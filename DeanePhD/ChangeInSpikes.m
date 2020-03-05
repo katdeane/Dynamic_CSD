@@ -1,4 +1,4 @@
-%% ChangInSpikes.m
+function ChangeInSpikes(homedir)
 
 % This script takes *.mat files out of the DATA/ folder. It checks the
 % condition names and finds the measurements associated with both clicks
@@ -14,15 +14,19 @@ warning('OFF');
 dbstop if error
 
 % Change directory to your working folder
-if exist('D:\MyCode\Dynamic_CSD_Analysis','dir') == 7
-    cd('D:\MyCode\Dynamic_CSD_Analysis');
-elseif exist('C:\Users\kedea\Documents\Dynamic_CSD_Analysis','dir') == 7
-    cd('C:\Users\kedea\Documents\Dynamic_CSD_Analysis')
+if ~exist('homedir','var')
+    if exist('D:\MyCode\Dynamic_CSD','dir') == 7
+        cd('D:\MyCode\Dynamic_CSD');
+    elseif exist('D:\Dynamic_CSD_Analysis','dir') == 7
+        cd('D:\Dynamic_CSD_Analysis');
+    elseif exist('C:\Users\kedea\Documents\Dynamic_CSD_Analysis','dir') == 7
+        cd('C:\Users\kedea\Documents\Dynamic_CSD_Analysis')
+    end
+    
+    homedir = pwd;
+    addpath(genpath(homedir));
 end
-
-home = pwd; 
-addpath(genpath(home));
-cd (home),cd DATA;
+cd (homedir),cd DATA;
 
 %% Load in
 input = dir('*.mat');
@@ -52,10 +56,10 @@ for i1 = 1:entries
     names = fieldnames(Data); 
     thisG = [input(i1).name(8:10) '.m'];
     
-    cd (home),cd groups;
+    cd (homedir),cd groups;
     run(thisG);
 
-    cd (home),cd figs;
+    cd (homedir),cd figs;
     mkdir Single_Spikes; cd Single_Spikes;
     
     %% Clicks    
@@ -243,11 +247,11 @@ for iAn = 1:length(names)
     SP_AnCount = SP_AnCount + 1;
 end
 
-    cd(home); cd DATA;
+    cd(homedir); cd DATA;
 end
 
 % save it out
-cd (home),cd figs;
+cd (homedir),cd figs;
 mkdir Group_Spikes; cd Group_Spikes;
 % save('SpikesAll','SpikesAll','PeakofPre');
 save('Spont_SpikesAll','SP_SpikesAll','SP_PeakofPre');

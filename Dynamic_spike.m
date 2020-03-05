@@ -1,19 +1,23 @@
+function Dynamic_spike(homedir)
 
-clear
 %% standard operations
 warning('OFF');
 dbstop if error
 
 % Change directory to your working folder
-if exist('D:\MyCode\Dynamic_CSD_Analysis','dir') == 7
-    cd('D:\MyCode\Dynamic_CSD_Analysis');
-elseif exist('C:\Users\kedea\Documents\Dynamic_CSD_Analysis','dir') == 7
-    cd('C:\Users\kedea\Documents\Dynamic_CSD_Analysis')
+if ~exist('homedir','var')
+    if exist('D:\MyCode\Dynamic_CSD','dir') == 7
+        cd('D:\MyCode\Dynamic_CSD');
+    elseif exist('D:\Dynamic_CSD_Analysis','dir') == 7
+        cd('D:\Dynamic_CSD_Analysis');
+    elseif exist('C:\Users\kedea\Documents\Dynamic_CSD_Analysis','dir') == 7
+        cd('C:\Users\kedea\Documents\Dynamic_CSD_Analysis')
+    end
+    
+    homedir = pwd;
+    addpath(genpath(homedir));
 end
-
-home = pwd; 
-addpath(genpath(home));
-cd (home),cd groups;
+cd (homedir),cd groups;
 
 %% Load in
 input = dir('*.m');
@@ -33,14 +37,14 @@ for i1 = 1:entries
     
     %% Condition and Indexer
     Data = struct;
-    cd (home); cd figs;
+    cd (homedir); cd figs;
     mkdir(['Single_Spike_' input(i1).name(1:end-2)]);
     
     Indexer = imakeIndexer(Condition,animals,Cond);
     
     % loop through animal subjects
     for iAn = 1:length(animals)
-        cd (home); cd raw;
+        cd (homedir); cd raw;
         name = animals{iAn};
         
         % loop through conditions from condition list
@@ -111,7 +115,7 @@ for i1 = 1:entries
                     
                     %% Visualize Spikes 
                     
-                    cd(home); cd figs;
+                    cd(homedir); cd figs;
                     cd(['Single_Spike_' input(i1).name(1:end-2)]);
                     
                     % run through stimuli
@@ -166,7 +170,7 @@ for i1 = 1:entries
         end
     end
     
-    cd ([home '/DATA'])
+    cd ([homedir '/DATA'])
     save(['Spikes_' input(i1).name(1:end-2) '_Data'],'Data');
     clear Data
                     

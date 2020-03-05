@@ -1,4 +1,4 @@
-%% ChangInAvrec.m
+function ChangeInAvrec(homedir)
 
 % This script takes *.mat files out of the DATA/ folder. It checks the
 % condition names and finds the measurements associated with both clicks
@@ -8,21 +8,24 @@
 %Input:     D:\MyCode\Dynamic_CSD_Analysis\DATA -> *DATA.mat
 %Output:    Figures of in "ChangeIn_Avrec"
 
-clear
 %% standard operations
 warning('OFF');
 dbstop if error
 
 % Change directory to your working folder
-if exist('D:\MyCode\Dynamic_CSD_Analysis','dir') == 7
-    cd('D:\MyCode\Dynamic_CSD_Analysis');
-elseif exist('C:\Users\kedea\Documents\Dynamic_CSD_Analysis','dir') == 7
-    cd('C:\Users\kedea\Documents\Dynamic_CSD_Analysis')
+if ~exist('homedir','var')
+    if exist('D:\MyCode\Dynamic_CSD','dir') == 7
+        cd('D:\MyCode\Dynamic_CSD');
+    elseif exist('D:\Dynamic_CSD_Analysis','dir') == 7
+        cd('D:\Dynamic_CSD_Analysis');
+    elseif exist('C:\Users\kedea\Documents\Dynamic_CSD_Analysis','dir') == 7
+        cd('C:\Users\kedea\Documents\Dynamic_CSD_Analysis')
+    end
+    
+    homedir = pwd;
+    addpath(genpath(homedir));
 end
-
-home = pwd;
-addpath(genpath(home));
-cd (home),cd DATA;
+cd (homedir),cd DATA;
 
 %% Load in
 input = dir('*.mat');
@@ -49,7 +52,7 @@ for i_In = 1:entries
     name = input(i_In).name(1:5);
     
     % load in Group .m for layer info and point to correct animal
-    cd (home),cd groups;
+    cd (homedir),cd groups;
     thisG = [input(i_In).name(1:3) '.m'];
     run(thisG);
     thisA = find(contains(animals,name));
@@ -57,7 +60,7 @@ for i_In = 1:entries
         continue
     end
     
-    cd (home),cd figs;
+    cd (homedir),cd figs;
     mkdir Single_Avrec; cd Single_Avrec;
     
     %% Clicks
@@ -259,11 +262,11 @@ for i_In = 1:entries
     end
     
     
-    cd(home); cd DATA;
+    cd(homedir); cd DATA;
 end
 
 % save it out
-cd (home),cd figs;
+cd (homedir),cd figs;
 mkdir Group_Avrec; cd Group_Avrec;
 save('AvrecAll','AvrecAll','PeakofPre');
 save('Spont_AvrecAll','SP_AvrecAll','SP_PeakofPre');
