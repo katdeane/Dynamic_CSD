@@ -3,8 +3,8 @@ groups/
 DATA/
 figs/
 raw/
-AndrewSpectralData/Data/
-AndrewSpectralData/Pictures/
+Deane2020/CurranSpectral/Data/
+Deane2020/CurranSpectral/Pictures/
 
 
 *.asv
