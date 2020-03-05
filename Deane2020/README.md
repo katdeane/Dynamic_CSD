@@ -1,0 +1,1 @@
+These are the scripts specific to Katrina's Master's Thesis. They may be modified for new purposes but should be copied to another area so that the integrety of the Pipeline here remains basically in tact. The Pipeline in this folder describes the input and output of each step used to generate the graphs and statistics for the Thesis.

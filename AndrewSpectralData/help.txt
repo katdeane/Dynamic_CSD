@@ -1,0 +1,4 @@
+The data for you to use are evokDatAllLayers and prettySpectralPlots.
+
+I threw in the evok_ind_full and prettyFULL plots so you can also visualize the full frequency plots
+that I made earlier.

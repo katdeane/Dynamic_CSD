@@ -1,0 +1,26 @@
+% needed to run
+groups/
+DATA/
+figs/
+raw/
+AndrewSpectralData/Data/
+AndrewSpectralData/Pictures/
+
+
+*.asv
+*.csv
+*.pdf
+*.pptx
+*.doc
+
+
+diaries&stats/
+16062018_ohne_mirror/
+Figs_Group_comparison/
+Martin_R_for_Micha/
+
+
+% Pipelines for specific projects
+Pipeline_KatPhD.m
+Pipeline_KatMasterThesis.m
+Pipline_RunScalos.m

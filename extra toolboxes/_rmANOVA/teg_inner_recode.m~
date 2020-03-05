@@ -1,0 +1,35 @@
+function [y_red, pred_red, thisset] = teg_inner_recode(y, yN, nSubj, X0)
+
+coder = 0;
+for icol = 1:size(X0, 2),
+    coder = coder + 10^(icol - 1) * X0(:, icol);
+end;
+u = unique(coder);
+codervec = zeros(size(y));
+for iu = 1:length(u),
+    f = find(coder == u(iu));
+    codervec(f) = u(iu);
+end;
+
+y_red = [];
+pred_red = [];
+thisset = {};
+
+for iVarSet = 1:length(u),
+    thisset{iVarSet} = find(pred == u(iVarSet));
+    y_cell_obs = y(thisset{iVarSet});
+    y_cell_obs = reshape(y_cell_obs, nSubj, length(y_cell_obs) / nSubj);
+    % Take differing cell counts into account
+    y_cell_obsN = yN(thisset{iVarSet});
+    y_cell_obsN = reshape(y_cell_obsN, nSubj, length(y_cell_obsN) / nSubj);
+    y_cell_obsMN = sum(y_cell_obsN, 2); % Get mean count per subject over variable combinations.
+    y_cell_obsProp = y_cell_obsN ./ (y_cell_obsMN * ones(1, size(y_cell_obsN, 2)));
+    y_cell_obs = y_cell_obs .* y_cell_obsProp;
+    y_cell_obs = sum(y_cell_obs, 2);
+    y_red = [y_red; y_cell_obs];
+    pred_cell_obs = pred(thisset{iVarSet});
+    pred_cell_obs = reshape(pred_cell_obs, nSubj, length(pred_cell_obs) / nSubj);
+    pred_cell_obs = pred_cell_obs .* y_cell_obsProp;
+    pred_cell_obs = sum(pred_cell_obs, 2);
+    pred_red = [pred_red; pred_cell_obs];
+end;

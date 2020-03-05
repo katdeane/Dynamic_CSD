@@ -1,0 +1,1 @@
+Functions here are called by either main scripts or scripts from specific projects within these folders.
