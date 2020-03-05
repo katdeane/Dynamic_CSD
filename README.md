@@ -1,3 +1,6 @@
+Dynamic CSD Analysis for projects associated with Team CortXplorer
+
+
 Suggested Git tutorial: https://www.chalkstreet.com/git-collaboration-tutorial/
 
 For git documentation:
@@ -28,7 +31,4 @@ Good Git Practices that Katrina will complain about you not doing:
 			* We are beginning true collaborative code and will absolutely need to be considering readability and clarity for other users
 ***
 			
-
-Andrew:
-
-To get the DATA folder with the already included that will run through PermutationTestCSD, unpack the zip and copy the folders into the Dynamic_CSD_Analysis main folder.  
+ 
