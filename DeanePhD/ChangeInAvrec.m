@@ -68,7 +68,7 @@ for i_In = 1:entries
     % 5 figures per animal
     for iLay = 1:length(layers)
         
-        AvrecCurves = figure('Name',['Avrec_Clicks_' layers{iLay} '_' name],'Position',[-1080 100 1080 1200]);
+        h = figure('Name',['Avrec_Clicks_' layers{iLay} '_' name],'Position',[-1080 100 1080 1200]);
         
         for iStim = 1:length(CLstimlist)
             % create container for lables
@@ -115,7 +115,6 @@ for i_In = 1:entries
             title([num2str(CLstimlist(iStim)) ' Hz'])
             hold off
         end
-        h = gcf;
         
         savefig(h,['Avrec_Clicks_' layers{iLay} '_' name],'compact')
         
@@ -185,7 +184,7 @@ for i_In = 1:entries
     
     for iLay = 1:length(layers)
         
-        AvrecCurves = figure('Name',['Avrec_Spontaneous_' layers{iLay} '_' name],'Position',[-900 400 800 400]);
+        h = figure('Name',['Avrec_Spontaneous_' layers{iLay} '_' name],'Position',[-900 400 800 400]);
         
         CondN = cell(1,size(Data,2));
         allmeas = [];
@@ -247,8 +246,6 @@ for i_In = 1:entries
         legend(CondN)
         title('Spontaneous Data')
         hold off
-        %         end
-        h = gcf;
         
         savefig(h,['Avrec_Spontaneous_Clicks_' layers{iLay} '_' name],'compact')
         

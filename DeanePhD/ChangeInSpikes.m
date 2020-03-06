@@ -31,7 +31,7 @@ cd (homedir),cd DATA;
 %% Load in
 input = dir('*.mat');
 entries = length(input);
-layers = {'All', 'I_IIE', 'IVE', 'VE', 'VIE'};
+layers = {'All', 'I_II', 'IV', 'V', 'VI'};
 stimlist = [2,5,10,20,40];
 
 % set up simple cell sheets to hold all data: avrec of total/layers and
@@ -63,70 +63,70 @@ for i1 = 1:entries
     mkdir Single_Spikes; cd Single_Spikes;
     
     %% Clicks    
-%     for iAn = 1:length(names)
-%         % 5 figures per animal
-%         
-%         for iLay = 1:length(layers)
-%             
-%             SpikeCurves = figure('Name',['Spikes_Clicks_' names{iAn}],'Position',[-1000 100 800 1200]);
-%             
-%             for iStim = 1:length(stimlist)
-%                 % create container for lables
-%                 CondN = cell(1,size(Data,2));
-%                 
-%                 
-%                 % 1 subplot per stimulus
-%                 subplot(length(stimlist),1,iStim);
-%                 allmeas = [];
-%                 
-%                 for iMeas = 1:size(Data,2)
-%                     if isempty(Data(iMeas).(names{iAn}))
-%                         continue
-%                     end
-%                     
-%                     if ~contains((Data(iMeas).(names{iAn}).Condition),'CL_')
-%                         continue
-%                     end
-%                     % take an average of all channels (already averaged across trials)
-%                     if contains(layers{iLay}, 'All')
-%                         avgchan = mean(Data(iMeas).(names{iAn}).AvgSpikes{1, iStim});
-%                     else
-%                         avgchan = mean(Data(iMeas).(names{iAn}).AvgSpikes{1, iStim}(str2num(Layer.(layers{iLay}){iAn}),:));
-%                     end
-%                     % smooth the data by gaussian window:
-%                     g_avgall = smoothdata(avgchan,'gaussian',5);
-%                     
-%                     % pull out condition
-%                     CondN{1,iMeas} = Data(iMeas).(names{iAn}).Condition;
-%                     % plot it
-%                     plot(g_avgall, 'LineWidth', 1)
-%                     hold on
-%                     % store this avg temporarily with buddies
-%                     allmeas = vertcat(allmeas,g_avgall);
-%                     
-%                     % store peak if preCL condition
-%                     if contains(CondN{1,iMeas},'preCL')
-%                         PeakofPre(iStim,iLay,AnCount) = max(avgchan);
-%                     end
-%                 end
-%                 %
-%                 % and store the lot
-%                 SpikesAll{iStim,iLay,AnCount} = allmeas;
-%                                 
-%                 CondN = CondN(~cellfun('isempty',CondN));
-%                 legend(CondN)
-%                 title([num2str(stimlist(iStim)) ' Hz'])
-%                 hold off
-%                 
-%             end
-%             h = gcf;
-%             savefig(h,['Spikes_Clicks_' layers{iLay} '_' names{iAn}],'compact')
-%             saveas(h,['Spikes_Clicks_' layers{iLay} '_' names{iAn} '.pdf'])
-%             close (h)
-%         end
-%         
-%         AnCount = AnCount + 1;
-%     end
+    for iAn = 1:length(names)
+        % 5 figures per animal
+        
+        for iLay = 1:length(layers)
+            
+            SpikeCurves = figure('Name',['Spikes_Clicks_' names{iAn}],'Position',[-1000 100 800 1200]);
+            
+            for iStim = 1:length(stimlist)
+                % create container for lables
+                CondN = cell(1,size(Data,2));
+                
+                
+                % 1 subplot per stimulus
+                subplot(length(stimlist),1,iStim);
+                allmeas = [];
+                
+                for iMeas = 1:size(Data,2)
+                    if isempty(Data(iMeas).(names{iAn}))
+                        continue
+                    end
+                    
+                    if ~contains((Data(iMeas).(names{iAn}).Condition),'CL_')
+                        continue
+                    end
+                    % take an average of all channels (already averaged across trials)
+                    if contains(layers{iLay}, 'All')
+                        avgchan = mean(Data(iMeas).(names{iAn}).AvgSpikes{1, iStim});
+                    else
+                        avgchan = mean(Data(iMeas).(names{iAn}).AvgSpikes{1, iStim}(str2num(Layer.(layers{iLay}){iAn}),:));
+                    end
+                    % smooth the data by gaussian window:
+                    g_avgall = smoothdata(avgchan,'gaussian',5);
+                    
+                    % pull out condition
+                    CondN{1,iMeas} = Data(iMeas).(names{iAn}).Condition;
+                    % plot it
+                    plot(g_avgall, 'LineWidth', 1)
+                    hold on
+                    % store this avg temporarily with buddies
+                    allmeas = vertcat(allmeas,g_avgall);
+                    
+                    % store peak if preCL condition
+                    if contains(CondN{1,iMeas},'preCL')
+                        PeakofPre(iStim,iLay,AnCount) = max(avgchan);
+                    end
+                end
+                %
+                % and store the lot
+                SpikesAll{iStim,iLay,AnCount} = allmeas;
+                                
+                CondN = CondN(~cellfun('isempty',CondN));
+                legend(CondN)
+                title([num2str(stimlist(iStim)) ' Hz'])
+                hold off
+                
+            end
+            h = gcf;
+            savefig(h,['Spikes_Clicks_' layers{iLay} '_' names{iAn}],'compact')
+            saveas(h,['Spikes_Clicks_' layers{iLay} '_' names{iAn} '.pdf'])
+            close (h)
+        end
+        
+        AnCount = AnCount + 1;
+    end
     
     %% Amplitude Modulation
 %     for iAn = 1:length(names)
