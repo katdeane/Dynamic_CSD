@@ -1,6 +1,6 @@
-##This repo contains Dynamic CSD Analysis for projects associated with Team CortXplorer at Leibniz Institute for Neurobiology
+## This repo contains Dynamic CSD Analysis for projects associated with Team CortXplorer at Leibniz Institute for Neurobiology
 
-###For information on how to use these scripts, please contact me at katrina.deane@lin-magdeburg.de 
+### For information on how to use these scripts, please contact me at katrina.deane@lin-magdeburg.de 
 
 Suggested Git tutorial: https://www.chalkstreet.com/git-collaboration-tutorial/
 Git documentation: https://confluence.atlassian.com/bitbucketserver/basic-git-commands-776639767.html
