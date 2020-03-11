@@ -10,7 +10,7 @@ addmusc = 1;                        %1 = include muscimol and 0 = do not include
 which = 2;                          %1 = GS_based and 2 = ST_based
 
 %% Start
-cd('D:\MyCode\Dynamic_CSD_Analysis');
+cd('D:\MyCode\Dynamic_CSD');
 warning('OFF');
 dbstop if error
 
@@ -24,7 +24,7 @@ based = {'GS_based','ST_based'};
 Parameter = {'SinkRMS','SinkPeakAmp','SinkPeakLate','Sinkonset'};
 
 %% Load in the appropriate files
-cd DATA;cd output;
+cd DATA;cd Output;
 load('AnesthetizedPre_Data.m_Threshold_0.25_Zscore_0_binned_1_mirror_0.mat');
 Ketamine = Data; clear Data;
 load('Awake10dB_Data.m_Threshold_0.25_Zscore_0_binned_1_mirror_0.mat')
@@ -202,9 +202,9 @@ figure('Position',[100 100 1000 550]);
 g(1,1)=gramm('x',T.tone,'y',T.data, 'color', T.group); %,'y',cars.Acceleration,'color',cars.Cylinders,'subset',cars.Cylinders~=3 & cars.Cylinders~=5
 g(1,1).facet_grid([],T.sink,'column_labels',true,'row_labels',true); %,'scale','free'
 % g(1,1).geom_point(); %to see each point, removed the YLim (highest points are closer to 2.5
-g(1,1).stat_summary('type','sem','geom','errorbar'); %mean and sem shown
-g(1,1).stat_summary('type','sem','geom','point'); %mean and sem shown
-g(1,1).stat_summary('type','sem','geom','area'); %mean and sem shown
+g(1,1).stat_summary('type','std','geom','errorbar'); %mean and sem shown
+g(1,1).stat_summary('type','std','geom','point'); %mean and sem shown
+g(1,1).stat_summary('type','std','geom','area'); %mean and sem shown
 g(1,1).set_layout_options('Position',[0 0 0.8 1],...
     'legend_pos',[0.62 0.77 0.15 0.15],... %We detach the legend from the plot and move it to the top right
     'margin_height',[0.1 0.02],...
@@ -228,10 +228,10 @@ g(1,1).set_color_options('map','matlab');
 g(1,1).axe_property('XTickLabel',{'-2', '-1', 'BF', '+1', '+2'})
 
 
-g.set_title([(based{which}) ' ' (sink{1}) ', ' (sink{2}) ', ' (sink{3})  ', and ' (sink{4}) ' for ' (Parameter{para})]);
+g.set_title([(based{which}) ' ' (sink{1}) ', ' (sink{2}) ', ' (sink{3})  ', and ' (sink{4}) ' for ' (Parameter{para}) 'std']);
 g.draw();
-g.export('file_name',[(based{which}) '_' (sink{1}) '_' (sink{2}) '_' (sink{3}) '_' (sink{4}) '_' (Parameter{para})], 'file_type','png');
-g.export('file_name',[(based{which}) '_' (sink{1}) '_' (sink{2}) '_' (sink{3}) '_' (sink{4}) '_' (Parameter{para})], 'file_type','pdf');
+g.export('file_name',[(based{which}) '_' (sink{1}) '_' (sink{2}) '_' (sink{3}) '_' (sink{4}) '_' (Parameter{para}) 'std'], 'file_type','png');
+g.export('file_name',[(based{which}) '_' (sink{1}) '_' (sink{2}) '_' (sink{3}) '_' (sink{4}) '_' (Parameter{para}) 'std'], 'file_type','pdf');
 close all
 
 %% grammplot for sink tuning curves NORMALIZED
@@ -242,9 +242,9 @@ figure('Position',[100 100 1000 550]);
 g(1,1)=gramm('x',T.tone,'y',T.normdata, 'color', T.group); %,'y',cars.Acceleration,'color',cars.Cylinders,'subset',cars.Cylinders~=3 & cars.Cylinders~=5
 g(1,1).facet_grid([],T.sink); %,'scale','free'
 % g(2,1).geom_point(); %to see each point, removed the YLim (highest points are closer to 2.5
-g(1,1).stat_summary('type','sem','geom','errorbar'); %mean and sem shown
-g(1,1).stat_summary('type','sem','geom','point'); %mean and sem shown
-g(1,1).stat_summary('type','sem','geom','area'); %mean and sem shown
+g(1,1).stat_summary('type','std','geom','errorbar'); %mean and sem shown
+g(1,1).stat_summary('type','std','geom','point'); %mean and sem shown
+g(1,1).stat_summary('type','std','geom','area'); %mean and sem shown
 g(1,1).set_layout_options('Position',[0 0 0.8 1],...
     'legend_pos',[0.62 0.77 0.15 0.15],... %We detach the legend from the plot and move it to the top right
     'margin_height',[0.1 0.02],...
@@ -257,10 +257,10 @@ g(1,1).set_color_options('map','matlab');
 g(1,1).axe_property('XTickLabel',{'-2', '-1', 'BF', '+1', '+2'})
 
 
-g.set_title([(based{which}) ' ' (sink{1}) ', ' (sink{2}) ', ' (sink{3}) ', and ' (sink{4}) ' for ' (Parameter{para})]);
+g.set_title([(based{which}) ' ' (sink{1}) ', ' (sink{2}) ', ' (sink{3}) ', and ' (sink{4}) ' for ' (Parameter{para}) 'std']);
 g.draw();
-g.export('file_name',['Normalized ' (based{which}) '_' (sink{1}) '_' (sink{2}) '_' (sink{3}) '_' (sink{4}) '_' (Parameter{para})], 'file_type','png');
-g.export('file_name',['Normalized ' (based{which}) '_' (sink{1}) '_' (sink{2}) '_' (sink{3}) '_' (sink{4}) '_' (Parameter{para})], 'file_type','pdf');
+g.export('file_name',['Normalized ' (based{which}) '_' (sink{1}) '_' (sink{2}) '_' (sink{3}) '_' (sink{4}) '_' (Parameter{para}) 'std'], 'file_type','png');
+g.export('file_name',['Normalized ' (based{which}) '_' (sink{1}) '_' (sink{2}) '_' (sink{3}) '_' (sink{4}) '_' (Parameter{para}) 'std'], 'file_type','pdf');
 close all
 %% got mirror?
 
@@ -458,9 +458,9 @@ figure('Position',[100 100 1000 550]);
 g(1,1)=gramm('x',Freq,'y',mirData, 'color', Groups ); %,'y',cars.Acceleration,'color',cars.Cylinders,'subset',cars.Cylinders~=3 & cars.Cylinders~=5
 g(1,1).facet_grid([],Sinks,'row_labels',false); %,'scale','free'
 % g(2,1).geom_point(); %to see each point, removed the YLim (highest points are closer to 2.5
-g(1,1).stat_summary('type','sem','geom','errorbar'); %mean and sem shown
-g(1,1).stat_summary('type','sem','geom','point'); %mean and sem shown
-g(1,1).stat_summary('type','sem','geom','area'); %mean and sem shown
+g(1,1).stat_summary('type','std','geom','errorbar'); %mean and sem shown
+g(1,1).stat_summary('type','std','geom','point'); %mean and sem shown
+g(1,1).stat_summary('type','std','geom','area'); %mean and sem shown
 g(1,1).set_layout_options('Position',[0 0 0.8 1],...
     'legend_pos',[0.62 0.77 0.15 0.15],... %We detach the legend from the plot and move it to the top right
     'margin_height',[0.1 0.02],...
@@ -474,12 +474,12 @@ g(1,1).set_color_options('map','matlab');
 g(1,1).axe_property('XTickLabel',{'BF', '+-1', '+-2', '+-3'})
 
 
-g.set_title([(based{which}) ' ' (sink{1}) ', ' (sink{2}) ', ' (sink{3}) ', and ' (sink{4}) ' for ' (Parameter{para})]);
+g.set_title([(based{which}) ' ' (sink{1}) ', ' (sink{2}) ', ' (sink{3}) ', and ' (sink{4}) ' for ' (Parameter{para}) 'std']);
 g.draw();
 g.export('file_name',['Normalized mirror ' (based{which}) '_' (sink{1}) '_' ...
-    (sink{2}) '_' (sink{3}) '_' (sink{4}) '_' (Parameter{para})], 'file_type','png');
+    (sink{2}) '_' (sink{3}) '_' (sink{4}) '_' (Parameter{para}) 'std'], 'file_type','png');
 g.export('file_name',['Normalized mirror ' (based{which}) '_' (sink{1}) '_' ...
-    (sink{2}) '_' (sink{3}) '_' (sink{4}) '_' (Parameter{para})], 'file_type','pdf');
+    (sink{2}) '_' (sink{3}) '_' (sink{4}) '_' (Parameter{para}) 'std'], 'file_type','pdf');
 close all
 
 
