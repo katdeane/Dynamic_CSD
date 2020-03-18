@@ -1,47 +1,46 @@
-%% README
+function avrec_relres_stats(homedir)
 
 %  This script is SPECIFIC for running the AVREC stats for Katrina's
 %  Master's thesis. It may be used as a template but please make a copy
 %  elsewhere for modicifications
 
-clear 
-cd('D:\MyCode\Dynamic_CSD_Analysis');
 warning('OFF');
 dbstop if error
 
-home = pwd;
-addpath(genpath(home));
+% Change directory to your working folder
+if ~exist('homedir','var')
+    if exist('D:\MyCode\Dynamic_CSD','dir') == 7
+        cd('D:\MyCode\Dynamic_CSD');
+    elseif exist('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD','dir') == 7
+        cd('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD')
+    end
+    
+    homedir = pwd;
+    addpath(genpath(homedir));
+end
 
 %for teg_repeated measures_ANOVA
 levels = [2,1];
 rowofnans = NaN(1,50); %IMPORTANT: if animal group sizes are equal this isn't needed. Currently these are commented in the code
 
 Ticks = {'a -3','b -2', 'c -1','d BF', 'e +1', 'f +2', 'g +3'};
-Ticknames = {'BF - 3','BF - 2','BF - 1','Best Frequency','BF + 1', 'BF + 2', 'BF + 3'};
-forsave = {'BF-3', 'BF-2','BF-1','BF','BF+1', 'BF+2', 'BF+3'};
+Ticknames = {'BF-3', 'BF-2','BF-1','BF','BF+1', 'BF+2', 'BF+3'};
 Group = {'Anesthetized','Awake','Muscimol','ANChronic'};
 FromBF = [-3,-2,-1,0,+1,+2,+3];
 
 %% Load in the appropriate files
-cd DATA;
-load('AnesthetizedPre_Data.mat')
+cd(homedir);cd DATA;
+load('AnesthetizedPre_Data.mat','Data')
 Anesthetized = Data; clear Data;
-load('Awake10dB_Data.mat')
+load('Awake10dB_Data.mat','Data')
 Awake = Data; clear Data;
-load('Muscimol_Data.mat')
+load('Muscimol_Data.mat','Data')
 Muscimol = Data; clear Data;
-load('ANChronic_Data.mat')
+load('ANChronic_Data.mat','Data')
 ANChronic = Data; clear Data;
-
 
 mkdir('Stats AvRec Relres single'); cd('Stats AvRec Relres single')
 %% Run Stats
-RelResT = table('Size',[18150 4],...
-    'VariableTypes',{'double','double','string','string'},...
-    'VariableNames',{'PeakAmp','PeakLat','Freq','Group'});
-
-newTicks = {'a -3','b -2', 'c -1','d BF', 'e +1', 'f +2', 'g +3'};
-newTicknames = {'BF - 3', 'BF - 2','BF - 1','Best Frequency','BF + 1', 'BF + 2', 'BF + 3'};
 
 plottune = struct;
 plottuner = struct;
@@ -54,9 +53,13 @@ plottuner.frqz = [];
 plottuner.tgroup = [];
 plottuner.peakamp = [];plottuner.peaklate = [];plottuner.peakvalue = [];plottuner.totalmean = [];
 
-for ifreq = 1:length(Ticknames)
-    disp(['***********************AVREC STATS FOR ' (newTicknames{ifreq}) '***********************'])
-    ANpeakamp = []; ANpeaklat = []; ANtotalvalue = []; ANpeakvalue = [];
+for ifreq = 1:length(Ticks)
+    
+    disp(['***********************AVREC STATS FOR ' (Ticknames{ifreq}) '***********************'])
+    % KETAMINE
+    ANpeakamp = nan(1,grpsz); ANpeaklat = nan(1,grpsz); 
+    ANtotalvalue = nan(1,grpsz); ANpeakvalue = nan(1,grpsz);
+    ThisVec = 1:50;
     ANnames = fieldnames(Anesthetized);
     for i1 = 1:length(ANnames)
         animal = ANnames{i1};
@@ -68,44 +71,41 @@ for ifreq = 1:length(Ticknames)
         catch %produce NAN if there isn't an entry here
             avreclist = NaN(1,length(avreclist));
         end
-        peakampme = []; peaklat = []; totalvalue = []; peakvalue = [];
+        
+        peakampme = nan(1,50); peaklat = nan(1,50); 
+        totalvalue = nan(1,50); peakvalue = nan(1,50);
         
         for i2 = 1:50
             if isnan(avreclist)
-                peaklat = [peaklat NaN];
-                peakampme = [peakampme NaN];
-                totalvalue = [totalvalue NaN];
-                peakvalue = [peakvalue NaN];
+                continue
             else
                 [latency, ampl, meanOfdata] = iGetPeakData_avrec(avreclist(:,:,i2),[200 300]);
                 [~, ~, meanOffulldata] = iGetPeakData_avrec(avreclist(:,:,i2));
-                peaklat = [peaklat latency];
-                peakampme = [peakampme ampl];
-                peakvalue = [peakvalue meanOfdata];
-                totalvalue = [totalvalue meanOffulldata];
+                peaklat(i2) = latency;
+                peakampme(i2) = ampl;
+                peakvalue(i2) = meanOfdata;
+                totalvalue(i2) = meanOffulldata;
             end
         end
         
         %apply a cutoff threshold
         if sum(isnan(peakampme)) > length(peakampme)*.75 % 25% at least
-            peakampme = NaN(1,50);
-            peaklat = NaN(1,50);
-            peakvalue = NaN(1,50);
+            peakampme = nan(1,50);
+            peaklat = nan(1,50);
+            peakvalue = nan(1,50);
         end
         
-        ANpeakamp = [ANpeakamp peakampme];
-        ANpeaklat = [ANpeaklat peaklat];
-        ANtotalvalue = [ANtotalvalue totalvalue];
-        ANpeakvalue = [ANpeakvalue peakvalue];
+        ANpeakamp(ThisVec) = peakampme;
+        ANpeaklat(ThisVec) = peaklat;
+        ANtotalvalue(ThisVec) = totalvalue;
+        ANpeakvalue(ThisVec) = peakvalue;
+        ThisVec = ThisVec + 50;
     end
-    
-%     ANpeakamp = [ANpeakamp rowofnans];
-%     ANpeaklat = [ANpeaklat rowofnans];
-%     ANtotalvalue = [ANtotalvalue rowofnans];
-%     ANpeakvalue = [ANpeakvalue rowofnans];
-    
-    
-    AWpeakamp = []; AWpeaklat = []; AWtotalvalue = []; AWpeakvalue = [];
+        
+    % AWAKE
+    AWpeakamp = nan(1,grpsz); AWpeaklat = nan(1,grpsz); 
+    AWtotalvalue = nan(1,grpsz); AWpeakvalue = nan(1,grpsz);
+    ThisVec = 1:50;
     AWnames = fieldnames(Awake);
     for i1 = 1:length(AWnames)
         animal = AWnames{i1};
@@ -115,50 +115,43 @@ for ifreq = 1:length(Ticknames)
         catch
             avreclist = NaN(1,length(avreclist));
         end
-        peakampme = []; peaklat = []; totalvalue = []; peakvalue = [];
+        peakampme = nan(1,50); peaklat = nan(1,50); 
+        totalvalue = nan(1,50); peakvalue = nan(1,50);
         for i2 = 1:50
             if isnan(avreclist)
-                peaklat = [peaklat NaN];
-                peakampme = [peakampme NaN];
-                totalvalue = [totalvalue NaN];
-                peakvalue = [peakvalue NaN];
+                continue
             else
                 try
                     [latency, ampl, meanOfdata] = iGetPeakData_avrec(avreclist(:,:,i2),[200 300]);
                     [~, ~, meanOffulldata] = iGetPeakData_avrec(avreclist(:,:,i2));
-                    peaklat = [peaklat latency];
-                    peakampme = [peakampme ampl];
-                    peakvalue = [peakvalue meanOfdata];
-                    totalvalue = [totalvalue meanOffulldata];
+                    peaklat(i2) = latency;
+                    peakampme(i2) = ampl;
+                    peakvalue(i2) = meanOfdata;
+                    totalvalue(i2) = meanOffulldata;
                 catch
-                    peaklat = [peaklat NaN];
-                    peakampme = [peakampme NaN];
-                    totalvalue = [totalvalue NaN];
-                    peakvalue = [peakvalue NaN];
+                    continue
                 end
             end
         end
         
         %apply a cutoff threshold
         if sum(isnan(peakampme)) > length(peakampme)*.75 %&& ifreq ~=5 % 25% at least
-            peakampme = NaN(1,50);
-            peaklat = NaN(1,50);
-            peakvalue = NaN(1,50);
+            peakampme = nan(1,50);
+            peaklat = nan(1,50);
+            peakvalue = nan(1,50);
         end
         
-        AWpeakamp = [AWpeakamp peakampme];
-        AWpeaklat = [AWpeaklat peaklat];
-        AWtotalvalue = [AWtotalvalue totalvalue];
-        AWpeakvalue = [AWpeakvalue peakvalue];
+        AWpeakamp(ThisVec) = peakampme;
+        AWpeaklat(ThisVec) = peaklat;
+        AWtotalvalue(ThisVec) = totalvalue;
+        AWpeakvalue(ThisVec) = peakvalue;
+        ThisVec = ThisVec + 50;
     end
     
-    AWpeakamp = [AWpeakamp rowofnans rowofnans];
-    AWpeaklat = [AWpeaklat rowofnans rowofnans];
-    AWtotalvalue = [AWtotalvalue rowofnans rowofnans];
-    AWpeakvalue = [AWpeakvalue rowofnans rowofnans];
-    
-    
-    Mpeakamp = []; Mpeaklat = []; Mtotalvalue = []; Mpeakvalue = [];
+    % MUSCIMOL
+    Mpeakamp = nan(1,grpsz); Mpeaklat = nan(1,grpsz); 
+    Mtotalvalue = nan(1,grpsz); Mpeakvalue = nan(1,grpsz);
+    ThisVec = 1:50;
     Mnames = fieldnames(Muscimol);
     for i1 = 1:length(Mnames)
         animal = Mnames{i1};
@@ -168,38 +161,39 @@ for ifreq = 1:length(Ticknames)
         catch
             avreclist = NaN(1,length(avreclist));
         end
-        peakampme = []; peaklat = []; totalvalue = []; peakvalue = [];
+        peakampme = nan(1,50); peaklat = nan(1,50); 
+        totalvalue = nan(1,50); peakvalue = nan(1,50);
         for i2 = 1:50
             if isnan(avreclist)
-                peaklat = [peaklat NaN];
-                peakampme = [peakampme NaN];
-                totalvalue = [totalvalue NaN];
-                peakvalue = [peakvalue NaN];
+                continue
             else
                 [latency, ampl, meanOfdata] = iGetPeakData_avrec(avreclist(:,:,i2),[200 300]);
                 [~, ~, meanOffulldata] = iGetPeakData_avrec(avreclist(:,:,i2));
-                peaklat = [peaklat latency];
-                peakampme = [peakampme ampl];
-                peakvalue = [peakvalue meanOfdata];
-                totalvalue = [totalvalue meanOffulldata];
+                peaklat(i2) = latency;
+                peakampme(i2) = ampl;
+                peakvalue(i2) = meanOfdata;
+                totalvalue(i2) = meanOffulldata;
             end
         end
         
         %apply a cutoff threshold
         if sum(isnan(peakampme)) > length(peakampme)*.75 % 25% at least
-            peakampme = NaN(1,50);
-            peaklat = NaN(1,50);
-            peakvalue = NaN(1,50);
+            peakampme = nan(1,50);
+            peaklat = nan(1,50);
+            peakvalue = nan(1,50);
         end
             
-        Mpeakamp = [Mpeakamp peakampme];
-        Mpeaklat = [Mpeaklat peaklat];
-        Mtotalvalue = [Mtotalvalue totalvalue];
-        Mpeakvalue = [Mpeakvalue peakvalue];
+        Mpeakamp(ThisVec) = peakampme;
+        Mpeaklat(ThisVec) = peaklat;
+        Mtotalvalue(ThisVec) = totalvalue;
+        Mpeakvalue(ThisVec) = peakvalue;
+        ThisVec = ThisVec + 50;
     end
-    
-    
-    ANCpeakamp = []; ANCpeaklat = []; ANCtotalvalue = []; ANCpeakvalue = [];
+        
+    % ANESTHETIZED CHRONIC
+    ANCpeakamp = nan(1,grpsz); ANCpeaklat = nan(1,grpsz); 
+    ANCtotalvalue = nan(1,grpsz); ANCpeakvalue = nan(1,grpsz);
+    ThisVec = 1:50;
     ANCnames = fieldnames(ANChronic);
     for i1 = 1:length(ANCnames)
         animal = ANCnames{i1};
@@ -209,26 +203,21 @@ for ifreq = 1:length(Ticknames)
         catch
             avreclist = NaN(1,length(avreclist));
         end
-        peakampme = []; peaklat = []; totalvalue = []; peakvalue = [];
+        peakampme = nan(1,50); peaklat = nan(1,50); 
+        totalvalue = nan(1,50); peakvalue = nan(1,50);
         for i2 = 1:50
             if isnan(avreclist)
-                peaklat = [peaklat NaN];
-                peakampme = [peakampme NaN];
-                totalvalue = [totalvalue NaN];
-                peakvalue = [peakvalue NaN];
+                continue
             else
                 try
                     [latency, ampl, meanOfdata] = iGetPeakData_avrec(avreclist(:,:,i2),[200 300]);
                     [~, ~, meanOffulldata] = iGetPeakData_avrec(avreclist(:,:,i2));
-                    peaklat = [peaklat latency];
-                    peakampme = [peakampme ampl];
-                    peakvalue = [peakvalue meanOfdata];
-                    totalvalue = [totalvalue meanOffulldata];
+                    peaklat(i2) = latency;
+                    peakampme(i2) = ampl;
+                    peakvalue(i2) = meanOfdata;
+                    totalvalue(i2) = meanOffulldata;
                 catch
-                    peaklat = [peaklat NaN];
-                    peakampme = [peakampme NaN];
-                    totalvalue = [totalvalue NaN];
-                    peakvalue = [peakvalue NaN];
+                    continue
                 end
             end
         end
@@ -240,27 +229,22 @@ for ifreq = 1:length(Ticknames)
             peakvalue = NaN(1,50);
         end
         
-        ANCpeakamp = [ANCpeakamp peakampme];
-        ANCpeaklat = [ANCpeaklat peaklat];
-        ANCtotalvalue = [ANCtotalvalue totalvalue];
-        ANCpeakvalue = [ANCpeakvalue peakvalue];
+        ANCpeakamp(ThisVec) = peakampme;
+        ANCpeaklat(ThisVec) = peaklat;
+        ANCtotalvalue(ThisVec) = totalvalue;
+        ANCpeakvalue(ThisVec) = peakvalue;
+        ThisVec = ThisVec + 50;
     end
-    
-    ANCpeakamp = [ANCpeakamp rowofnans rowofnans];
-    ANCpeaklat = [ANCpeaklat rowofnans rowofnans];
-    ANCtotalvalue = [ANCtotalvalue rowofnans rowofnans];
-    ANCpeakvalue = [ANCpeakvalue rowofnans rowofnans];
-    
-  
+      
     %for later tuning curves
     plottune.peakamp = horzcat(plottune.peakamp, ANpeakamp, AWpeakamp, Mpeakamp, ANCpeakamp);
     plottune.peaklate = horzcat(plottune.peaklate, ANpeaklat, AWpeaklat, Mpeaklat, ANCpeaklat);
     plottune.peakvalue = horzcat(plottune.peakvalue, ANpeakvalue, AWpeakvalue, Mpeakvalue, ANCpeakvalue);
     plottune.totalmean = horzcat(plottune.totalmean, ANtotalvalue, AWtotalvalue, Mtotalvalue, ANCtotalvalue);
     plottune.tgroup = horzcat(plottune.tgroup, repmat({Group{1}},1,grpsz), ...
-        repmat({Group{2}},1,grpsz), repmat({Group{3}},1,grpsz), repmat({Group{4}},1,grpsz));
-    plottune.frqz = horzcat(plottune.frqz, repmat({newTicks{ifreq}}, 1, grpsz), ...
-        repmat({newTicks{ifreq}}, 1, grpsz), repmat({newTicks{ifreq}}, 1, grpsz), repmat({newTicks{ifreq}}, 1, grpsz));
+        repmat({Group{2}},1,grpsz), repmat({Group{3}},1,grpsz), repmat({Group{4}},1,grpsz)); %#ok<*CCAT1>
+    plottune.frqz = horzcat(plottune.frqz, repmat({Ticks{ifreq}}, 1, grpsz), ...
+        repmat({Ticks{ifreq}}, 1, grpsz), repmat({Ticks{ifreq}}, 1, grpsz), repmat({Ticks{ifreq}}, 1, grpsz));
     
     % Peak Amp
     % for special case
@@ -290,7 +274,7 @@ for ifreq = 1:length(Ticknames)
     disp('**Anesthetized vs Awake**')
     AnesthetizedvsAwake = teg_repeated_measures_ANOVA(peakamp_ANvsAW, levels, var_peakamp);
     disp('**Anesthetized vs Awake COHEN D**')
-    ANvsAWcohenD = iMakeCohensD(ANpeakamp, AWpeakamp)
+    ANvsAWcohenD = iMakeCohensD(ANpeakamp, AWpeakamp) %#ok<*NOPRT>
     disp('**ANChronic vs Awake**')
     ANChronicvsAwake = teg_repeated_measures_ANOVA(peakamp_ANCvsAW, levels, var_peakamp);
     disp('**ANChronic vs Awake COHEN D**')
@@ -300,7 +284,7 @@ for ifreq = 1:length(Ticknames)
     disp('**Anesthetized vs Muscimol COHEN D**')
     ANvsMcohenD = iMakeCohensD(ANpeakamp, Mpeakamp)
     
-    savefile = [forsave{ifreq} 'PeakAmp STAvrecStats.mat'];
+    savefile = [Ticknames{ifreq} 'PeakAmp STAvrecStats.mat'];
     save(savefile, 'AnesthetizedvsAwake', 'AnesthetizedvsMuscimol','ANChronicvsAwake', ...
         'ANvsAWcohenD', 'ANCvsAWcohenD', 'ANvsMcohenD')
     
@@ -342,7 +326,7 @@ for ifreq = 1:length(Ticknames)
     disp('**Anesthetized vs Muscimol COHEN D**')
     ANvsMcohenD = iMakeCohensD(ANpeaklat, Mpeaklat)
     
-    savefile = [forsave{ifreq} ' Peaklat STAvrecStats.mat'];
+    savefile = [Ticknames{ifreq} ' Peaklat STAvrecStats.mat'];
     save(savefile, 'AnesthetizedvsAwake', 'AnesthetizedvsMuscimol','ANChronicvsAwake', ...
         'ANvsAWcohenD', 'ANCvsAWcohenD', 'ANvsMcohenD')
     
@@ -384,7 +368,7 @@ for ifreq = 1:length(Ticknames)
     disp('**Anesthetized vs Muscimol COHEN D**')
     ANvsMcohenD = iMakeCohensD(ANtotalvalue, Mtotalvalue)
     
-    savefile = [forsave{ifreq} ' Total STAvrecStats.mat'];
+    savefile = [Ticknames{ifreq} ' Total STAvrecStats.mat'];
     save(savefile, 'AnesthetizedvsAwake', 'AnesthetizedvsMuscimol','ANChronicvsAwake', ...
         'ANvsAWcohenD', 'ANCvsAWcohenD', 'ANvsMcohenD')
     
@@ -426,242 +410,9 @@ for ifreq = 1:length(Ticknames)
     disp('**Anesthetized vs Muscimol COHEN D**')
     ANvsMcohenD = iMakeCohensD(ANpeakvalue, Mpeakvalue)
     
-    savefile = [forsave{ifreq} ' PeakValue STAvrecStats.mat'];
+    savefile = [Ticknames{ifreq} ' PeakValue STAvrecStats.mat'];
     save(savefile, 'AnesthetizedvsAwake', 'AnesthetizedvsMuscimol','ANChronicvsAwake', ...
         'ANvsAWcohenD', 'ANCvsAWcohenD', 'ANvsMcohenD')
-    
-%     %% RELRES
-%     disp(['***********************RELRES STATS FOR ' (newTicknames{ifreq}) '***********************'])
-%     ANpeakampr = []; ANpeaklatr = []; ANtotalvaluer = []; ANpeakvaluer = [];
-%     ANnames = fieldnames(Anesthetized);
-%     for i1 = 1:length(ANnames)
-%         animal = ANnames{i1};
-%         %Find the best frequency
-%         BF = find((Anesthetized.(ANnames{i1}).GS_BF) == (Anesthetized.(ANnames{i1}).Frqz'));
-%         
-%         try %cut out the section of the matrix necessary (BF, BF-1, etc)
-%             relreslist =  Anesthetized.(animal).SingleTrial_RelRes_raw{1,(BF+FromBF(ifreq))};
-%         catch %produce NAN if there isn't an entry here
-%             relreslist = NaN(1,length(relreslist));
-%         end
-%         peakampmer = []; peaklatr = []; totalvaluer = []; peakvaluer = [];
-%         
-%         for i2 = 1:50
-%             if isnan(relreslist)
-%                 peaklatr = [peaklatr NaN];
-%                 peakampmer = [peakampmer NaN];
-%                 totalvaluer = [totalvaluer NaN];
-%                 peakvaluer = [peakvaluer NaN];
-%             else
-%                 [latencyr, amplr, meanOfdatar] = iGetPeakData_relres(relreslist(:,:,i2),[200 300]);
-%                 [~, ~, meanOffulldatar] = iGetPeakData_relres(relreslist(:,:,i2));
-%                 peaklatr = [peaklatr latencyr];
-%                 peakampmer = [peakampmer amplr];
-%                 peakvaluer = [peakvaluer meanOfdatar];
-%                 totalvaluer = [totalvaluer meanOffulldatar];
-%             end
-%         end
-%         
-%         %apply a cutoff threshold
-%         if sum(isnan(peakampmer)) > length(peakampmer)/4 % 25% at least
-%             peakampmer = NaN(1,50);
-%             peaklatr = NaN(1,50);
-%         end
-%         
-%         ANpeakampr = [ANpeakampr peakampmer];
-%         ANpeaklatr = [ANpeaklatr peaklatr];
-%         ANtotalvaluer = [ANtotalvaluer totalvaluer];
-%         ANpeakvaluer = [ANpeakvaluer peakvaluer];
-%     end
-%     
-% %     ANpeakamp = [ANpeakamp rowofnans];
-% %     ANpeaklat = [ANpeaklat rowofnans];
-% %     ANtotalvalue = [ANtotalvalue rowofnans];
-% %     ANpeakvalue = [ANpeakvalue rowofnans];
-%     
-%     
-%     AWpeakampr = []; AWpeaklatr = []; AWtotalvaluer = []; AWpeakvaluer = [];
-%     AWnames = fieldnames(Awake);
-%     for i1 = 1:length(AWnames)
-%         animal = AWnames{i1};
-%         BF = find((Awake.(AWnames{i1}).GS_BF) == (Awake.(AWnames{i1}).Frqz'));
-%         try
-%             relreslist =  Awake.(animal).SingleTrial_RelRes_raw{:,(BF+FromBF(ifreq))};
-%         catch
-%             relreslist = NaN(1,length(relreslist));
-%         end
-%         peakampmer = []; peaklatr = []; totalvaluer = []; peakvaluer = [];
-%         for i2 = 1:50
-%             if isnan(relreslist)
-%                 peaklatr = [peaklatr NaN];
-%                 peakampmer = [peakampmer NaN];
-%                 totalvaluer = [totalvaluer NaN];
-%                 peakvaluer = [peakvaluer NaN];
-%             else
-%                 try
-%                     [latencyr, amplr, meanOfdatar] = iGetPeakData_relres(relreslist(:,:,i2),[200 300]);
-%                     [~, ~, meanOffulldatar] = iGetPeakData_relres(relreslist(:,:,i2));
-%                     peaklatr = [peaklatr latencyr];
-%                     peakampmer = [peakampmer amplr];
-%                     peakvaluer = [peakvaluer meanOfdatar];
-%                     totalvaluer = [totalvaluer meanOffulldatar];
-%                 catch
-%                     peaklatr = [peaklatr NaN];
-%                     peakampmer = [peakampmer NaN];
-%                     totalvaluer = [totalvaluer NaN];
-%                     peakvaluer = [peakvaluer NaN];
-%                 end
-%             end
-%         end
-%         
-%         %apply a cutoff threshold
-%         if sum(isnan(peakampmer)) > length(peakampmer)/4 % 25% at least
-%             peakampmer = NaN(1,50);
-%             peaklatr = NaN(1,50);
-%         end
-%         
-%         AWpeakampr = [AWpeakampr peakampmer];
-%         AWpeaklatr = [AWpeaklatr peaklatr];
-%         AWtotalvaluer = [AWtotalvaluer totalvaluer];
-%         AWpeakvaluer = [AWpeakvaluer peakvaluer];
-%     end
-%     
-%     AWpeakampr = [AWpeakampr rowofnans rowofnans];
-%     AWpeaklatr = [AWpeaklatr rowofnans rowofnans];
-%     AWtotalvaluer = [AWtotalvaluer rowofnans rowofnans];
-%     AWpeakvaluer = [AWpeakvaluer rowofnans rowofnans];
-%     
-%     Mpeakampr = []; Mpeaklatr = []; Mtotalvaluer = []; Mpeakvaluer = [];
-%     Mnames = fieldnames(Muscimol);
-%     for i1 = 1:length(Mnames)
-%         animal = Mnames{i1};
-%         BF = find((Muscimol.(Mnames{i1}).GS_BF) == (Muscimol.(Mnames{i1}).Frqz'));
-%         try
-%             relreslist =  Muscimol.(animal).SingleTrial_RelRes_raw{:,(BF+FromBF(ifreq))};
-%         catch
-%             relreslist = NaN(1,length(relreslist));
-%         end
-%         peakampmer = []; peaklatr = []; totalvaluer = []; peakvaluer = [];
-%         for i2 = 1:50
-%             if isnan(relreslist)
-%                 peaklatr = [peaklatr NaN];
-%                 peakampmer = [peakampmer NaN];
-%                 totalvaluer = [totalvaluer NaN];
-%                 peakvaluer = [peakvaluer NaN];
-%             else
-%                 [latencyr, amplr, meanOfdatar] = iGetPeakData_relres(relreslist(:,:,i2),[200 300]);
-%                 [~, ~, meanOffulldatar] = iGetPeakData_relres(relreslist(:,:,i2));
-%                 peaklatr = [peaklatr latencyr];
-%                 peakampmer = [peakampmer amplr];
-%                 peakvaluer = [peakvaluer meanOfdatar];
-%                 totalvaluer = [totalvaluer meanOffulldatar];
-%             end
-%         end
-%         
-%         %apply a cutoff threshold
-%         if sum(isnan(peakampmer)) > length(peakampmer)/4 % 25% at least
-%             peakampmer = NaN(1,50);
-%             peaklatr = NaN(1,50);
-%         end
-%         
-%         Mpeakampr = [Mpeakampr peakampmer];
-%         Mpeaklatr = [Mpeaklatr peaklatr];
-%         Mtotalvaluer = [Mtotalvaluer totalvaluer];
-%         Mpeakvaluer = [Mpeakvaluer peakvaluer];
-%     end
-%      
-%     
-%     %only take the points taken also in the avrec
-%     ANpeakampr(isnan(ANpeakamp)) = NaN; 
-%     AWpeakampr(isnan(AWpeakamp)) = NaN;
-%     Mpeakampr(isnan(Mpeakamp)) = NaN;
-%     
-%     ANpeaklatr(isnan(ANpeaklat)) = NaN;
-%     AWpeaklatr(isnan(AWpeaklat)) = NaN;
-%     Mpeaklatr(isnan(Mpeaklat)) = NaN;
-%     
-%     ANpeakvaluer(isnan(ANpeakvalue)) = NaN;
-%     AWpeakvaluer(isnan(AWpeakvalue)) = NaN;
-%     Mpeakvaluer(isnan(Mpeakvalue)) = NaN;
-%     
-%     %for later tuning curves
-%     plottuner.peakamp = horzcat(plottuner.peakamp, ANpeakampr, AWpeakampr, Mpeakampr);
-%     plottuner.peaklate = horzcat(plottuner.peaklate, ANpeaklatr, AWpeaklatr, Mpeaklatr);
-%     plottuner.peakvalue = horzcat(plottuner.peakvalue, ANpeakvaluer, AWpeakvaluer, Mpeakvaluer);
-%     plottuner.totalmean = horzcat(plottuner.totalmean, ANtotalvaluer, AWtotalvaluer, Mtotalvaluer);
-%     plottuner.tgroup = horzcat(plottuner.tgroup, repmat({Group{1}},1,grpsz), repmat({Group{2}},1,grpsz), repmat({Group{3}},1,grpsz));
-%     plottuner.frqz = horzcat(plottuner.frqz, repmat({newTicks{ifreq}}, 1, grpsz), repmat({newTicks{ifreq}}, 1, grpsz), repmat({newTicks{ifreq}}, 1, grpsz));    
-%     % Peak Amp
-%     disp('********Peak Amplitude********')
-%     peakamp_ANvsAW = horzcat(ANpeakampr', AWpeakampr');
-%     peakamp_ANvsM = horzcat(ANpeakampr', Mpeakampr');
-%     var_peakamp = {'Groups','Peak Amplitude'};
-%     
-%     disp('**Anesthetized vs Awake**')
-%     AnesthetizedvsAwake = teg_repeated_measures_ANOVA(peakamp_ANvsAW, levels, var_peakamp);
-%     disp('**Anesthetized vs Awake COHEN D**')
-%     ANvsAWcohenD = iMakeCohensD(ANpeakampr, AWpeakampr)
-%     disp('**Anesthetized vs Muscimol**')
-%     AnesthetizedvsMuscimol = teg_repeated_measures_ANOVA(peakamp_ANvsM, levels, var_peakamp);
-%     disp('**Anesthetized vs Muscimol COHEN D**')
-%     ANvsMcohenD = iMakeCohensD(ANpeakampr, Mpeakampr)
-%     
-%     savefile = [forsave{ifreq} 'PeakAmp RelresStats.mat'];
-%     save(savefile, 'AnesthetizedvsAwake', 'AnesthetizedvsMuscimol','ANvsAWcohenD','ANvsMcohenD')
-%     
-%     % Peak Lat
-%     disp('********Peak Latency********')
-%     peaklat_ANvsAW = horzcat(ANpeaklatr', AWpeaklatr');
-%     peaklat_ANvsM = horzcat(ANpeaklatr', Mpeaklatr');
-%     var_peaklat = {'Groups','Peak Latency'};
-%     
-%     disp('**Anesthetized vs Awake**')
-%     AnesthetizedvsAwake = teg_repeated_measures_ANOVA(peaklat_ANvsAW, levels, var_peaklat);
-%     disp('**Anesthetized vs Awake COHEN D**')
-%     ANvsAWcohenD = iMakeCohensD(ANpeaklatr, AWpeaklatr)
-%     disp('**Anesthetized vs Muscimol**')
-%     AnesthetizedvsMuscimol = teg_repeated_measures_ANOVA(peaklat_ANvsM, levels, var_peaklat);
-%     disp('**Anesthetized vs Muscimol COHEN D**')
-%     ANvsMcohenD = iMakeCohensD(ANpeaklatr, Mpeaklatr)
-%     
-%     savefile = [forsave{ifreq} ' Peaklat RelresStats.mat'];
-%     save(savefile, 'AnesthetizedvsAwake',  'AnesthetizedvsMuscimol','ANvsAWcohenD','ANvsMcohenD')
-%     
-%     % Total Value
-%     disp('********Total Value********')
-%     totalvalue_ANvsAW = horzcat(ANtotalvaluer', AWtotalvaluer');
-%     totalvalue_ANvsM = horzcat(ANtotalvaluer', Mtotalvaluer');
-%     var_totalvalue = {'Groups','Total'};
-%     
-%     disp('**Anesthetized vs Awake**')
-%     AnesthetizedvsAwake = teg_repeated_measures_ANOVA(totalvalue_ANvsAW, levels, var_totalvalue);
-%     disp('**Anesthetized vs Awake COHEN D**')
-%     ANvsAWcohenD = iMakeCohensD(ANtotalvaluer, AWtotalvaluer)
-%     disp('**Anesthetized vs Muscimol**')
-%     AnesthetizedvsMuscimol = teg_repeated_measures_ANOVA(totalvalue_ANvsM, levels, var_totalvalue);
-%     disp('**Anesthetized vs Muscimol COHEN D**')
-%     ANvsMcohenD = iMakeCohensD(ANtotalvaluer, Mtotalvaluer)
-%     
-%     savefile = [forsave{ifreq} ' Total RelresStats.mat'];
-%     save(savefile, 'AnesthetizedvsAwake',  'AnesthetizedvsMuscimol','ANvsAWcohenD','ANvsMcohenD')
-%     
-%     % Peak Value
-%     disp('********Peak Value********')
-%     peakvalue_ANvsAW = horzcat(ANpeakvaluer', AWpeakvaluer');
-%     peakvalue_ANvsM = horzcat(ANpeakvaluer', Mpeakvaluer');
-%     var_peakvalue = {'Groups','Total'};
-%     
-%     disp('**Anesthetized vs Awake**')
-%     AnesthetizedvsAwake = teg_repeated_measures_ANOVA(peakvalue_ANvsAW, levels, var_peakvalue);
-%     disp('**Anesthetized vs Awake COHEN D**')
-%     ANvsAWcohenD = iMakeCohensD(ANpeakvaluer, AWpeakvaluer)
-%     disp('**Anesthetized vs Muscimol**')
-%     AnesthetizedvsMuscimol = teg_repeated_measures_ANOVA(peakvalue_ANvsM, levels, var_peakvalue);
-%     disp('**Anesthetized vs Muscimol COHEN D**')
-%     ANvsMcohenD = iMakeCohensD(ANpeakvaluer, Mpeakvaluer)
-%     
-%     savefile = [forsave{ifreq} ' PeakValue RelresStats.mat'];
-%     save(savefile, 'AnesthetizedvsAwake', 'AnesthetizedvsMuscimol','ANvsAWcohenD','ANvsMcohenD')
 end
 %%
 levels = [2,7];
@@ -1034,166 +785,6 @@ save(savefile, 'AvK_AvrecPeakAmp_mini', 'AvK_AvrecPeakAmp_miniCD', ...
     'MvK_AvrecPeakLat_miniCD', 'AvK_AvrecRMS_mini', 'AvK_AvrecRMS_miniCD', ...
     'AvN_AvrecRMS_mini', 'AvN_AvrecRMS_miniCD', 'MvK_AvrecRMS_mini', 'MvK_AvrecRMS_miniCD')
 
-% %% RELRES tuning stats
-% % pull out and organize features 
-% % % AWAKE PEAKAMP
-% Am3 = TRe.PeakAmp(strcmp(TRe.Group,'Awake')&strcmp(TRe.Freq,'a -3'))';
-% Am2 = TRe.PeakAmp(strcmp(TRe.Group,'Awake')&strcmp(TRe.Freq,'b -2'))';
-% Am1 = TRe.PeakAmp(strcmp(TRe.Group,'Awake')&strcmp(TRe.Freq,'c -1'))';
-% ABF = TRe.PeakAmp(strcmp(TRe.Group,'Awake')&strcmp(TRe.Freq,'d BF'))';
-% Ap1 = TRe.PeakAmp(strcmp(TRe.Group,'Awake')&strcmp(TRe.Freq,'e +1'))';
-% Ap2 = TRe.PeakAmp(strcmp(TRe.Group,'Awake')&strcmp(TRe.Freq,'f +2'))';
-% Ap3 = TRe.PeakAmp(strcmp(TRe.Group,'Awake')&strcmp(TRe.Freq,'g +3'))';
-% 
-% A_PA = horzcat(Am3,Am2,Am1,ABF,Ap1,Ap2,Ap3);
-% A_PA_3 = horzcat(Am1,ABF,Ap1);
-% 
-% % % AWAKE PEAKLAT
-% Am3 = TRe.PeakLat(strcmp(TRe.Group,'Awake')&strcmp(TRe.Freq,'a -3'))';
-% Am2 = TRe.PeakLat(strcmp(TRe.Group,'Awake')&strcmp(TRe.Freq,'b -2'))';
-% Am1 = TRe.PeakLat(strcmp(TRe.Group,'Awake')&strcmp(TRe.Freq,'c -1'))';
-% ABF = TRe.PeakLat(strcmp(TRe.Group,'Awake')&strcmp(TRe.Freq,'d BF'))';
-% Ap1 = TRe.PeakLat(strcmp(TRe.Group,'Awake')&strcmp(TRe.Freq,'e +1'))';
-% Ap2 = TRe.PeakLat(strcmp(TRe.Group,'Awake')&strcmp(TRe.Freq,'f +2'))';
-% Ap3 = TRe.PeakLat(strcmp(TRe.Group,'Awake')&strcmp(TRe.Freq,'g +3'))';
-% 
-% A_PL = horzcat(Am3,Am2,Am1,ABF,Ap1,Ap2,Ap3);
-% A_PL_3 = horzcat(Am1,ABF,Ap1);
-% 
-% % % AWAKE RMS
-% Am3 = TRe.RMS(strcmp(TRe.Group,'Awake')&strcmp(TRe.Freq,'a -3'))';
-% Am2 = TRe.RMS(strcmp(TRe.Group,'Awake')&strcmp(TRe.Freq,'b -2'))';
-% Am1 = TRe.RMS(strcmp(TRe.Group,'Awake')&strcmp(TRe.Freq,'c -1'))';
-% ABF = TRe.RMS(strcmp(TRe.Group,'Awake')&strcmp(TRe.Freq,'d BF'))';
-% Ap1 = TRe.RMS(strcmp(TRe.Group,'Awake')&strcmp(TRe.Freq,'e +1'))';
-% Ap2 = TRe.RMS(strcmp(TRe.Group,'Awake')&strcmp(TRe.Freq,'f +2'))';
-% Ap3 = TRe.RMS(strcmp(TRe.Group,'Awake')&strcmp(TRe.Freq,'g +3'))';
-% 
-% A_RMS = horzcat(Am3,Am2,Am1,ABF,Ap1,Ap2,Ap3);
-% A_RMS_3 = horzcat(Am1,ABF,Ap1);
-% 
-% % % KET PEAKAMP
-% Km3 = TRe.PeakAmp(strcmp(TRe.Group,'Anesthetized')&strcmp(TRe.Freq,'a -3'))';
-% Km2 = TRe.PeakAmp(strcmp(TRe.Group,'Anesthetized')&strcmp(TRe.Freq,'b -2'))';
-% Km1 = TRe.PeakAmp(strcmp(TRe.Group,'Anesthetized')&strcmp(TRe.Freq,'c -1'))';
-% KBF = TRe.PeakAmp(strcmp(TRe.Group,'Anesthetized')&strcmp(TRe.Freq,'d BF'))';
-% Kp1 = TRe.PeakAmp(strcmp(TRe.Group,'Anesthetized')&strcmp(TRe.Freq,'e +1'))';
-% Kp2 = TRe.PeakAmp(strcmp(TRe.Group,'Anesthetized')&strcmp(TRe.Freq,'f +2'))';
-% Kp3 = TRe.PeakAmp(strcmp(TRe.Group,'Anesthetized')&strcmp(TRe.Freq,'g +3'))';
-% 
-% K_PA = horzcat(Km3,Km2,Km1,KBF,Kp1,Kp2,Kp3);
-% K_PA_3 = horzcat(Km1,KBF,Kp1);
-% 
-% % % KET PEAKLAT
-% Km3 = TRe.PeakLat(strcmp(TRe.Group,'Anesthetized')&strcmp(TRe.Freq,'a -3'))';
-% Km2 = TRe.PeakLat(strcmp(TRe.Group,'Anesthetized')&strcmp(TRe.Freq,'b -2'))';
-% Km1 = TRe.PeakLat(strcmp(TRe.Group,'Anesthetized')&strcmp(TRe.Freq,'c -1'))';
-% KBF = TRe.PeakLat(strcmp(TRe.Group,'Anesthetized')&strcmp(TRe.Freq,'d BF'))';
-% Kp1 = TRe.PeakLat(strcmp(TRe.Group,'Anesthetized')&strcmp(TRe.Freq,'e +1'))';
-% Kp2 = TRe.PeakLat(strcmp(TRe.Group,'Anesthetized')&strcmp(TRe.Freq,'f +2'))';
-% Kp3 = TRe.PeakLat(strcmp(TRe.Group,'Anesthetized')&strcmp(TRe.Freq,'g +3'))';
-% K_PL = horzcat(Km3,Km2,Km1,KBF,Kp1,Kp2,Kp3);
-% K_PL_3 = horzcat(Km1,KBF,Kp1);
-% 
-% % % KET RMS
-% Km3 = TRe.RMS(strcmp(TRe.Group,'Anesthetized')&strcmp(TRe.Freq,'a -3'))';
-% Km2 = TRe.RMS(strcmp(TRe.Group,'Anesthetized')&strcmp(TRe.Freq,'b -2'))';
-% Km1 = TRe.RMS(strcmp(TRe.Group,'Anesthetized')&strcmp(TRe.Freq,'c -1'))';
-% KBF = TRe.RMS(strcmp(TRe.Group,'Anesthetized')&strcmp(TRe.Freq,'d BF'))';
-% Kp1 = TRe.RMS(strcmp(TRe.Group,'Anesthetized')&strcmp(TRe.Freq,'e +1'))';
-% Kp2 = TRe.RMS(strcmp(TRe.Group,'Anesthetized')&strcmp(TRe.Freq,'f +2'))';
-% Kp3 = TRe.RMS(strcmp(TRe.Group,'Anesthetized')&strcmp(TRe.Freq,'g +3'))';
-% 
-% K_RMS = horzcat(Km3,Km2,Km1,KBF,Kp1,Kp2,Kp3);
-% K_RMS_3 = horzcat(Km1,KBF,Kp1);
-% 
-% % % MUSC PEAKAMP
-% Mm3 = TRe.PeakAmp(strcmp(TRe.Group,'Muscimol')&strcmp(TRe.Freq,'a -3'))';
-% Mm2 = TRe.PeakAmp(strcmp(TRe.Group,'Muscimol')&strcmp(TRe.Freq,'b -2'))';
-% Mm1 = TRe.PeakAmp(strcmp(TRe.Group,'Muscimol')&strcmp(TRe.Freq,'c -1'))';
-% MBF = TRe.PeakAmp(strcmp(TRe.Group,'Muscimol')&strcmp(TRe.Freq,'d BF'))';
-% Mp1 = TRe.PeakAmp(strcmp(TRe.Group,'Muscimol')&strcmp(TRe.Freq,'e +1'))';
-% Mp2 = TRe.PeakAmp(strcmp(TRe.Group,'Muscimol')&strcmp(TRe.Freq,'f +2'))';
-% Mp3 = TRe.PeakAmp(strcmp(TRe.Group,'Muscimol')&strcmp(TRe.Freq,'g +3'))';
-% 
-% M_PA = horzcat(Mm3,Mm2,Mm1,MBF,Mp1,Mp2,Mp3);
-% M_PA_3 = horzcat(Mm1,MBF,Mp1);
-% 
-% % % MUSC PEAKLAT
-% Mm3 = TRe.PeakLat(strcmp(TRe.Group,'Muscimol')&strcmp(TRe.Freq,'a -3'))';
-% Mm2 = TRe.PeakLat(strcmp(TRe.Group,'Muscimol')&strcmp(TRe.Freq,'b -2'))';
-% Mm1 = TRe.PeakLat(strcmp(TRe.Group,'Muscimol')&strcmp(TRe.Freq,'c -1'))';
-% MBF = TRe.PeakLat(strcmp(TRe.Group,'Muscimol')&strcmp(TRe.Freq,'d BF'))';
-% Mp1 = TRe.PeakLat(strcmp(TRe.Group,'Muscimol')&strcmp(TRe.Freq,'e +1'))';
-% Mp2 = TRe.PeakLat(strcmp(TRe.Group,'Muscimol')&strcmp(TRe.Freq,'f +2'))';
-% Mp3 = TRe.PeakLat(strcmp(TRe.Group,'Muscimol')&strcmp(TRe.Freq,'g +3'))';
-% M_PL = horzcat(Mm3,Mm2,Mm1,MBF,Mp1,Mp2,Mp3);
-% M_PL_3 = horzcat(Mm1,MBF,Mp1);
-% 
-% % % MUSC RMS
-% Mm3 = TRe.RMS(strcmp(TRe.Group,'Muscimol')&strcmp(TRe.Freq,'a -3'))';
-% Mm2 = TRe.RMS(strcmp(TRe.Group,'Muscimol')&strcmp(TRe.Freq,'b -2'))';
-% Mm1 = TRe.RMS(strcmp(TRe.Group,'Muscimol')&strcmp(TRe.Freq,'c -1'))';
-% MBF = TRe.RMS(strcmp(TRe.Group,'Muscimol')&strcmp(TRe.Freq,'d BF'))';
-% Mp1 = TRe.RMS(strcmp(TRe.Group,'Muscimol')&strcmp(TRe.Freq,'e +1'))';
-% Mp2 = TRe.RMS(strcmp(TRe.Group,'Muscimol')&strcmp(TRe.Freq,'f +2'))';
-% Mp3 = TRe.RMS(strcmp(TRe.Group,'Muscimol')&strcmp(TRe.Freq,'g +3'))';
-% 
-% M_RMS = horzcat(Mm3,Mm2,Mm1,MBF,Mp1,Mp2,Mp3);
-% M_RMS_3 = horzcat(Mm1,MBF,Mp1);
-% 
-% 
-% 
-% %% RELRES STATS
-% disp('*********************** RELRES STATS FULL CURVE ***********************')
-% disp('************** PEAKAMP ***************')
-% com_KvA = horzcat(A_PA, K_PA);
-% com_KvM = horzcat(K_PA, M_PA);
-% 
-% disp('**Anesthetized vs Awake**')
-% AvK_RelresPeakAmp = teg_repeated_measures_ANOVA(com_KvA, levels, varinames);
-% AvK_RelresPeakAmpCD = iMakeCohensD(K_PA, A_PA) %#ok<*NOPTS>
-% 
-% disp('**Anesthetized vs Muscimol**')
-% MvK_RelresPeakAmp = teg_repeated_measures_ANOVA(com_KvM, levels, varinames);
-% MvK_RelresPeakAmpCD = iMakeCohensD(K_PA, M_PA)
-% 
-% disp('************** PEAKLAT ***************')
-% com_KvsAw = horzcat(A_PL, K_PL);
-% com_KvM = horzcat(K_PL, M_PL);
-% 
-% disp('**Anesthetized vs Awake**')
-% AvK_RelresPeakLat = teg_repeated_measures_ANOVA(com_KvsAw, levels, varinames);
-% AvK_RelresPeakLatCD = iMakeCohensD(K_PL, A_PL)
-% 
-% disp('**Anesthetized vs Muscimol**')
-% MvK_RelresPeakLat = teg_repeated_measures_ANOVA(com_KvM, levels, varinames);
-% MvK_RelresPeakLatCD = iMakeCohensD(K_PL, M_PL)
-% 
-% disp('**************   RMS   ***************')
-% com_KvsAw = horzcat(A_RMS, K_RMS);
-% com_KvM = horzcat(K_RMS, M_RMS);
-% 
-% disp('**Anesthetized vs Awake**')
-% AvK_RelresRMS = teg_repeated_measures_ANOVA(com_KvsAw, levels, varinames);
-% AvK_RelresRMSCD = iMakeCohensD(K_RMS, A_RMS)
-% 
-% disp('**Anesthetized vs Muscimol**')
-% MvK_RelresRMS = teg_repeated_measures_ANOVA(com_KvM, levels, varinames);
-% MvK_RelresRMSCD = iMakeCohensD(K_RMS, M_RMS)
-% 
-% 
-% %% Save
-% savefile = 'Full Tuning curve Relres.mat';
-% save(savefile, 'AvK_RelresPeakAmp', 'AvK_RelresPeakLat', ...
-%     'AvK_RelresRMS', 'AvK_RelresRMS', 'MvK_RelresPeakAmp', ...
-%     'MvK_RelresPeakLat', 'MvK_RelresRMS', ...
-%     'MvK_RelresRMS', 'AvK_RelresPeakAmpCD', 'AvK_RelresPeakLatCD', ...
-%     'AvK_RelresRMSCD', 'AvK_RelresRMSCD', 'MvK_RelresPeakAmpCD', ...
-%     'MvK_RelresPeakLatCD', 'MvK_RelresRMSCD', ...
-%     'MvK_RelresRMSCD')
-% 
-% 
 
 
 
