@@ -1,23 +1,30 @@
+function grammplots_ST(homedir)
 %% Start
-clear all
-cd('D:\MyCode\Dynamic_CSD_Analysis');
 warning('OFF');
 dbstop if error
 
-home = pwd;
-addpath(genpath(home));
+% Change directory to your working folder
+if ~exist('homedir','var')
+    if exist('D:\MyCode\Dynamic_CSD','dir') == 7
+        cd('D:\MyCode\Dynamic_CSD');
+    elseif exist('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD','dir') == 7
+        cd('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD')
+    end
+    
+    homedir = pwd;
+    addpath(genpath(homedir));
+end
 
-%for teg_repeated measures_ANOVA
-levels = [2,7];
-varinames = {'Groups','Frequencies'};
+% averaged tuning
 rowofnans = NaN(1,7);
-srowofnans = [{NaN(1,50)} {NaN(1,50)} {NaN(1,50)} {NaN(1,50)} {NaN(1,50)} {NaN(1,50)} {NaN(1,50)}];
-ticks = {'a-3' 'b-2' 'c-1' 'dBF' 'e+1' 'f+2' 'g+3'};
+Parameter = {'SinkRMS','SinkPeakAmp','SinkPeakLate','Sinkonset'};
+% single trial tuning
+% SParameter = {'SingleSinkRMS','SingleSinkPeakAmp','SingleSinkPeakLat'};
+% srowofnans = [{NaN(1,50)} {NaN(1,50)} {NaN(1,50)} {NaN(1,50)} {NaN(1,50)} {NaN(1,50)} {NaN(1,50)}];
 
 % Order = {'IVE','IVL','I_IIE','I_IIL', 'VaE','VaL','VbE','VbL','VIE','VIL'};
 Order = {'IVE','IVL','I_IIE','I_IIL', 'VaE','VaL','VbE','VbL','VIaE','VIaL','VIbE','VIbL'};
-Parameter = {'SinkRMS','SinkPeakAmp','SinkPeakLate','Sinkonset'};
-SParameter = {'SingleSinkRMS','SingleSinkPeakAmp','SingleSinkPeakLat'};
+ticks = {'a-3' 'b-2' 'c-1' 'dBF' 'e+1' 'f+2' 'g+3'};
 
 
 %% Load in the appropriate files
@@ -31,30 +38,19 @@ AnChronic = Data; clear Data;
 load('Muscimol_Data.m_Threshold_0.25_Zscore_0_binned_1_mirror_0.mat')
 Muscimol = Data; clear Data;
 
-cd(home);cd figs;
-mkdir('Group Plots Gramm ST'); cd('Group Plots Gramm ST'); mkdir('AVG');mkdir('SINGLE');addpath(genpath(home));
+cd(homedir);cd figs;
+mkdir('Group Plots Gramm ST'); cd('Group Plots Gramm ST'); mkdir('AVG');mkdir('SINGLE');addpath(genpath(homedir));
 
 %% Sink Loop
 for isink = 1:length(Order)
     %% Avg Trials Loop
-    cd(home); cd figs; cd('Group Plots Gramm ST'); cd('AVG');
+    cd(homedir); cd figs; cd('Group Plots Gramm ST'); cd('AVG');
     for ipara = 1:length(Parameter)
         %% 3 Groups
         An_data = vertcat(Anesthetized.ST_based.(Parameter{ipara}).(Order{isink})(:,5:11));
-        An_datamean = nanmean(An_data,1);
-        An_datasem = nanstd(An_data,1)/sqrt(sum(~isnan(An_datamean)));
-        
         Aw_data = vertcat(Awake.ST_based.(Parameter{ipara}).(Order{isink})(:,4:10),rowofnans,rowofnans);
-        Aw_datamean = nanmean(Aw_data,1);
-        Aw_datasem = nanstd(Aw_data,1)/sqrt(sum(~isnan(Aw_datamean)));
-        
         AnC_data = vertcat(AnChronic.GS_based.(Parameter{ipara}).(Order{isink})(:,4:10), rowofnans,rowofnans);
-        AnC_datamean = nanmean(AnC_data,1);
-        AnC_datasem = nanstd(AnC_data,1)/sqrt(sum(~isnan(AnC_datamean)));
-        
         M_data = vertcat(Muscimol.ST_based.(Parameter{ipara}).(Order{isink})(:,5:11));
-        M_datamean = nanmean(M_data,1);
-        M_datasem = nanstd(M_data,1)/sqrt(sum(~isnan(M_datamean)));
         
         fullmean = nanmean(vertcat(An_data,Aw_data,AnC_data,M_data),1)';
         
@@ -115,9 +111,9 @@ for isink = 1:length(Order)
         %Tuning curve
         g(2,1)=gramm('x',plotdata.tone,'y',plotdata.data, 'color', plotdata.group); %,'y',cars.Acceleration,'color',cars.Cylinders,'subset',cars.Cylinders~=3 & cars.Cylinders~=5
         % g(2,1).geom_point(); %to see each point, removed the YLim (highest points are closer to 2.5
-        g(2,1).stat_summary('type','sem','geom','errorbar'); %mean and sem shown
-        g(2,1).stat_summary('type','sem','geom','point'); %mean and sem shown
-        g(2,1).stat_summary('type','sem','geom','area'); %mean and sem shown
+        g(2,1).stat_summary('type','std','geom','errorbar'); %mean and sem shown
+        g(2,1).stat_summary('type','std','geom','point'); %mean and sem shown
+        g(2,1).stat_summary('type','std','geom','area'); %mean and sem shown
         g(2,1).set_layout_options('Position',[0 0 0.8 0.8],...
             'legend_pos',[0.83 0.75 0.2 0.2],... %We detach the legend from the plot and move it to the top right
             'margin_height',[0.1 0.02],...
@@ -153,29 +149,21 @@ end
 %% Sink Loop Normalized
 for isink = 1:length(Order)
     %% Avg Trials Loop
-    cd(home); cd figs; cd('Group Plots Gramm ST Normalized'); 
+    cd(homedir); cd figs; cd('Group Plots Gramm ST Normalized'); 
     for ipara = 1:length(Parameter)
         %% 3 Groups
         An_data = vertcat(Anesthetized.ST_based.(Parameter{ipara}).(Order{isink})(:,5:11));
         An_data = An_data./An_data(:,4);
-        An_datamean = nanmean(An_data,1);
-        An_datasem = nanstd(An_data,1)/sqrt(sum(~isnan(An_datamean)));
         
         Aw_data = vertcat(Awake.ST_based.(Parameter{ipara}).(Order{isink})(:,4:10),rowofnans,rowofnans);
         Aw_data = Aw_data./Aw_data(:,4);
-        Aw_datamean = nanmean(Aw_data,1);
-        Aw_datasem = nanstd(Aw_data,1)/sqrt(sum(~isnan(Aw_datamean)));
         
         AnC_data = vertcat(AnChronic.GS_based.(Parameter{ipara}).(Order{isink})(:,4:10), rowofnans,rowofnans);
         AnC_data = AnC_data./AnC_data(:,4);
-        AnC_datamean = nanmean(AnC_data,1);
-        AnC_datasem = nanstd(AnC_data,1)/sqrt(sum(~isnan(AnC_datamean)));
         
         M_data = vertcat(Muscimol.ST_based.(Parameter{ipara}).(Order{isink})(:,5:11));
         M_data = M_data./M_data(:,4);
-        M_datamean = nanmean(M_data,1);
-        M_datasem = nanstd(M_data,1)/sqrt(sum(~isnan(M_datamean)));
-        
+
         fullmean = nanmean(vertcat(An_data,Aw_data,AnC_data,M_data),1)';
         
         % Create Appropriate Structure

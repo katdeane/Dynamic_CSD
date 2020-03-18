@@ -1,3 +1,4 @@
+function Statistical_groupanalysis_Loop_ST_2sides(homedir)
 %% Stats Loop FOR 5 FREQUENCIES
 % copy of stats loop but with ST data!
 %This loop is an interface for the teg_repeated_measures_Anova code. It
@@ -10,13 +11,20 @@
 %variable within the code itself. 
 
 %% Start
-clear
-cd('D:\MyCode\Dynamic_CSD_Analysis');
 warning('OFF');
 dbstop if error
 
-home = pwd;
-addpath(genpath(home));
+% Change directory to your working folder
+if ~exist('homedir','var')
+    if exist('D:\MyCode\Dynamic_CSD','dir') == 7
+        cd('D:\MyCode\Dynamic_CSD');
+    elseif exist('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD','dir') == 7
+        cd('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD')
+    end
+    
+    homedir = pwd;
+    addpath(genpath(homedir));
+end
 
 %for teg_repeated measures_ANOVA
 levels = [2,5];
@@ -45,16 +53,16 @@ load('Muscimol_Data.m_Threshold_0.25_Zscore_0_binned_1_mirror_0.mat')
 Muscimol = Data; clear Data;
 
 
-cd(home);cd figs;
+cd(homedir);cd figs;
 mkdir('Group Tuning Curves ST'); % change this name if you ever need to run more stats so as not to over-write
-cd('Group Tuning Curves ST');mkdir('AVG');mkdir('SINGLE');addpath(genpath(home));
+cd('Group Tuning Curves ST');mkdir('AVG');mkdir('SINGLE');
 
 %% Sink Loop
 for isink = 1:length(Order)
     
     disp(['***********************ST STATS FOR ' (Order{isink}) '***********************'])
     %% Avg Trial Loop
-    cd(home); cd figs; cd('Group Tuning Curves ST');cd('AVG');
+    cd(homedir); cd figs; cd('Group Tuning Curves ST');cd('AVG');
     for ipara = 1:length(Parameter)
         
         disp(['********' (Parameter{ipara}) '********']) %these headers allow a copy and paste of all post-hoc tests which aren't saved in the data at the end
@@ -88,7 +96,7 @@ for isink = 1:length(Order)
         title(['Sink' (Order{isink}) (Parameter{ipara})])
         set(gca,'XTick',1:5); set(gca,'XTickLabel',ticks,'FontSize',10);
         
-        cd([home '\figs\' 'Group Tuning Curves ST']);
+        cd([homedir '\figs\' 'Group Tuning Curves ST']);
         savefig(h,['Sink' (Order{isink}) (Parameter{ipara})]); close all;
         
         %finally, we run the statistics. The stats will only appear in the
@@ -110,7 +118,7 @@ for isink = 1:length(Order)
         MvK_CD = iMakeCohensD(M_data, An_data)
         
         %significant or not, the F = #(#,#) and p= # will be saves in this file
-        cd(home); cd DATA
+        cd(homedir); cd DATA
         mkdir('StatsST'); cd StatsST
         savefile = [(Order{isink}) (Parameter{ipara}) 'SinkStats.mat'];
         save(savefile, 'AnesthetizedvsAwake', 'AvK_CD', 'AnChronicvsAwake', 'AvN_CD', 'AnesthetizedvsMuscimol', 'MvK_CD')
@@ -123,7 +131,7 @@ for isink = 1:length(Order)
     
     disp(['***********************Normalized ST STATS FOR ' (Order{isink}) '***********************'])
     %% Avg Trial Loop
-    cd(home); cd figs; cd('Group Tuning Curves ST');cd('AVG');
+    cd(homedir); cd figs; cd('Group Tuning Curves ST');cd('AVG');
     for ipara = 1:length(Parameter)
         
         disp(['********Normalized ' (Parameter{ipara}) '********']) %these headers allow a copy and paste of all post-hoc tests which aren't saved in the data at the end
@@ -165,7 +173,7 @@ for isink = 1:length(Order)
         title(['Sink' (Order{isink}) (Parameter{ipara})])
         set(gca,'XTick',1:5); set(gca,'XTickLabel',ticks,'FontSize',10);
         
-        cd([home '\figs\' 'Group Tuning Curves ST']);
+        cd([homedir '\figs\' 'Group Tuning Curves ST']);
         savefig(h,['Sink' (Order{isink}) (Parameter{ipara})]); close all;
         
         %finally, we run the statistics. The stats will only appear in the
@@ -188,7 +196,7 @@ for isink = 1:length(Order)
         MvK_CDN = iMakeCohensD(M_data, An_data)
         
         %significant or not, the F = #(#,#) and p= # will be saves in this file
-        cd(home); cd DATA
+        cd(homedir); cd DATA
         mkdir('StatsST'); cd StatsST
         savefile = [(Order{isink}) (Parameter{ipara}) 'SinkStats_Norm.mat'];
         save(savefile, 'AnesthetizedvsAwakeN', 'AvK_CDN', 'AnChronicvsAwakeN', 'AvN_CDN', 'AnesthetizedvsMuscimolN', 'MvK_CDN')
@@ -201,7 +209,7 @@ for isink = 1:length(Order)
     
     disp(['***********************Mirror Normalized ST STATS FOR ' (Order{isink}) '***********************'])
     %% Avg Trial Loop
-    cd(home); cd figs; cd('Group Tuning Curves ST');cd('AVG');
+    cd(homedir); cd figs; cd('Group Tuning Curves ST');cd('AVG');
     for ipara = 1:length(Parameter)
         
         disp(['********Mirror Normalized ' (Parameter{ipara}) '********']) %these headers allow a copy and paste of all post-hoc tests which aren't saved in the data at the end
@@ -251,7 +259,7 @@ for isink = 1:length(Order)
         title(['Sink' (Order{isink}) (Parameter{ipara})])
         set(gca,'XTick',1:5); set(gca,'XTickLabel',ticks,'FontSize',10);
         
-        cd([home '\figs\' 'Group Tuning Curves ST']);
+        cd([homedir '\figs\' 'Group Tuning Curves ST']);
         savefig(h,['Sink' (Order{isink}) (Parameter{ipara})]); close all;
         
         %finally, we run the statistics. The stats will only appear in the
@@ -274,7 +282,7 @@ for isink = 1:length(Order)
         MvK_CDNM = iMakeCohensD(M_Mir_data, An_Mir_data)
         
         %significant or not, the F = #(#,#) and p= # will be saves in this file
-        cd(home); cd DATA
+        cd(homedir); cd DATA
         mkdir('StatsST'); cd StatsST
         savefile = [(Order{isink}) (Parameter{ipara}) 'SinkStats_Mir_Norm.mat'];
         save(savefile, 'AnesthetizedvsAwakeNM', 'AvK_CDNM', 'AnChronicvsAwakeNM', 'AvN_CDNM', 'AnesthetizedvsMuscimolNM', 'MvK_CDNM')

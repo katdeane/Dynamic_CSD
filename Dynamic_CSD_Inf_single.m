@@ -1,3 +1,4 @@
+function Dynamic_CSD_Inf_single(homedir)
 %% Dynamic CSD for sinks I_II through Inf; incl. single
 
 %   This script takes input from the groups and raw folders. It calculates 
@@ -19,16 +20,19 @@ warning('OFF');
 dbstop if error
 
 % Change directory to your working folder
-if exist('D:\MyCode\Dynamic_CSD_Analysis','dir') == 7
-    cd('D:\MyCode\Dynamic_CSD_Analysis');
-elseif exist('D:\Dynamic_CSD_Analysis','dir') == 7
-    cd('D:\Dynamic_CSD_Analysis');
-elseif exist('C:\Users\kedea\Documents\Dynamic_CSD_Analysis','dir') == 7
-    cd('C:\Users\kedea\Documents\Dynamic_CSD_Analysis')
+if ~exist('homedir','var')
+    if exist('D:\MyCode\Dynamic_CSD','dir') == 7
+        cd('D:\MyCode\Dynamic_CSD');
+    elseif exist('D:\Dynamic_CSD_Analysis','dir') == 7
+        cd('D:\Dynamic_CSD_Analysis');
+    elseif exist('C:\Users\kedea\Documents\Dynamic_CSD_Analysis','dir') == 7
+        cd('C:\Users\kedea\Documents\Dynamic_CSD_Analysis')
+    end
+    
+    homedir = pwd;
+    addpath(genpath(homedir));
 end
 
-home = pwd; 
-addpath(genpath(home));
 cd (home),cd groups;
 
 %% Load in
@@ -49,14 +53,14 @@ for i1 = 1:entries
     
     %% Condition and Indexer   
     Data = struct;
-    cd (home); cd figs;
+    cd (homedir); cd figs;
     mkdir(['Single_Spike_' input(i1).name(1:end-2)]);
     
     Indexer = imakeIndexer(Condition,animals,Cond);
     %%
     
     for iA = 1:length(animals)
-        cd (home); cd raw;
+        cd (homedir); cd raw;
         name = animals{iA};
         
         for iC = 1:length(Condition)
@@ -78,7 +82,7 @@ for i1 = 1:entries
                         fprintf('the name or measurement does not exist/n')
                     end
                     
-                    cd (home),cd groups;
+                    cd (homedir),cd groups;
                     try load([name '_Baseline']); %this Baseline is determined by gen_threshold.m from multiple recordings of one animal
                     catch
                         Baseline = []; %if a baseline wasn't taken, create an empty variable
@@ -95,7 +99,7 @@ for i1 = 1:entries
                         frqz(find(frqz == inf))=[]; % takes click out of analysis
                         frqz(find(frqz == 0))=[]; % takes pause out of analysis
                     else %Chronic recordings
-                        cd (home); cd subfunc;
+                        cd (homedir); cd subfunc;
                         %To apply channel interpolation
                         if ~isempty(DATA.ART)
                             [DATA.LFP]=chaninterp(DATA.LFP, 'linextra', DATA.ART.chan,...
@@ -114,7 +118,7 @@ for i1 = 1:entries
                     end
                     
                     %% CSD full
-                    cd (home),cd subfunc;
+                    cd (homedir),cd subfunc;
                     
                     %note: channel order is given twice because the whole
                     %CSD needs to be checked now (and not any one layer)
@@ -441,7 +445,7 @@ for i1 = 1:entries
                     end
                     toc
                     
-                    cd([home '\figs\']); mkdir(['Single_' input(i1).name(1:end-2)]);
+                    cd([homedir '\figs\']); mkdir(['Single_' input(i1).name(1:end-2)]);
                     cd(['Single_' input(i1).name(1:end-2)])
                     h = gcf;
                     set(h, 'PaperType', 'A4');
@@ -697,9 +701,9 @@ for i1 = 1:entries
             end
         end
     end
-    cd ([home '/DATA'])
+    cd ([homedir '/DATA'])
     save([input(i1).name(1:end-2) '_Data'],'Data');
     clear Data
 end
-cd(home)
+cd(homedir)
 toc
