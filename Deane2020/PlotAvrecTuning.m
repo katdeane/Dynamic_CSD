@@ -15,10 +15,10 @@ if contains(feature{i1},'_norm')
     g(1,1).axe_property('YLim',[.25 1.5]);
 elseif strcmp(feature{i1},'peaklate')
     g(1,1).set_names('x','Tone','y','ms','color','Group');
-    g(1,1).axe_property('YLim',[220 270]);
+    g(1,1).axe_property('YLim',[200 270]);
 elseif strcmp(feature{i1},'peakamp')
     g(1,1).set_names('x','Tone','y','mV/mm?','color','Group');
-    g(1,1).axe_property('YLim',[0 0.003]);
+    g(1,1).axe_property('YLim',[0 0.005]);
 else
     g(1,1).set_names('x','Tone','y','mV/mm?','color','Group');
     g(1,1).axe_property('YLim',[0.0002 0.0015]);
@@ -120,7 +120,7 @@ g.export('file_name','Peak Latency against Amp BF-2', 'file_type','pdf');
 g.export('file_name','Peak Latency against Amp BF-2', 'file_type','png');
 close all;
 
-cd(home);cd DATA; cd avrec_compare;
+cd(home);cd DATA; mkdir('avrec_compare'); cd avrec_compare;
 save('AvrecPlotData_single.mat','plottune')
 
 
