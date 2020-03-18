@@ -154,7 +154,7 @@ for iticks = 1:length(Ticks)
             'margin_width',[0.1 0.1],...
             'redraw',false);
     g.set_names('x','Time (ms)','y','?V','color','Group');
-    g.axe_property('ylim',[0 0.002],'xlim',[0 600])
+    g.axe_property('ylim',[0 0.003],'xlim',[0 600])
     g.set_color_options('map','matlab');
     g.set_title((Ticknames{iticks}));
     g.draw();
@@ -168,9 +168,9 @@ end
 newTicks = {'b -2', 'c -1','d BF', 'e +1', 'f +2'};
 newTicknames = {'BF - 2','BF - 1','Best Frequency','BF + 1', 'BF + 2'};
 
+disp('***sorting frequencies***')
 for ifreq = 1:length(newTicknames)
-    disp(['***********************STATS FOR ' (newTicknames{ifreq}) '***********************'])
-    
+   
     % Anesthetized Acute
     Kpeakamp = []; Kpeaklat = []; Ktotalvalue = []; Kpeakvalue = [];
     Kpeakamp_norm = []; Kpeakvalue_norm = [];

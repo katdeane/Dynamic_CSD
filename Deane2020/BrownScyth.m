@@ -1,25 +1,33 @@
-%% BrownScyth for avrec/relres
+function BrownScyth(homedir)
 
 % folder:   D:\MyCode\Dynamic_CSD_Analysis\DATA\avrec_compare
 % Input:    stats from single trial avrec and relres 
 % Output:   BrownScyth statistical comparison of variances; box plots and
 %           stats saved as pictures
 
-clear 
-cd('D:\MyCode\Dynamic_CSD_Analysis');
 warning('OFF');
 dbstop if error
 
-home = pwd;
-addpath(genpath(home));
-cd Data; cd avrec_compare
+% Change directory to your working folder
+if ~exist('homedir','var')
+    if exist('D:\MyCode\Dynamic_CSD','dir') == 7
+        cd('D:\MyCode\Dynamic_CSD');
+    elseif exist('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD','dir') == 7
+        cd('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD')
+    end
+    
+    homedir = pwd;
+    addpath(genpath(homedir));
+end
+cd(homedir);
+cd Data; cd avrec_compare;
 
 figlist = {'vMusc_Box','vMusc_Stat','vAw_Box','vAw_Stat'};
 
 %% Load and sort the data 
-load('AvrecPlotData_single.mat'); AVRECdata = plottune;
-load('RelresPlotData_single.mat'); RELRESdata = plottune; 
-load('AbsresPlotData_single.mat'); ABSRESdata = plottune; clear plotdata
+load('AvrecPlotData_single.mat','plottune'); AVRECdata = plottune;
+load('RelresPlotData_single.mat','plottune'); RELRESdata = plottune; 
+load('AbsresPlotData_single.mat','plottune'); ABSRESdata = plottune; clear plotdata
 
 % pull out the needed structure 
 AVREC.peakamp = AVRECdata.peakamp';

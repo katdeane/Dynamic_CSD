@@ -1,4 +1,4 @@
-%% Cluster Permutation Test
+function PermutationTestCSD(homedir)
 
 % Author: Katrina Deane
 
@@ -20,24 +20,23 @@
 % layer selection (e.g. LIV early is (8:11,200:300) and needs to be
 % manually changed if there are other specifications required
 
-clear
-
 %% standard operations
 
-% Change directory to your working folder
-if exist('D:\MyCode\Dynamic_CSD_Analysis','dir') == 7
-    cd('D:\MyCode\Dynamic_CSD_Analysis');
-elseif exist('D:\Dynamic_CSD_Analysis','dir') == 7
-    cd('D:\Dynamic_CSD_Analysis');
-elseif exist('C:\Users\kedea\Documents\Dynamic_CSD_Analysis','dir') == 7
-    cd('C:\Users\kedea\Documents\Dynamic_CSD_Analysis')
-else
-    error('Please add your working folder to the list in the header')
-end
+warning('OFF');
+dbstop if error
 
-home = pwd; 
-addpath(genpath(home));
-cd (home),cd DATA;
+% Change directory to your working folder
+if ~exist('homedir','var')
+    if exist('D:\MyCode\Dynamic_CSD','dir') == 7
+        cd('D:\MyCode\Dynamic_CSD');
+    elseif exist('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD','dir') == 7
+        cd('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD')
+    end
+    
+    homedir = pwd;
+    addpath(genpath(homedir));
+end
+cd (homedir),cd DATA;
 
 Ticknames = {'BF - 3','BF - 2','BF - 1','BF','BF + 1', 'BF + 2', 'BF + 3'};
 ticklen = length(Ticknames);
@@ -520,7 +519,7 @@ for iperm = 1:nperms
 end
 
 %% Visualize observed phenomonon
-cd(home);cd figs; mkdir('PermuteCSDs'); cd('PermuteCSDs')
+cd(homedir);cd figs; mkdir('PermuteCSDs'); cd('PermuteCSDs')
 
 % pull out all visuals associated
 figure('Name',[compName ' Observed Difference Matrix'])
