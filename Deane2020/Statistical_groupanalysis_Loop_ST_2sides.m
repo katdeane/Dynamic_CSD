@@ -1,6 +1,6 @@
 function Statistical_groupanalysis_Loop_ST_2sides(homedir)
-%% Stats Loop FOR 5 FREQUENCIES
-% copy of stats loop but with ST data!
+%% Stats Loop FOR 5 FREQUENCIES self-tuned
+
 %This loop is an interface for the teg_repeated_measures_Anova code. It
 %runs through each parameter (pulled from group analysis Data structure) in
 %each specified sink. It generates simple errorbar line plots in a group 
