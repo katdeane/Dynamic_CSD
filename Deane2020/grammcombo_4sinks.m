@@ -5,12 +5,12 @@
 
 clear
 sink = {'I_IIE','IVE','VbE','VIaE'};%The sinks we would like to compare - currently limited to 4 sinks exactly
-para = 1;                           %1 = 'SinkRMS',2 = 'SinkPeakAmp', 3 = 'SinkPeakLate', 4 = 'Sinkonset'
+para = 3;                           %1 = 'SinkRMS',2 = 'SinkPeakAmp', 3 = 'SinkPeakLate', 4 = 'Sinkonset'
 addmusc = 1;                        %1 = include muscimol and 0 = do not include muscimol
 which = 2;                          %1 = GS_based and 2 = ST_based
 
 %% Start
-cd('D:\MyCode\Dynamic_CSD');
+cd('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD');
 warning('OFF');
 dbstop if error
 
@@ -202,9 +202,9 @@ figure('Position',[100 100 1000 550]);
 g(1,1)=gramm('x',T.tone,'y',T.data, 'color', T.group); %,'y',cars.Acceleration,'color',cars.Cylinders,'subset',cars.Cylinders~=3 & cars.Cylinders~=5
 g(1,1).facet_grid([],T.sink,'column_labels',true,'row_labels',true); %,'scale','free'
 % g(1,1).geom_point(); %to see each point, removed the YLim (highest points are closer to 2.5
-g(1,1).stat_summary('type','std','geom','errorbar'); %mean and sem shown
-g(1,1).stat_summary('type','std','geom','point'); %mean and sem shown
-g(1,1).stat_summary('type','std','geom','area'); %mean and sem shown
+g(1,1).stat_summary('type','std','geom','errorbar'); %mean and std shown
+g(1,1).stat_summary('type','std','geom','point'); %mean and std shown
+g(1,1).stat_summary('type','std','geom','area'); %mean and std shown
 g(1,1).set_layout_options('Position',[0 0 0.8 1],...
     'legend_pos',[0.62 0.77 0.15 0.15],... %We detach the legend from the plot and move it to the top right
     'margin_height',[0.1 0.02],...
@@ -213,10 +213,10 @@ g(1,1).set_layout_options('Position',[0 0 0.8 1],...
 g(1,1).set_text_options('base_size',11,'legend_title_scaling', 1,'facet_scaling', 1)
 % 
 if para == 1
-    g(1,1).set_names('x','Tone','y','mV/mm²','color','Group');
+    g(1,1).set_names('x','Tone','y','mV/mm?','color','Group');
 %     g(1,1).axe_property('Ygrid','on','YLim',[0.005 0.04]); %,'YLim',[0 0.0015]
 elseif para == 2
-    g(1,1).set_names('x','Tone','y','mV/mm²','color','Group');
+    g(1,1).set_names('x','Tone','y','mV/mm?','color','Group');
     g(1,1).axe_property('Ygrid','on','YLim',[0 0.005]); %,'YLim',[0 0.0015]
 elseif para == 3
     g(1,1).set_names('x','Tone','y','ms','color','Group');
@@ -242,9 +242,9 @@ figure('Position',[100 100 1000 550]);
 g(1,1)=gramm('x',T.tone,'y',T.normdata, 'color', T.group); %,'y',cars.Acceleration,'color',cars.Cylinders,'subset',cars.Cylinders~=3 & cars.Cylinders~=5
 g(1,1).facet_grid([],T.sink); %,'scale','free'
 % g(2,1).geom_point(); %to see each point, removed the YLim (highest points are closer to 2.5
-g(1,1).stat_summary('type','std','geom','errorbar'); %mean and sem shown
-g(1,1).stat_summary('type','std','geom','point'); %mean and sem shown
-g(1,1).stat_summary('type','std','geom','area'); %mean and sem shown
+g(1,1).stat_summary('type','std','geom','errorbar'); %mean and std shown
+g(1,1).stat_summary('type','std','geom','point'); %mean and std shown
+g(1,1).stat_summary('type','std','geom','area'); %mean and std shown
 g(1,1).set_layout_options('Position',[0 0 0.8 1],...
     'legend_pos',[0.62 0.77 0.15 0.15],... %We detach the legend from the plot and move it to the top right
     'margin_height',[0.1 0.02],...
@@ -458,9 +458,9 @@ figure('Position',[100 100 1000 550]);
 g(1,1)=gramm('x',Freq,'y',mirData, 'color', Groups ); %,'y',cars.Acceleration,'color',cars.Cylinders,'subset',cars.Cylinders~=3 & cars.Cylinders~=5
 g(1,1).facet_grid([],Sinks,'row_labels',false); %,'scale','free'
 % g(2,1).geom_point(); %to see each point, removed the YLim (highest points are closer to 2.5
-g(1,1).stat_summary('type','std','geom','errorbar'); %mean and sem shown
-g(1,1).stat_summary('type','std','geom','point'); %mean and sem shown
-g(1,1).stat_summary('type','std','geom','area'); %mean and sem shown
+g(1,1).stat_summary('type','std','geom','errorbar'); %mean and std shown
+g(1,1).stat_summary('type','std','geom','point'); %mean and std shown
+g(1,1).stat_summary('type','std','geom','area'); %mean and std shown
 g(1,1).set_layout_options('Position',[0 0 0.8 1],...
     'legend_pos',[0.62 0.77 0.15 0.15],... %We detach the legend from the plot and move it to the top right
     'margin_height',[0.1 0.02],...

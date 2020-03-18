@@ -6,9 +6,9 @@ clear g
 figure();
 
 g(1,1)=gramm('x',plottune.frqzMir,'y',plottune.(feature{i1}), 'color', plottune.tgroup); %,'y',cars.Acceleration,'color',cars.Cylinders,'subset',cars.Cylinders~=3 & cars.Cylinders~=5
-g(1,1).stat_summary('type','sem','geom','errorbar'); %mean and sem shown
-g(1,1).stat_summary('type','sem','geom','point'); %mean and sem shown
-g(1,1).stat_summary('type','sem','geom','area'); %mean and sem shown
+g(1,1).stat_summary('type','std','geom','errorbar'); %mean and std shown
+g(1,1).stat_summary('type','std','geom','point'); %mean and std shown
+g(1,1).stat_summary('type','std','geom','area'); %mean and std shown
 g(1,1).set_text_options('base_size',12) 
 
 g(1,1).set_names('x','Tone','y','%','color','Group');

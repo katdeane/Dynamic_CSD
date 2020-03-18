@@ -13,14 +13,14 @@ Deane2020/CurranSpectral/Pictures/
 *.pptx
 *.doc
 
-
-diaries&stats/
-16062018_ohne_mirror/
-Figs_Group_comparison/
-Martin_R_for_Micha/
-
-
 % Pipelines for specific projects
 Pipeline_KatPhD.m
 Pipeline_KatMasterThesis.m
 Pipline_RunScalos.m
+
+% extra
+diaries&stats/
+16062018_ohne_mirror/
+Figs_Group_comparison/
+Martin_R_for_Micha/
+sinktuning_readout_STonset

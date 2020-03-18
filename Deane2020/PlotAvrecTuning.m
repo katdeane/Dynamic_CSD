@@ -6,9 +6,9 @@ clear g
 figure();
 
 g(1,1)=gramm('x',plottune.frqz,'y',plottune.(feature{i1}), 'color', plottune.tgroup); %,'y',cars.Acceleration,'color',cars.Cylinders,'subset',cars.Cylinders~=3 & cars.Cylinders~=5
-g(1,1).stat_summary('type','sem','geom','errorbar'); %mean and sem shown
-g(1,1).stat_summary('type','sem','geom','point'); %mean and sem shown
-g(1,1).stat_summary('type','sem','geom','area'); %mean and sem shown
+g(1,1).stat_summary('type','std','geom','errorbar'); %mean and std shown
+g(1,1).stat_summary('type','std','geom','point'); %mean and std shown
+g(1,1).stat_summary('type','std','geom','area'); %mean and std shown
 g(1,1).set_text_options('base_size',12) 
 if contains(feature{i1},'_norm')
     g(1,1).set_names('x','Tone','y','%','color','Group');
@@ -17,10 +17,10 @@ elseif strcmp(feature{i1},'peaklate')
     g(1,1).set_names('x','Tone','y','ms','color','Group');
     g(1,1).axe_property('YLim',[220 270]);
 elseif strcmp(feature{i1},'peakamp')
-    g(1,1).set_names('x','Tone','y','mV/mm²','color','Group');
+    g(1,1).set_names('x','Tone','y','mV/mm?','color','Group');
     g(1,1).axe_property('YLim',[0 0.003]);
 else
-    g(1,1).set_names('x','Tone','y','mV/mm²','color','Group');
+    g(1,1).set_names('x','Tone','y','mV/mm?','color','Group');
     g(1,1).axe_property('YLim',[0.0002 0.0015]);
 end
 g(1,1).set_color_options('map','matlab');
@@ -42,9 +42,9 @@ g.stat_boxplot('notch',true);
 if strcmp(feature{i1},'peaklate')
     g(1,1).set_names('x','Group','y','Latency (ms)','color','Group');
 elseif strcmp(feature{i1},'peakamp')
-    g(1,1).set_names('x','Group','y','Amplituded (mV/mm²)','color','Group');
+    g(1,1).set_names('x','Group','y','Amplituded (mV/mm?)','color','Group');
 else
-    g(1,1).set_names('x','Tone','y','RMS (mV/mm²)','color','Group');
+    g(1,1).set_names('x','Tone','y','RMS (mV/mm?)','color','Group');
 
 end
 g(1,1).set_color_options('map','matlab');
