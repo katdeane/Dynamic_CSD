@@ -5,7 +5,7 @@
 
 clear
 sink = {'I_IIE','IVE','VbE','VIaE'};%The sinks we would like to compare - currently limited to 4 sinks exactly
-para = 3;                           %1 = 'SinkRMS',2 = 'SinkPeakAmp', 3 = 'SinkPeakLate', 4 = 'Sinkonset'
+para = 2;                           %1 = 'SinkRMS',2 = 'SinkPeakAmp', 3 = 'SinkPeakLate', 4 = 'Sinkonset'
 addmusc = 1;                        %1 = include muscimol and 0 = do not include muscimol
 which = 2;                          %1 = GS_based and 2 = ST_based
 
@@ -120,11 +120,11 @@ A = Agroup';
 Mgroup = {'Muscimol' 'Muscimol' 'Muscimol' 'Muscimol' 'Muscimol'};
 M = Mgroup';
 
-sinklist1pre = {['a' sink{1}], ['a' sink{1}], ['a' sink{1}], ['a' sink{1}], ['a' sink{1}]}; %{'IVE' 'IVE' 'IVE' 'IVE' 'IVE' 'IVE' 'IVE'};
+sinklist1pre = {['a' sink{1}], ['a' sink{1}], ['a' sink{1}], ['a' sink{1}], ['a' sink{1}]}; %{'I_IIE' 'I_IIE' 'I_IIE' 'I_IIE' 'I_IIE' 'I_IIE' 'I_IIE'};
 sinklist1 = sinklist1pre';
-sinklist2pre = {['b' sink{2}], ['b' sink{2}], ['b' sink{2}], ['b' sink{2}], ['b' sink{2}]}; %{'VbE' 'VbE' 'VbE' 'VbE' 'VbE' 'VbE' 'VbE'};
+sinklist2pre = {['b' sink{2}], ['b' sink{2}], ['b' sink{2}], ['b' sink{2}], ['b' sink{2}]}; %{'IVE' 'IVE' 'IVE' 'IVE' 'IVE' 'IVE' 'IVE'};
 sinklist2 = sinklist2pre';
-sinklist3pre = {['c' sink{3}], ['c' sink{3}], ['c' sink{3}], ['c' sink{3}], ['c' sink{3}]}; %{'VIaE' 'VIaE' 'VIaE' 'VIaE' 'VIaE' 'VIaE' 'VIaE'};
+sinklist3pre = {['c' sink{3}], ['c' sink{3}], ['c' sink{3}], ['c' sink{3}], ['c' sink{3}]}; %{'VbE' 'VbE' 'VbE' 'VbE' 'VbE' 'VbE' 'VbE'};
 sinklist3 = sinklist3pre';
 sinklist4pre = {['d' sink{4}], ['d' sink{4}], ['d' sink{4}], ['d' sink{4}], ['d' sink{4}]}; %{'VIaE' 'VIaE' 'VIaE' 'VIaE' 'VIaE' 'VIaE' 'VIaE'};
 sinklist4 = sinklist4pre';
@@ -217,7 +217,7 @@ if para == 1
 %     g(1,1).axe_property('Ygrid','on','YLim',[0.005 0.04]); %,'YLim',[0 0.0015]
 elseif para == 2
     g(1,1).set_names('x','Tone','y','mV/mm?','color','Group');
-    g(1,1).axe_property('Ygrid','on','YLim',[0 0.005]); %,'YLim',[0 0.0015]
+    g(1,1).axe_property('Ygrid','on','YLim',[-0.001 0.006]); %,'YLim',[0 0.0015]
 elseif para == 3
     g(1,1).set_names('x','Tone','y','ms','color','Group');
     g(1,1).axe_property('Ygrid','on','YLim',[200 350]);
@@ -288,13 +288,17 @@ one = one';
 two = {'c2' 'c2' 'c2' 'c2' 'c2' 'c2' 'c2' 'c2' 'c2' 'c2' 'c2'};
 two = two';
 % stacks of 11 to sort the lists later (11 animals) - frequency
-sink1 = {sink{1}, sink{1}, sink{1}, sink{1}, sink{1}, sink{1}, sink{1}, sink{1}, sink{1}, sink{1}, sink{1}};
+sink1 = {['a' sink{1}], ['a' sink{1}], ['a' sink{1}], ['a' sink{1}], ['a' sink{1}], ...
+    ['a' sink{1}], ['a' sink{1}], ['a' sink{1}], ['a' sink{1}], ['a' sink{1}], ['a' sink{1}]};
 sink1 = sink1';
-sink2 = {sink{2}, sink{2}, sink{2}, sink{2}, sink{2}, sink{2}, sink{2}, sink{2}, sink{2}, sink{2}, sink{2}};
+sink2 = {['b' sink{2}], ['b' sink{2}], ['b' sink{2}], ['b' sink{2}], ['b' sink{2}], ...
+    ['b' sink{2}], ['b' sink{2}], ['b' sink{2}], ['b' sink{2}], ['b' sink{2}], ['b' sink{2}]};
 sink2 = sink2';
-sink3 = {sink{3}, sink{3}, sink{3}, sink{3}, sink{3}, sink{3}, sink{3}, sink{3}, sink{3}, sink{3}, sink{3}}; 
+sink3 = {['c' sink{3}], ['c' sink{3}], ['c' sink{3}], ['c' sink{3}], ['c' sink{3}], ...
+    ['c' sink{3}], ['c' sink{3}], ['c' sink{3}], ['c' sink{3}], ['c' sink{3}], ['c' sink{3}]};
 sink3 = sink3';
-sink4 = {sink{4}, sink{4}, sink{4}, sink{4}, sink{4}, sink{4}, sink{4}, sink{4}, sink{4}, sink{4}, sink{4}}; 
+sink4 = {['d' sink{4}], ['d' sink{4}], ['d' sink{4}], ['d' sink{4}], ['d' sink{4}], ...
+    ['d' sink{4}], ['d' sink{4}], ['d' sink{4}], ['d' sink{4}], ['d' sink{4}], ['d' sink{4}]};
 sink4 = sink4';
  
 %% sink 1
