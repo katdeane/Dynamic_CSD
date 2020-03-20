@@ -1,21 +1,29 @@
-function X = GroupAnalysis_fnc_singlecondition(bin, zscore, mirror)
+function X = GroupAnalysis_fnc_singlecondition(bin, zscore, mirror, homedir)
 % This function asks if it should bin (1 or 0), take zscore (1 or 0), or
 % mirror (1 or 0)
 
 % This group analysis deals only with obtaining group data for animals with
 % one condition/one measurement
 
-cd('D:\MyCode\Dynamic_CSD_Analysis');
 warning('OFF');
 dbstop if error
 
-nThresh = 0.25; % Threshold for animals
-home = pwd;
-addpath(genpath(home));
+% Change directory to your working folder
+if ~exist('homedir','var')
+    if exist('D:\MyCode\Dynamic_CSD','dir') == 7
+        cd('D:\MyCode\Dynamic_CSD');
+    elseif exist('C:\Users\kedea\Documents\Dynamic_CSD','dir') == 7
+        cd('C:\Users\kedea\Documents\Dynamic_CSD')
+    end
+    
+    homedir = pwd;
+    addpath(genpath(homedir));
+end
 
-cd DATA;
+cd (homedir); cd DATA;
 input = dir('*.mat');
 entries = length(input);
+nThresh = 0.25; % Threshold for animals
 
 %cell of target output features
 para = { 'SinkRMS', 'tempSinkRMS', 'init_Peak_BF_tune', 'SinkDur',...
@@ -32,13 +40,13 @@ for i1 = 1:entries
     tic
     load (input(i1).name) %loads data into workspace
     
-    cd(home); cd figs; %opens figure folder to store future images
+    cd(homedir); cd figs; %opens figure folder to store future images
     mkdir(['Group_' input(i1).name(1:end-9)]); %adds folder to directory
     
     names = fieldnames(Data); %list of animal names
-    NumAnimals = length(names);
+%     NumAnimals = length(names);
     
-    BF_Pos = [];
+%     BF_Pos = [];
     DimDat = length(Data);
     
     %to determine where the BF should be placed (i.e. the length of the longest frequency list)
@@ -120,7 +128,7 @@ for i1 = 1:entries
     end
     
     title('Avg Sink Tuning Curves','FontSize',20,'FontWeight','bold');
-    cd([home '\figs\' 'Group_' input(i1).name(1:end-9)]);
+    cd([homedir '\figs\' 'Group_' input(i1).name(1:end-9)]);
     savefig(h,[input(i1).name(1:end-4), ' Avg Tuning Curves GS']); close all
     
     %% plot Latency Curves GS Avg
@@ -152,7 +160,7 @@ for i1 = 1:entries
     end
     
     title('Latency Curves','FontSize',20,'FontWeight','bold');
-    cd([home '\figs\' 'Group_' input(i1).name(1:end-9)]);
+    cd([homedir '\figs\' 'Group_' input(i1).name(1:end-9)]);
     savefig(h,[input(i1).name(1:end-4), ' Avg Latency Curves GS']); close all
     
   %% plot Tuning Curves ST Avg
@@ -193,7 +201,7 @@ for i1 = 1:entries
     end
     
     title('Avg Sink Tuning Curves','FontSize',20,'FontWeight','bold');
-    cd([home '\figs\' 'Group_' input(i1).name(1:end-9)]);
+    cd([homedir '\figs\' 'Group_' input(i1).name(1:end-9)]);
     savefig(h,[input(i1).name(1:end-4), ' Avg Tuning Curves ST']); close all
     
     
@@ -226,7 +234,7 @@ for i1 = 1:entries
     end
     
     title('Latency Curves','FontSize',20,'FontWeight','bold');    
-    cd([home '\figs\' 'Group_' input(i1).name(1:end-9)]);
+    cd([homedir '\figs\' 'Group_' input(i1).name(1:end-9)]);
     savefig(h,[input(i1).name(1:end-4), ' Avg Latency Curves ST']); close all
     
     %% plot ST_Shift group
@@ -284,7 +292,7 @@ for i1 = 1:entries
                     
                 end
             end
-            cd([home '\figs\' 'Group_' input(i1).name(1:end-9)]);
+            cd([homedir '\figs\' 'Group_' input(i1).name(1:end-9)]);
             savefig(h,[input(i1).name(1:end-4), ' rel Sink Tuning shifts towards granular layer ', FNames{i2}]); close all
         end
     end
@@ -353,11 +361,11 @@ for i1 = 1:entries
     ylabel('%','FontSize',8);
     xlabel('Phase','FontSize',8);
     
-    cd([home '\figs\' 'Group_' input(i1).name(1:end-9)]);
+    cd([homedir '\figs\' 'Group_' input(i1).name(1:end-9)]);
     savefig(h,[input(i1).name(1:end-4), ' RelRes']); close all
     
     %% Save and Quit
-    cd(home); cd DATA; clear Data;
+    cd(homedir); cd DATA; clear Data;
     Data.GS_based = Data_GSBased;
     Data.ST_based = Data_STBased;
 %     Data.singleGS_based = sData_GSBased;
@@ -367,10 +375,10 @@ for i1 = 1:entries
     Data.BF_Pos = BF_Pos;
     Data.Sinks = SINKs;
     
-    cd (home); cd Data; cd output;
+    cd (homedir); cd Data; cd output;
     save([input(i1).name(1:end-2) '_Threshold_' num2str(nThresh) '_Zscore_' num2str(zscore) '_binned_' num2str(bin) '_mirror_' num2str(mirror) '.mat'],'Data')
     clear Data_GSBased Data Data_STBased ST_Shift
-    cd (home); cd Data;
+    cd (homedir); cd Data;
     
     toc    
 end

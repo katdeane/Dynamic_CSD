@@ -23,17 +23,15 @@ dbstop if error
 if ~exist('homedir','var')
     if exist('D:\MyCode\Dynamic_CSD','dir') == 7
         cd('D:\MyCode\Dynamic_CSD');
-    elseif exist('D:\Dynamic_CSD_Analysis','dir') == 7
-        cd('D:\Dynamic_CSD_Analysis');
-    elseif exist('C:\Users\kedea\Documents\Dynamic_CSD_Analysis','dir') == 7
-        cd('C:\Users\kedea\Documents\Dynamic_CSD_Analysis')
+    elseif exist('C:\Users\kedea\Documents\Dynamic_CSD','dir') == 7
+        cd('C:\Users\kedea\Documents\Dynamic_CSD')
     end
     
     homedir = pwd;
     addpath(genpath(homedir));
 end
 
-cd (home),cd groups;
+cd (homedir),cd groups;
 
 %% Load in
 input = dir('*.m');

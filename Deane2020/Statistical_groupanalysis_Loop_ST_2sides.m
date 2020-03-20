@@ -31,25 +31,25 @@ levels = [2,5];
 levelsMir = [2,3];
 varinames = {'Groups','Frequencies'};
 rowofnans = NaN(1,5);
-srowofnans = [{NaN(1,50)} {NaN(1,50)} {NaN(1,50)} {NaN(1,50)} {NaN(1,50)}];
+% srowofnans = [{NaN(1,50)} {NaN(1,50)} {NaN(1,50)} {NaN(1,50)} {NaN(1,50)}];
 
 ticks = {'-2' '-1' 'BF' '+1' '+2'};
 
 % Order = {'IVE','IVL','I_IIE','I_IIL', 'VaE','VaL','VbE','VbL','VIE','VIL'};
 Order = {'IVE','IVL','I_IIE','I_IIL', 'VaE','VaL','VbE','VbL','VIaE','VIaL','VIbE','VIbL'};
 Parameter = {'SinkRMS','SinkPeakAmp','SinkPeakLate','Sinkonset'};
-SParameter = {'SingleSinkRMS','SingleSinkPeakAmp','SingleSinkPeakLat'};
+% SParameter = {'SingleSinkRMS','SingleSinkPeakAmp','SingleSinkPeakLat'};
 
 
 %% Load in the appropriate files
-cd DATA;cd output;
-load('AnesthetizedPre_Data.m_Threshold_0.25_Zscore_0_binned_1_mirror_0.mat')
+cd DATA;cd Output;
+load('AnesthetizedPre_Data.m_Threshold_0.25_Zscore_0_binned_1_mirror_0.mat','Data')
 Anesthetized = Data; clear Data; 
-load('Awake10dB_Data.m_Threshold_0.25_Zscore_0_binned_1_mirror_0.mat')
+load('Awake10dB_Data.m_Threshold_0.25_Zscore_0_binned_1_mirror_0.mat','Data')
 Awake = Data; clear Data;
-load('ANChronic_Data.m_Threshold_0.25_Zscore_0_binned_1_mirror_0.mat')
+load('ANChronic_Data.m_Threshold_0.25_Zscore_0_binned_1_mirror_0.mat','Data')
 AnChronic = Data; clear Data;
-load('Muscimol_Data.m_Threshold_0.25_Zscore_0_binned_1_mirror_0.mat')
+load('Muscimol_Data.m_Threshold_0.25_Zscore_0_binned_1_mirror_0.mat','Data')
 Muscimol = Data; clear Data;
 
 
@@ -62,7 +62,7 @@ for isink = 1:length(Order)
     
     disp(['***********************ST STATS FOR ' (Order{isink}) '***********************'])
     %% Avg Trial Loop
-    cd(homedir); cd figs; cd('Group Tuning Curves ST');cd('AVG');
+    cd(homedir); cd figs; cd('Group Tuning Curves ST');
     for ipara = 1:length(Parameter)
         
         disp(['********' (Parameter{ipara}) '********']) %these headers allow a copy and paste of all post-hoc tests which aren't saved in the data at the end
@@ -107,7 +107,7 @@ for isink = 1:length(Order)
         
         disp('**Anesthetized vs Awake**')
         AnesthetizedvsAwake = teg_repeated_measures_ANOVA(com_AnvsAw, levels, varinames);
-        AvK_CD = iMakeCohensD(Aw_data, An_data)
+        AvK_CD = iMakeCohensD(Aw_data, An_data)  %#ok<*NOPRT>
             
         disp('**Anesthetized Chronic vs Awake**')
         AnChronicvsAwake = teg_repeated_measures_ANOVA(com_AnCvsAw, levels, varinames);
@@ -258,8 +258,7 @@ for isink = 1:length(Order)
         legend('Anesthetized', 'Awake', 'Anesthetized Chronic', 'Muscimol')
         title(['Sink' (Order{isink}) (Parameter{ipara})])
         set(gca,'XTick',1:5); set(gca,'XTickLabel',ticks,'FontSize',10);
-        
-        cd([homedir '\figs\' 'Group Tuning Curves ST']);
+       
         savefig(h,['Sink' (Order{isink}) (Parameter{ipara})]); close all;
         
         %finally, we run the statistics. The stats will only appear in the
@@ -281,7 +280,7 @@ for isink = 1:length(Order)
         AnesthetizedvsMuscimolNM = teg_repeated_measures_ANOVA(com_AnvsM, levelsMir, varinames);
         MvK_CDNM = iMakeCohensD(M_Mir_data, An_Mir_data)
         
-        %significant or not, the F = #(#,#) and p= # will be saves in this file
+        %significant or not, the F = #(#,#) and p= # will be saved in this file
         cd(homedir); cd DATA
         mkdir('StatsST'); cd StatsST
         savefile = [(Order{isink}) (Parameter{ipara}) 'SinkStats_Mir_Norm.mat'];
@@ -289,3 +288,4 @@ for isink = 1:length(Order)
     end
     
 end
+
