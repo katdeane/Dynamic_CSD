@@ -1,112 +1,83 @@
-%% Dynamic CSD for sinks I_II through VIb
+function Dynamic_CSD_6B(homedir)
+%% Dynamic CSD for sinks I_II through 6B; incl. single
+
 %   This script takes input from the groups and raw folders. It calculates 
 %   and stores CSD information in Data struct which is
 %   saved in the DATA folder. 
 % 
-%   6a and 6b are detected here and there is no single trial data
+%   6a and 6b are detected here and there is single trial data
 %   IMPORTANT: DO NOT change sink list here. If you need another set of
 %   sinks then create a SEPARATE and UNIQUELY NAMED script. 
-%   Note: we are keeping scripts that do not run single trial stuff for now
-%   because it is faster without. We will eventually remove these if we
-%   permenantly move to using single-trial data across the board
+%   Note: Currently the graphs being generated are limited to select sinks
+%   although all sinks are being stored in the data structure
 % 
 %   CHANGE if needed: add your working directory to the try/catch; change
 %   condition to run 
 
-clear;
-%% Choose Condition
-
-% Condition = {'Pre' 'post' 'att' 'FM' 'between' 'muscimol' 'musatt' 'musFM'};
-Condition = {'condition'};
-% Condition = {'Pre' 'post'}; %MUST HAVE CAPITAL P FOR STRING MATCH IN NEXT CODE
-
 %% standard operations
 warning('OFF');
-dbstop if error %stops execution of program if and allows user to examine the workspace
+dbstop if error
 
 % Change directory to your working folder
-if exist('D:\MyCode\Dynamic_CSD_Analysis','dir') == 7
-    cd('D:\MyCode\Dynamic_CSD_Analysis');
-elseif exist('D:\Dynamic_CSD_Analysis','dir') == 7
-    cd('D:\Dynamic_CSD_Analysis');
-elseif exist('C:\Users\kedea\Documents\Dynamic_CSD_Analysis','dir') == 7
-    cd('C:\Users\kedea\Documents\Dynamic_CSD_Analysis')
+if ~exist('homedir','var')
+    if exist('D:\MyCode\Dynamic_CSD','dir') == 7
+        cd('D:\MyCode\Dynamic_CSD');
+    elseif exist('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD','dir') == 7
+        cd('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD')
+    end
+    
+    homedir = pwd;
+    addpath(genpath(homedir));
 end
 
-home = pwd; %pwd: print working directory, gives full current directory title of "home"
-addpath(genpath(home)); %adds all subdirectories of 'home' to path for access
-cd (home),cd groups; 
+cd (homedir),cd groups;
 
-%% Load in 
-input = dir('*.m'); %dir *.m lists all program files in the current directory (stores 5 fields of data but struc array contains #x1)
-entries = length(input); %number of input entries
+%% Load in
+input = dir('*.m');
+entries = length(input);
 
+
+for i1 = 1:entries    
     
-for i1 = 1:entries
     run(input(i1).name);
     
-    cd (home); cd figs; %opens figure folder to store future images
-    mkdir(['Single_' input(i1).name(1:end-2)]); %adds folder to directory - name without '.m' (-2 from the end)
+    %% Choose Condition    
+    Condition = {'TM1' 'TM2' 'TM3'};
+%     Condition = {'condition'};
+    %If Pre condition, must have capital P to match string in group code 
     
-    Data = struct; %creating empty structure to fill
-    Indexer = struct; %creating empty structure to fill
+    %% Condition and Indexer   
+    Data = struct;
+    cd (homedir); cd figs;
+    mkdir(['Single_Spike_' input(i1).name(1:end-2)]);
     
-
-    %% Condition and Indexer
-    for iC = 1:length(Condition) %input from script (length of condition: 'Pre' 'Combo' 'Post1'=3) %i2 is condition we are in
-        for iA = 1:length(animals) %input from groups (in workspace) %i3 is animal we are on
-            counter = 0;
-            counter = counter + length(Cond.(Condition{iC}){iA}); %Cond has all conditions recorded, condition(current cond type selection for current animal selection)
-            % counter = the number of entries in current condition for the current animal
-            if iA == 1 %for the first animal
-                Indexer(1).(Condition{iC}) = counter; %the indexer structure is the size of the current counter
-            elseif Indexer.(Condition{iC}) < counter %if the next animal has a structure larger than the current counter, it will make the indexer that size
-                Indexer(1).(Condition{iC}) = counter;
-            end
-            %An indexer is now made for the i2th condition that is the size of the largest amongst the animals
-        end
-        % Indexer now contains all conditions at their greatest sizes
-    end
-    
-    count = 1; %new variable 'count'
-    for iC = 1:length(Condition) %i2 is still which condition we are in and it's reset to 1
-        if iC == 1 %first condition type
-            Indexer(2).(Condition{iC}) =1; %adding a second field to the condition i2
-        else
-            Indexer(2).(Condition{iC}) = count;
-        end
-        count = count + Indexer(1).(Condition{iC}); %current count (e.g. 1)+size of condition i2 in index(e.g. 3) = (e.g. 4)
-    end
-    %now the indexer has 2 columns beyond the cond names, indicating the condition size in the first and the starting count in the second
-    
+    Indexer = imakeIndexer(Condition,animals,Cond);
     %%
-    for iA = 1:length(animals) 
-        cd (home); cd raw;    
-        name = animals{iA}; %assigns the i2th entry in the list in the current group to variable 'name'
+    
+    for iA = 1:length(animals)
+        cd (homedir); cd raw;
+        name = animals{iA};
         
-        for iC = 1:length(Condition) 
-            clear SWEEP;
-            for i4 = 1:length(Cond.(Condition{iC}){iA}) %i4 goes through the number of entries in condition i3 for animal i4
-                if i4 == 1 
-                    CondIDX = Indexer(2).(Condition{iC}); %new count variable calling the start count number for the first condition entry (which equals 1)
-                else 
+        for iC = 1:length(Condition)
+            for i4 = 1:length(Cond.(Condition{iC}){iA})
+                if i4 == 1
+                    CondIDX = Indexer(2).(Condition{iC});
+                else
                     CondIDX = Indexer(2).(Condition{iC})+i4-1;
                 end
+                tic
                 
-                measurement = Cond.(Condition{iC}){iA}{i4}; 
-                %e.g. 003 is the first entry of the first animal in the first condition
-                
-                if ~isempty(measurement) % ~ is the logical argument 'not' so this says if the measurement variable is not empty than true
+                measurement = Cond.(Condition{iC}){iA}{i4};
+                if ~isempty(measurement)
                     disp(['Analyzing animal: ' name '_' measurement])
-                    tic
-                    
-                    try 
-                        load ([name '_' measurement]);clear avgFP;   %loads info from mat file (Data, DS, Header, P, Spik_list, SWEEP)
+                    clear SWEEP
+                    try
+                        load ([name '_' measurement]);clear avgFP;
                     catch
                         fprintf('the name or measurement does not exist/n')
                     end
                     
-                    cd (home),cd groups;
+                    cd (homedir),cd groups;
                     try load([name '_Baseline']); %this Baseline is determined by gen_threshold.m from multiple recordings of one animal
                     catch
                         Baseline = []; %if a baseline wasn't taken, create an empty variable
@@ -120,10 +91,10 @@ for i1 = 1:entries
                         tone = Header.t_sig(1)*P.Fs_AD(1); %t_sig is duration of stimulus * sampling rate = 200
                         frqz = Header.stimlist(:,1); %stimlist contains tone frequencies in all rows (:), first column (:,1)
                         Fs = P.Fs_AD(1); %sampling rate
-                        frqz(find(frqz == inf))=[];
-                        frqz(find(frqz == 0))=[];
+                        frqz(find(frqz == inf))=[]; % takes click out of analysis
+                        frqz(find(frqz == 0))=[]; % takes pause out of analysis
                     else %Chronic recordings
-                        cd (home); cd subfunc;
+                        cd (homedir); cd subfunc;
                         %To apply channel interpolation
                         if ~isempty(DATA.ART)
                             [DATA.LFP]=chaninterp(DATA.LFP, 'linextra', DATA.ART.chan,...
@@ -138,26 +109,42 @@ for i1 = 1:entries
                             end
                         end
                         %To create SWEEP
-                        [BL, tone, Fs, SWEEP, frqz]=reformat(DATA);
+                        if contains(measurement,'art')
+                            [BL, tone, Fs, SWEEP, frqz]=reformat_art(DATA);
+                        else
+                            [BL, tone, Fs, SWEEP, frqz]=reformat(DATA);
+                        end
                     end
                     
                     %% CSD full
-                    cd (home),cd subfunc;
-
-                    [AvgFP, AvgCSD,AvgRecCSD, SingleTrialAvgRecCSD, AvgRelResCSD,...
-                        SingleTrialAvgRelResCSD, AvgAbsResCSD, AvgLayerRelRes] =...
-                        SingleTrialCSD_reduced(SWEEP, str2num(channels{iA}),BL);
-
+                    cd (homedir),cd subfunc;
+                    
+                    %note: channel order is given twice because the whole
+                    %CSD needs to be checked now (and not any one layer)
+                    [SingleLayer_AVREC,Layer_AVREC,AvgFP, SingleTrialFP, AvgCSD,...
+                        SingleTrialCSD, AvgRecCSD, SingleTrialAvgRecCSD,...
+                        SingleTrialRelResCSD, AvgRelResCSD,AvgAbsResCSD,...
+                        SingleTrialAbsResCSD, LayerRelRes, AvgLayerRelRes] =...
+                        SingleTrialCSD_full(SWEEP, str2num(channels{iA}),1:length(str2num(channels{iA})),BL);
+                    
                     
                     
                     %delete empty columns to have the correct amount of stimuli
                     %present (needed for attenuation 30)
+                    SingleLayer_AVREC = SingleLayer_AVREC(~cellfun('isempty',SingleLayer_AVREC'));
+                    SingleTrialFP = SingleTrialFP(~cellfun('isempty',SingleTrialFP'));
+                    SingleTrialCSD = SingleTrialCSD(~cellfun('isempty',SingleTrialCSD'));
+                    SingleTrialRelResCSD = SingleTrialRelResCSD(~cellfun('isempty',SingleTrialRelResCSD'));
+                    AvgAbsResCSD = AvgAbsResCSD(~cellfun('isempty',AvgAbsResCSD'));
+                    SingleTrialAbsResCSD = SingleTrialAbsResCSD(~cellfun('isempty',SingleTrialAbsResCSD'));
+                    LayerRelRes = LayerRelRes(~cellfun('isempty',LayerRelRes'));
+                    AvgLayerRelRes = AvgLayerRelRes(~cellfun('isempty',AvgLayerRelRes'));
                     SingleTrialAvgRecCSD = SingleTrialAvgRecCSD(~cellfun('isempty',SingleTrialAvgRecCSD'));
-                    SingleTrialAvgRelResCSD = SingleTrialAvgRelResCSD(~cellfun('isempty',SingleTrialAvgRelResCSD'));
-                    AvgCSD = AvgCSD(~cellfun('isempty', AvgCSD'));
-                    AvgFP = AvgFP(~cellfun('isempty', AvgFP'));
-                    AvgRecCSD = AvgRecCSD(~cellfun('isempty', AvgRecCSD')); AvgCSD=AvgCSD(1:length(frqz)); 
                     AvgRelResCSD = AvgRelResCSD(~cellfun('isempty', AvgRelResCSD'));
+                    AvgCSD = AvgCSD(~cellfun('isempty', AvgCSD')); AvgCSD=AvgCSD(1:length(frqz));
+                    AvgFP = AvgFP(~cellfun('isempty', AvgFP'));
+                    AvgRecCSD = AvgRecCSD(~cellfun('isempty', AvgRecCSD'));
+                    
                     
                     % Sink durations
                     L.I_IIE = str2num(Layer.I_IIE{iA}); L.I_IIL = str2num(Layer.I_IIL{iA}); 
@@ -170,9 +157,12 @@ for i1 = 1:entries
                     curChan = str2num(channels{iA});
                     
                     %Generate Sink Boxes
-                    [DUR,RMS,PAMP,PLAT,INT] = sink_dura_group(L,AvgCSD,BL,tone,SWEEP,curChan,Baseline);
+                    [DUR,RMS,SINGLE_RMS,PAMP,SINGLE_PAMP,PLAT,SINGLE_PLAT,INT] =...
+                        sink_dura_single(L,AvgCSD,BL,SWEEP,curChan,Baseline);
                     
-                    %Calculate CSD
+                    toc
+                    
+                    % Calculate CSD %                    
                     %columns of starting and ending values minus the baseline
                     DUR2.I_IIE = reshape(round([DUR(:).I_IIE]),[],length([DUR(:).I_IIE])/2)'-BL;
                     DUR2.I_IIL = reshape(round([DUR(:).I_IIL]),[],length([DUR(:).I_IIL])/2)'-BL;
@@ -215,69 +205,131 @@ for i1 = 1:entries
                     DUR2.VIbE = DUR2.VIbE(:,2)' - DUR2.VIbE(:,1)';
                     DUR2.VIbL = DUR2.VIbL(:,2)' - DUR2.VIbL(:,1)';
                     
-                    threshold_std = 2; 
-                    threshold_dur = 0.005;
-                    Latency_HighCutoff = 0.2;
-                    Latency_LowCutoff = 0.015;
-                    state = 1:(length(AvgRecCSD{1})-BL); %KD this idicates the length after the stimulus 
+%                     threshold_std = 2;
+%                     threshold_dur = 0.005;
+%                     Latency_HighCutoff = 0.2;
+%                     Latency_LowCutoff = 0.015;
+%                     state = 1:(length(AvgRecCSD{1})-BL);
                     
-
+                    %reformulate the single trial data to run through ExtractCSDBasePar
+%                     temp = nan(size(SingleTrialAvgRecCSD{1},1),1,size(SingleTrialAvgRecCSD{1},3));
+%                     for i5 = 1: length(SingleTrialAvgRecCSD)
+%                         temp(:,i5,1:size([SingleTrialAvgRecCSD{i5}],3))=[SingleTrialAvgRecCSD{i5}];
+%                     end
+%                     extractSTAvgRecCSD= temp;
+%                     
+%                     temp = nan(size(SingleTrialRelResCSD{1},1),1,size(SingleTrialRelResCSD{1},3));
+%                     for i5 = 1: length(SingleTrialRelResCSD)
+%                         temp(:,i5,1:size([SingleTrialRelResCSD{i5}],3))=[SingleTrialRelResCSD{i5}];
+%                     end
+%                     extractSTRelResCSD= temp;
+%                     
+%                     temp = nan(size(SingleTrialAbsResCSD{1},1),1,size(SingleTrialAbsResCSD{1},3));
+%                     for i5 = 1: length(SingleTrialAbsResCSD)
+%                         temp(:,i5,1:size([SingleTrialAbsResCSD{i5}],3))=[SingleTrialAbsResCSD{i5}];
+%                     end
+%                     extractSTAbsResCSD= temp;
+                    
                     %calculate full RMS of AVREC and RELRES (1-max Duration)
-                    [full_BW,~, ~, full_RMS_AvgRecCSD,~, ~,~, ~] =...
-                        ExtractCSDBasedPar(1,AvgRecCSD,BL,...
-                        Fs, 1, 0, threshold_std, threshold_dur,...
-                        Latency_HighCutoff, Latency_LowCutoff,state);
+%                     [full_BW,~, ~, full_RMS_AvgRecCSD,~, ~,~, ~] =...
+%                         ExtractCSDBasedPar(1,AvgRecCSD,BL,...
+%                         Fs, 1, 0, threshold_std, threshold_dur,...
+%                         Latency_HighCutoff, Latency_LowCutoff,state);
+%                     
+%                     [~,~, ~, full_RMS_RelResCSD,~, ~, ~, ~] =...
+%                         ExtractCSDBasedPar(1,AvgRelResCSD,BL,...
+%                         Fs, 0, 0, threshold_std, threshold_dur,...
+%                         Latency_HighCutoff, Latency_LowCutoff,state);
+%                     
+%                     [~,~, ~, full_RMS_AbsResCSD,~, ~, ~, ~] =...
+%                         ExtractCSDBasedPar(1,AvgAbsResCSD,BL,...
+%                         Fs, 0, 0, threshold_std, threshold_dur,...
+%                         Latency_HighCutoff, Latency_LowCutoff,state);
+%                     
+%                     
+%                     [~,~, ~, full_Single_RMS_AvgRecCSD,~, ~,~, ~] =...
+%                         ExtractCSDBasedPar(2,extractSTAvgRecCSD,BL,...
+%                         Fs, 1, 0, threshold_std, threshold_dur,...
+%                         Latency_HighCutoff, Latency_LowCutoff,state);
+%                     
+%                     [~,~, ~, full_Single_RMS_RelResCSD,~, ~,~, ~] =...
+%                         ExtractCSDBasedPar(2,extractSTRelResCSD,BL,...
+%                         Fs, 1, 0, threshold_std, threshold_dur,...
+%                         Latency_HighCutoff, Latency_LowCutoff,state);
+%                     
+%                     [~,~, ~, full_Single_RMS_AbsResCSD,~, ~,~, ~] =...
+%                         ExtractCSDBasedPar(2,extractSTAbsResCSD,BL,...
+%                         Fs, 1, 0, threshold_std, threshold_dur,...
+%                         Latency_HighCutoff, Latency_LowCutoff,state);
+%                     
+%                     %calculate early RMS of AVREC and RELRES (1-50 ms)
+%                     state = 1:50;
+%                     [e_BW,~, ~, e_RMS_AvgRecCSD,~, ~, ~, ~] =...
+%                         ExtractCSDBasedPar(1,AvgRecCSD,BL,...
+%                         Fs, 1, 0, threshold_std, threshold_dur,...
+%                         Latency_HighCutoff, Latency_LowCutoff,state);
+%                     
+%                     [~,~, ~, e_RMS_RelResCSD, ~, ~, ~, ~] =...
+%                         ExtractCSDBasedPar(1,AvgRelResCSD,BL,...
+%                         Fs, 0, 0, threshold_std, threshold_dur,...
+%                         Latency_HighCutoff, Latency_LowCutoff,state);
+%                     
+%                     [~,~, ~, e_RMS_AbsResCSD, ~, ~, ~, ~] =...
+%                         ExtractCSDBasedPar(1,AvgAbsResCSD,BL,...
+%                         Fs, 0, 0, threshold_std, threshold_dur,...
+%                         Latency_HighCutoff, Latency_LowCutoff,state);
+%                     
+%                     [~,~, ~, e_Single_RMS_AvgRecCSD,~, ~,~, ~] =...
+%                         ExtractCSDBasedPar(2,extractSTAvgRecCSD,BL,...
+%                         Fs, 1, 0, threshold_std, threshold_dur,...
+%                         Latency_HighCutoff, Latency_LowCutoff,state);
+%                     
+%                     [~,~, ~, e_Single_RMS_RelResCSD,~, ~,~, ~] =...
+%                         ExtractCSDBasedPar(2,extractSTRelResCSD,BL,...
+%                         Fs, 1, 0, threshold_std, threshold_dur,...
+%                         Latency_HighCutoff, Latency_LowCutoff,state);
+%                     
+%                     [~,~, ~, e_Single_RMS_AbsResCSD,~, ~,~, ~] =...
+%                         ExtractCSDBasedPar(2,extractSTAbsResCSD,BL,...
+%                         Fs, 1, 0, threshold_std, threshold_dur,...
+%                         Latency_HighCutoff, Latency_LowCutoff,state);
                     
-                    [~,~, ~, full_RMS_RelResCSD,~, ~, ~] =...
-                        ExtractCSDBasedPar(1,AvgRelResCSD,BL,...
-                        Fs, 0, 0, threshold_std, threshold_dur,...
-                        Latency_HighCutoff, Latency_LowCutoff,state);
+                    %calculate early RMS of AVREC and RELRES (81-300 ms)
+%                     state = 81:300;
+%                     [l_BW,~, ~, l_RMS_AvgRecCSD,~, ~, ~, ~] =...
+%                         ExtractCSDBasedPar(1,AvgRecCSD,BL,...
+%                         Fs, 1, 0, threshold_std, threshold_dur,...
+%                         Latency_HighCutoff, Latency_LowCutoff,state);
+%                     
+%                     [~,~, ~, l_RMS_RelResCSD, ~, ~, ~, ~] =...
+%                         ExtractCSDBasedPar(1,AvgRelResCSD,BL,...
+%                         Fs, 0, 0, threshold_std, threshold_dur,...
+%                         Latency_HighCutoff, Latency_LowCutoff,state);
+%                     
+%                     [~,~, ~, l_RMS_AbsResCSD, ~, ~, ~, ~] =...
+%                         ExtractCSDBasedPar(1,AvgAbsResCSD,BL,...
+%                         Fs, 0, 0, threshold_std, threshold_dur,...
+%                         Latency_HighCutoff, Latency_LowCutoff,state);
+%                     
+%                     [~,~, ~, l_Single_RMS_SingleAvgRecCSD,~, ~,~, ~] =...
+%                         ExtractCSDBasedPar(2,extractSTAvgRecCSD,BL,...
+%                         Fs, 1, 0, threshold_std, threshold_dur,...
+%                         Latency_HighCutoff, Latency_LowCutoff,state);
+%                     
+%                     [~,~, ~, l_Single_RMS_RelResCSD,~, ~,~, ~] =...
+%                         ExtractCSDBasedPar(2,extractSTRelResCSD,BL,...
+%                         Fs, 1, 0, threshold_std, threshold_dur,...
+%                         Latency_HighCutoff, Latency_LowCutoff,state);
+%                     
+%                     [~,~, ~, l_Single_RMS_AbsResCSD,~, ~,~, ~] =...
+%                         ExtractCSDBasedPar(2,extractSTAbsResCSD,BL,...
+%                         Fs, 1, 0, threshold_std, threshold_dur,...
+%                         Latency_HighCutoff, Latency_LowCutoff,state);
                     
-                    [~,~, ~, full_RMS_AbsResCSD,~, ~, ~] =...
-                        ExtractCSDBasedPar(1,AvgAbsResCSD,BL,...
-                        Fs, 0, 0, threshold_std, threshold_dur,...
-                        Latency_HighCutoff, Latency_LowCutoff,state);
-                    
-                    %calculate early RMS of AVREC and RELRES (1-50 ms)
-                    state = 1:50;         
-                    [e_BW,~, ~, e_RMS_AvgRecCSD,~, ~, ~, ~] =...
-                        ExtractCSDBasedPar(1,AvgRecCSD,BL,...
-                        Fs, 1, 0, threshold_std, threshold_dur,...
-                        Latency_HighCutoff, Latency_LowCutoff,state);
-                    
-                    [~,~, ~, e_RMS_RelResCSD, ~, ~, ~] =...
-                        ExtractCSDBasedPar(1,AvgRelResCSD,BL,...
-                        Fs, 0, 0, threshold_std, threshold_dur,...
-                        Latency_HighCutoff, Latency_LowCutoff,state);
-                    
-                    [~,~, ~, e_RMS_AbsResCSD, ~, ~, ~] =...
-                        ExtractCSDBasedPar(1,AvgAbsResCSD,BL,...
-                        Fs, 0, 0, threshold_std, threshold_dur,...
-                        Latency_HighCutoff, Latency_LowCutoff,state);
-                    
-                    %calculate late RMS of AVREC and RELRES (81-300 ms)
-                    state = 81:300;
-                    [l_BW,~, ~, l_RMS_AvgRecCSD,~, ~, ~, ~] =...
-                        ExtractCSDBasedPar(1,AvgRecCSD,BL,...
-                        Fs, 1, 0, threshold_std, threshold_dur,...
-                        Latency_HighCutoff, Latency_LowCutoff,state);
-                    
-                    [~,~, ~, l_RMS_RelResCSD, ~, ~, ~] =...
-                        ExtractCSDBasedPar(1,AvgRelResCSD,BL,...
-                        Fs, 0, 0, threshold_std, threshold_dur,...
-                        Latency_HighCutoff, Latency_LowCutoff,state);
-                    
-                    [~,~, ~, l_RMS_AbsResCSD, ~, ~, ~] =...
-                        ExtractCSDBasedPar(1,AvgAbsResCSD,BL,...
-                        Fs, 0, 0, threshold_std, threshold_dur,...
-                        Latency_HighCutoff, Latency_LowCutoff,state);
-
-                    toc
-
                     %rename data for plots
-                    if ~isempty(dB_lev{iA})
-                        name = [animals{iA} '_' dB_lev{iA}];
-                    end
+%                     if ~isempty(dB_lev{iA})
+%                         name = [animals{iA} '_' dB_lev{iA}];
+%                     end
                     
                     %% BANDWIDTH and TUNINGWIDTH
                     rmscurve = [];
@@ -293,103 +345,102 @@ for i1 = 1:entries
                     
                     firststd = std(rmscurve);
                     tuningwidth = length(find(rmscurve >= firststd));
-                                                          
-                    %% Plots and Figures %%
+                    
+                    %% Plots and Figures
                     figure('Name',[name ' ' measurement ': ' Condition{iC}])
                     tic
                     disp('Plotting CSD with sink detections')
                     for i5 = 1:length(AvgCSD)
                         subplot(2,round(length(AvgCSD)/2),i5)
                         imagesc(AvgCSD{i5})
-                        if i5 == 1 %full title for first image
+                        if i5 == 1
                             title ([name ' ' measurement ': ' Condition{iC} ' ' num2str(i5) ' ' num2str(frqz(i5)) ' Hz'])
-                        else %abbreviated version for images to follow on same figure
+                        else
                             title ([num2str(frqz(i5)) ' Hz'])
                         end
                         
                         colormap (jet)
+                        
+                        
                         caxis([-0.0005 0.0005])
-
+                        
+                        
                         
                         hold on
-                        % Layer I_IIE
+                        % Layer I_II
                         y =[(max(L.I_IIE)+0.5),(max(L.I_IIE)+0.5),(min(L.I_IIE)-0.5),(min(L.I_IIE)-0.5),(max(L.I_IIE)+0.5)];
-                        if isempty(y); y = [NaN NaN NaN NaN NaN]; end
+                        if isempty(y); y = [NaN NaN NaN NaN NaN]; end %in case the upper layer is not there
                         x = [DUR(i5).I_IIE(1), DUR(i5).I_IIE(2),DUR(i5).I_IIE(2),DUR(i5).I_IIE(1),DUR(i5).I_IIE(1)];
                         plot(x,y,'black','LineWidth',2)
                         
-                        % Layer I_IIL
                         y =[(max(L.I_IIL)+0.5),(max(L.I_IIL)+0.5),(min(L.I_IIL)-0.5),(min(L.I_IIL)-0.5),(max(L.I_IIL)+0.5)];
                         if isempty(y); y = [NaN NaN NaN NaN NaN]; end
                         x = [DUR(i5).I_IIL(1), DUR(i5).I_IIL(2),DUR(i5).I_IIL(2),DUR(i5).I_IIL(1),DUR(i5).I_IIL(1)];
                         plot(x,y,'white','LineWidth',2)
                         
-                        % Layer IVE
+                        % Layer IV
                         y =[(max(L.IVE)+0.5),(max(L.IVE)+0.5),(min(L.IVE)-0.5),(min(L.IVE)-0.5),(max(L.IVE)+0.5)];
                         x = [DUR(i5).IVE(1), DUR(i5).IVE(2),DUR(i5).IVE(2),DUR(i5).IVE(1),DUR(i5).IVE(1)];
                         plot(x,y,'black','LineWidth',2)
                         
-                        % Layer IVL
                         y =[(max(L.IVL)+0.5),(max(L.IVL)+0.5),(min(L.IVL)-0.5),(min(L.IVL)-0.5),(max(L.IVL)+0.5)];
                         x = [DUR(i5).IVL(1), DUR(i5).IVL(2),DUR(i5).IVL(2),DUR(i5).IVL(1),DUR(i5).IVL(1)];
                         plot(x,y,'white','LineWidth',2)
                         
-                        % Layer VaE
+                        % Layer Va
                         y =[(max(L.VaE)+0.5),(max(L.VaE)+0.5),(min(L.VaE)-0.5),(min(L.VaE)-0.5),(max(L.VaE)+0.5)];
                         x = [DUR(i5).VaE(1), DUR(i5).VaE(2),DUR(i5).VaE(2),DUR(i5).VaE(1),DUR(i5).VaE(1)];
                         plot(x,y,'black','LineWidth',2)
                         
-                        % Layer VaL
                         y =[(max(L.VaL)+0.5),(max(L.VaL)+0.5),(min(L.VaL)-0.5),(min(L.VaL)-0.5),(max(L.VaL)+0.5)];
                         x = [DUR(i5).VaL(1), DUR(i5).VaL(2),DUR(i5).VaL(2),DUR(i5).VaL(1),DUR(i5).VaL(1)];
                         plot(x,y,'white','LineWidth',2)
                         
-                        % Layer VbE
+                        % Layer Vb
                         y =[(max(L.VbE)+0.5),(max(L.VbE)+0.5),(min(L.VbE)-0.5),(min(L.VbE)-0.5),(max(L.VbE)+0.5)];
                         x = [DUR(i5).VbE(1), DUR(i5).VbE(2),DUR(i5).VbE(2),DUR(i5).VbE(1),DUR(i5).VbE(1)];
                         plot(x,y,'black','LineWidth',2)
                         
-                        % Layer VbL
                         y =[(max(L.VbL)+0.5),(max(L.VbL)+0.5),(min(L.VbL)-0.5),(min(L.VbL)-0.5),(max(L.VbL)+0.5)];
                         x = [DUR(i5).VbL(1), DUR(i5).VbL(2),DUR(i5).VbL(2),DUR(i5).VbL(1),DUR(i5).VbL(1)];
                         plot(x,y,'white','LineWidth',2)
                         
-                        % Layer VIaE
+                        % Layer VIa
                         y =[(max(L.VIaE)+0.5),(max(L.VIaE)+0.5),(min(L.VIaE)-0.5),(min(L.VIaE)-0.5),(max(L.VIaE)+0.5)];
                         x = [DUR(i5).VIaE(1), DUR(i5).VIaE(2),DUR(i5).VIaE(2),DUR(i5).VIaE(1),DUR(i5).VIaE(1)];
                         plot(x,y,'black','LineWidth',2)
                         
-                        % Layer VIaL
                         y =[(max(L.VIaL)+0.5),(max(L.VIaL)+0.5),(min(L.VIaL)-0.5),(min(L.VIaL)-0.5),(max(L.VIaL)+0.5)];
                         x = [DUR(i5).VIaL(1), DUR(i5).VIaL(2),DUR(i5).VIaL(2),DUR(i5).VIaL(1),DUR(i5).VIaL(1)];
                         plot(x,y,'white','LineWidth',2)
                         
-                        % Layer VIbE
+                        % Layer VIb
                         y =[(max(L.VIbE)+0.5),(max(L.VIbE)+0.5),(min(L.VIbE)-0.5),(min(L.VIbE)-0.5),(max(L.VIbE)+0.5)];
                         x = [DUR(i5).VIbE(1), DUR(i5).VIbE(2),DUR(i5).VIbE(2),DUR(i5).VIbE(1),DUR(i5).VIbE(1)];
                         plot(x,y,'black','LineWidth',2)
                         
-                        % Layer VIbL
                         y =[(max(L.VIbL)+0.5),(max(L.VIbL)+0.5),(min(L.VIbL)-0.5),(min(L.VIbL)-0.5),(max(L.VIbL)+0.5)];
                         x = [DUR(i5).VIbL(1), DUR(i5).VIbL(2),DUR(i5).VIbL(2),DUR(i5).VIbL(1),DUR(i5).VIbL(1)];
                         plot(x,y,'white','LineWidth',2)
                         
                         hold off
+                        
                     end
+                    toc
                     
-                    cd([home '\figs\' 'Single_' input(i1).name(1:end-2)])
-                    h = gcf; %returns the handle of the current figure
+                    cd([homedir '\figs\']); mkdir(['Single_' input(i1).name(1:end-2)]);
+                    cd(['Single_' input(i1).name(1:end-2)])
+                    h = gcf;
                     set(h, 'PaperType', 'A4');
                     set(h, 'PaperOrientation', 'landscape');
                     set(h, 'PaperUnits', 'centimeters');
                     savefig(h,[name '_' measurement '_CSDs' ],'compact')
                     close (h)
-                    
-                    Order = {'I_IIE','IVE','VaE','VbE','VIaE','VIaE',...
-                             'I_IIL','IVL','VaL','VbL','VIaL','VIaL'};
+
+                    Order = {'I_IIL','IVE','VaE','VbE','VIaE','VIaL'};
                     h = figure('Name',[name ' ' measurement ': ' Condition{iC} ' ' num2str(i4)]);
-                    for i5 = 1:(length(Order)/2)
-                        subplot(2,(round((length(Order)/2)/2)),i5)
+                    for i5 = 1:length(Order)
+                        subplot(1,7,i5)
                         time = [DUR(:).(Order{i5})];
                         time = reshape(time,[],length(time)/2);
                         time = time-BL;
@@ -409,45 +460,20 @@ for i1 = 1:entries
                     set(h, 'PaperType', 'A4');
                     set(h, 'PaperOrientation', 'landscape');
                     set(h, 'PaperUnits', 'centimeters');
-                    savefig(h,[name '_' measurement '_Sink_onset+offset_Early' ],'compact')
+                    savefig(h,[name '_' measurement '_Sink_onset+offset' ],'compact')
                     close (h)
-                    
-                    h = figure('Name',[name ' ' measurement ': ' Condition{iC} ' ' num2str(i4)]);
-                    for i5 = (length(Order)/2)+1:(length(Order)/2)*2
-                        subplot(2,(round((length(Order)/2)/2)),(i5-(length(Order)/2)))
-                        time = [DUR(:).(Order{i5})];
-                        time = reshape(time,[],length(time)/2);
-                        time = time-BL;
-                        hold on
-                        plot (time(1,:),'b--o','LineWidth',2);
-                        plot (time(2,:),'r--o','LineWidth',2);
-                        hold off
-                        title(Order{i5})
-                        ylim([0 (length(AvgCSD{1})-BL)])
-                        xlim([0 (length(AvgCSD)+1)])
-                        ylabel ('Time in ms')
-                        xlabel ('Index of Stimuli')
-                        if i5 == 1
-                            legend('Sink onset','Sink offset','Location','best')
-                        end
-                    end
-                    set(h, 'PaperType', 'A4');
-                    set(h, 'PaperOrientation', 'landscape');
-                    set(h, 'PaperUnits', 'centimeters');
-                    savefig(h,[name '_' measurement '_Sink_onset+offset_Late' ],'compact')
-                    close (h)
-                    
-                    BF = find([RMS.IVE] == max([RMS.IVE])); 
+
+                    BF = find([PAMP.IVE] == max([PAMP.IVE]));
                     BF_frqz = frqz(BF);
                     
                     if isnan(BF), BF = 1; end
                     if isempty(BF), BF = 1; end
                     
-                    SINK = {'I_IIE','IVE','VaE','VbE','VIaE','VIbE',...
-                             'I_IIL','IVL','VaL','VbL','VIaL','VIbL'};
+                    SINK = {'VbE', 'IVE', 'VIaE', 'VIbE', 'VaE', 'I_IIE',...
+                        'VbL', 'IVL', 'VIaL', 'VIbL', 'VaL', 'I_IIL'};
                     h = figure('Name',[name ' ' measurement ': ' Condition{iC} ' ' num2str(i4)]);
-                    for i5 = 1:(length(Order)/2)
-                        subplot(3,(length(Order)/2),i5)
+                    for i5 = 1: length(SINK)
+                        subplot(3,length(SINK),i5)
                         durtime = DUR2.(SINK{i5});
                         plot(durtime,'b--o','LineWidth',2)
                         hold on
@@ -456,15 +482,15 @@ for i1 = 1:entries
                         xlim([0 (length(AvgCSD)+1)])
                         title (['Sink duration Layer ' SINK{i5} ' ms'])
                         
-                        subplot(3,(length(Order)/2),i5+(length(Order)/2))
+                        subplot(3,length(SINK),i5+length(SINK))
                         plot([RMS.(SINK{i5})],'b--o','LineWidth',2)
                         hold on
                         plot (BF,RMS(BF).(SINK{i5}),'r*','LineWidth',2)
                         hold off
                         xlim([0 (length(AvgCSD)+1)])
-                        title (['RMS Layer ' SINK{i5} ' V/mm?'])
+                        title (['RMS Layer ' SINK{i5} ' mV/mm?'])
                         
-                        subplot(3,(length(Order)/2),i5+((length(Order)/2)*2))
+                        subplot(3,length(SINK),i5+2*length(SINK))
                         relRMS = [RMS.(SINK{i5})]./durtime;
                         plot(relRMS,'b--o','LineWidth',2)
                         hold on
@@ -479,121 +505,46 @@ for i1 = 1:entries
                     set(h, 'PaperType', 'A4');
                     set(h, 'PaperOrientation', 'landscape');
                     set(h, 'PaperUnits', 'centimeters');
-                    savefig(h,[name '_' measurement '_Duration_RMS_Ratio_Early' ],'compact')
+                    savefig(h,[name '_' measurement '_Duration_RMS_Ratio' ],'compact')
                     close (h)
                     
+                    % Integral current flow V*ms/mm?
                     h = figure('Name',[name ' ' measurement ': ' Condition{iC} ' ' num2str(i4)]);
-                    for i5 = (length(Order)/2)+1:(length(Order)/2)*2
-                        subplot(3,(length(Order)/2),i5-(length(Order)/2))
+                    for i5 = 1: length(SINK)
+                        subplot(3,length(SINK),i5)
                         durtime = DUR2.(SINK{i5});
-                        plot(durtime,'b--o','LineWidth',2)
+                        plot(durtime./durtime(BF),'LineWidth',2)
                         hold on
-                        plot (BF,durtime(BF),'r*','LineWidth',2)
+                        plot (BF,durtime(BF)./durtime(BF),'r*','LineWidth',2)
                         hold off
                         xlim([0 (length(AvgCSD)+1)])
                         title (['Sink duration Layer ' SINK{i5} ' ms'])
                         
-                        subplot(3,(length(Order)/2),i5)
-                        plot([RMS.(SINK{i5})],'b--o','LineWidth',2)
+                        subplot(3,length(SINK),i5+length(SINK))
+                        RS =[RMS.(SINK{i5})];
+                        plot(RS./RS(BF),'LineWidth',2)
                         hold on
-                        plot (BF,RMS(BF).(SINK{i5}),'r*','LineWidth',2)
+                        plot (BF,RMS(BF).(SINK{i5})/RS(BF),'r*','LineWidth',2)
                         hold off
                         xlim([0 (length(AvgCSD)+1)])
-                        title (['RMS Layer ' SINK{i5} ' V/mm?'])
+                        title (['RMS Layer ' SINK{i5} ' mV/mm?'])
                         
-                        subplot(3,(length(Order)/2),i5+(length(Order)/2))
+                        subplot(3,length(SINK),i5+2*length(SINK))
                         relRMS = [RMS.(SINK{i5})]./durtime;
-                        plot(relRMS,'b--o','LineWidth',2)
+                        plot(relRMS./relRMS(BF),'LineWidth',2)
                         hold on
-                        plot (BF,relRMS(BF),'r*','LineWidth',2)
+                        plot (BF,relRMS(BF)/relRMS(BF),'r*','LineWidth',2)
                         hold off
                         xlim([0 (length(AvgCSD)+1)])
                         title (['RMS / ms L ' SINK{i5} ' mV/mm? ms'])
-                        RMSTIME.(SINK{i5}) = relRMS;
                         
                     end
                     
                     set(h, 'PaperType', 'A4');
                     set(h, 'PaperOrientation', 'landscape');
                     set(h, 'PaperUnits', 'centimeters');
-                    savefig(h,[name '_' measurement '_Duration_RMS_Ratio_Late' ],'compact')
+                    savefig(h,[name '_' measurement 'Duration_RMS_Ratio_BF_normalized' ],'compact')
                     close (h)
-                    
-                    % BF normalized
-                    h = figure('Name',[name ' ' measurement ': ' Condition{iC} ' ' num2str(i4)]);
-                    for i5 = 1:(length(Order)/2)
-                        subplot(3,(length(Order)/2),i5)
-                        durtime = DUR2.(SINK{i5});
-                        plot(durtime./durtime(BF),'LineWidth',2)
-                        hold on
-                        plot (BF,durtime(BF)./durtime(BF),'r*','LineWidth',2)
-                        hold off
-                        xlim([0 (length(AvgCSD)+1)])
-                        title (['Sink duration Layer ' SINK{i5} ' ms'])
-                        
-                        subplot(3,(length(Order)/2),i5+(length(Order)/2))
-                        RS =[RMS.(SINK{i5})];
-                        plot(RS./RS(BF),'LineWidth',2)
-                        hold on
-                        plot (BF,RMS(BF).(SINK{i5})/RS(BF),'r*','LineWidth',2)
-                        hold off
-                        xlim([0 (length(AvgCSD)+1)])
-                        title (['RMS Layer ' SINK{i5} ' mV/mm?'])
-                        
-                        subplot(3,(length(Order)/2),i5+(length(Order)/2))
-                        relRMS = [RMS.(SINK{i5})].*durtime;
-                        plot(relRMS./relRMS(BF),'LineWidth',2)
-                        hold on
-                        plot (BF,relRMS(BF)/relRMS(BF),'r*','LineWidth',2)
-                        hold off
-                        xlim([0 (length(AvgCSD)+1)])
-                        title (['RMS * ms L ' SINK{i5} ' mV/mm? ms'])
-                        
-                    end
-                    
-                    set(h, 'PaperType', 'A4');
-                    set(h, 'PaperOrientation', 'landscape');
-                    set(h, 'PaperUnits', 'centimeters');
-                    savefig(h,[name '_' measurement '_Duration_RMS_Ratio_BF_normalized_Early' ],'compact')
-                    close (h)
-                    
-                    h = figure('Name',[name ' ' measurement ': ' Condition{iC} ' ' num2str(i4)]);
-                    for i5 = (length(Order)/2)+1:(length(Order)/2)*2
-                        subplot(3,(length(Order)/2),i5-(length(Order)/2))
-                        durtime = DUR2.(SINK{i5});
-                        plot(durtime./durtime(BF),'LineWidth',2)
-                        hold on
-                        plot (BF,durtime(BF)./durtime(BF),'r*','LineWidth',2)
-                        hold off
-                        xlim([0 (length(AvgCSD)+1)])
-                        title (['Sink duration Layer ' SINK{i5} ' ms'])
-                        
-                        subplot(3,(length(Order)/2),i5)
-                        RS =[RMS.(SINK{i5})];
-                        plot(RS./RS(BF),'LineWidth',2)
-                        hold on
-                        plot (BF,RMS(BF).(SINK{i5})/RS(BF),'r*','LineWidth',2)
-                        hold off
-                        xlim([0 (length(AvgCSD)+1)])
-                        title (['RMS Layer ' SINK{i5} ' mV/mm?'])
-                        
-                        subplot(3,(length(Order)/2),i5+(length(Order)/2))
-                        relRMS = [RMS.(SINK{i5})].*durtime;
-                        plot(relRMS./relRMS(BF),'LineWidth',2)
-                        hold on
-                        plot (BF,relRMS(BF)/relRMS(BF),'r*','LineWidth',2)
-                        hold off
-                        xlim([0 (length(AvgCSD)+1)])
-                        title (['RMS * ms L ' SINK{i5} ' mV/mm? ms'])
-                        
-                    end
-                    
-                    set(h, 'PaperType', 'A4');
-                    set(h, 'PaperOrientation', 'landscape');
-                    set(h, 'PaperUnits', 'centimeters');
-                    savefig(h,[name '_' measurement '_Duration_RMS_Ratio_BF_normalized_Late' ],'compact')
-                    close (h)
-                    
                     
                     h = figure('Name',[name ' ' measurement ': ' Condition{iC} ' ' num2str(i4)]);
                     for i5 = 1: length(SINK)
@@ -632,7 +583,6 @@ for i1 = 1:entries
                     savefig(h,[name '_' measurement '_Current_flow' ],'compact')
                     close (h)
                     
-                    
                     all = [AvgRecCSD{:}];
                     all = all(BL+15:BL+50,:);
                     initPeakTune = max(all);
@@ -649,51 +599,64 @@ for i1 = 1:entries
                     Data(CondIDX).(name).init_Peak_BF = frqz(find(initPeakTune == max(initPeakTune(1:size(frqz,1)))));
                     Data(CondIDX).(name).init_Peak_BF_tune = initPeakTune;
                     Data(CondIDX).(name).SinkPeakAmp =PAMP;
+                    Data(CondIDX).(name).SingleSinkPeakAmp =SINGLE_PAMP;
                     Data(CondIDX).(name).SinkPeakLate =PLAT;
+                    Data(CondIDX).(name).SingleSinkPeakLat =SINGLE_PLAT;
                     Data(CondIDX).(name).IntCurFlow = INT;
                     Data(CondIDX).(name).SinkDur = DUR2;
                     Data(CondIDX).(name).Sinkonset = onset;
                     Data(CondIDX).(name).Sinkoffset = offset;
                     Data(CondIDX).(name).SinkRMS = RMS;
+                    Data(CondIDX).(name).SingleSinkRMS = SINGLE_RMS;
                     Data(CondIDX).(name).tempSinkRMS = RMSTIME;
+                    Data(CondIDX).(name).singletrialLFP = SingleTrialFP;
                     Data(CondIDX).(name).LFP = AvgFP;
+                    Data(CondIDX).(name).singletrialCSD =SingleTrialCSD;
                     Data(CondIDX).(name).CSD = AvgCSD;
-                    Data(CondIDX).(name).BW_full = full_BW;
-                    Data(CondIDX).(name).BW_early = e_BW;
-                    Data(CondIDX).(name).BW_late = l_BW;
+%                     Data(CondIDX).(name).BW_full = full_BW;
+%                     Data(CondIDX).(name).BW_early = e_BW;
+%                     Data(CondIDX).(name).BW_late = l_BW;
                     Data(CondIDX).(name).LayerRelRes =AvgLayerRelRes;
                     Data(CondIDX).(name).AVREC_raw = AvgRecCSD;
                     Data(CondIDX).(name).SingleTrial_AVREC_raw = SingleTrialAvgRecCSD;
-                    Data(CondIDX).(name).SingleTrial_RELRES_raw = SingleTrialAvgRelResCSD;
+                    Data(CondIDX).(name).SingleTrial_RelRes_raw = SingleTrialRelResCSD;
+                    Data(CondIDX).(name).SingleTrial_AbsRes_raw = SingleTrialAbsResCSD;
                     Data(CondIDX).(name).RELRES_raw = AvgRelResCSD;
-                    Data(CondIDX).(name).Full_RMS_AVREC = full_RMS_AvgRecCSD;
-                    Data(CondIDX).(name).Early_RMS_AVREC = e_RMS_AvgRecCSD;
-                    Data(CondIDX).(name).Late_RMS_AVREC = l_RMS_AvgRecCSD;
-                    Data(CondIDX).(name).Early_RMS_RELRES = e_RMS_RelResCSD*100;
-                    Data(CondIDX).(name).Late_RMS_RELRES = l_RMS_RelResCSD*100;
-                    Data(CondIDX).(name).Full_RMS_ABSRES= full_RMS_AbsResCSD;
-                    Data(CondIDX).(name).Early_RMS_ABSRES = e_RMS_AbsResCSD;
-                    Data(CondIDX).(name).Late_RMS_ABSRES = l_RMS_AbsResCSD;                   
-
+                    Data(CondIDX).(name).ABSRES_raw = AvgAbsResCSD;
                     
+%                     Data(CondIDX).(name).Full_RMS_AVREC = full_RMS_AvgRecCSD;
+%                     Data(CondIDX).(name).Early_RMS_AVREC = e_RMS_AvgRecCSD;
+%                     Data(CondIDX).(name).Late_RMS_AVREC = l_RMS_AvgRecCSD;
+%                     Data(CondIDX).(name).Full_Single_RMS_AVREC = full_Single_RMS_AvgRecCSD;
+%                     Data(CondIDX).(name).Early_Single_RMS_AVREC = e_Single_RMS_AvgRecCSD;
+%                     Data(CondIDX).(name).Late_Single_RMS_AVREC = l_Single_RMS_SingleAvgRecCSD;
+%                     
+%                     Data(CondIDX).(name).Full_RMS_RELRES= full_RMS_RelResCSD*100;% make it percent
+%                     Data(CondIDX).(name).Early_RMS_RELRES = e_RMS_RelResCSD*100;
+%                     Data(CondIDX).(name).Late_RMS_RELRES = l_RMS_RelResCSD*100;
+%                     Data(CondIDX).(name).Full_Single_RMS_RELRES= full_Single_RMS_RelResCSD*100;% make it percent
+%                     Data(CondIDX).(name).Early_Single_RMS_RELRES = e_Single_RMS_RelResCSD*100;
+%                     Data(CondIDX).(name).Late_Single_RMS_RELRES = l_Single_RMS_RelResCSD*100;
+%                     
+%                     Data(CondIDX).(name).Full_RMS_ABSRES= full_RMS_AbsResCSD;
+%                     Data(CondIDX).(name).Early_RMS_ABSRES = e_RMS_AbsResCSD;
+%                     Data(CondIDX).(name).Late_RMS_ABSRES = l_RMS_AbsResCSD;
+%                     Data(CondIDX).(name).Full_Single_RMS_ABSRES= full_Single_RMS_AbsResCSD;
+%                     Data(CondIDX).(name).Early_Single_RMS_ABSRES = e_Single_RMS_AbsResCSD;
+%                     Data(CondIDX).(name).Late_Single_RMS_ABSRES = l_Single_RMS_AbsResCSD;
+                
                     figure('Name',[name ' ' measurement ': ' Condition{iC} ' ' num2str(i4)]);
-                    plot(1:length(frqz),[Data(CondIDX).(name).SinkRMS.I_IIE],'LineWidth',2),... %'Color','black'
+                    plot(1:length(frqz),[Data(CondIDX).(name).SinkRMS.I_IIL],'LineWidth',2,'Color','black'),...
                         hold on,...
-                        plot(1:length(frqz),[Data(CondIDX).(name).SinkRMS.I_IIL],'LineWidth',2),...
-                        plot(1:length(frqz),[Data(CondIDX).(name).SinkRMS.IVE],'LineWidth',2),...
-                        plot(1:length(frqz),[Data(CondIDX).(name).SinkRMS.IVL],'LineWidth',2),...
-                        plot(1:length(frqz),[Data(CondIDX).(name).SinkRMS.VaE],'LineWidth',2),...
-                        plot(1:length(frqz),[Data(CondIDX).(name).SinkRMS.VaL],'LineWidth',2),...
-                        plot(1:length(frqz),[Data(CondIDX).(name).SinkRMS.VbE],'LineWidth',2),...
-                        plot(1:length(frqz),[Data(CondIDX).(name).SinkRMS.VbL],'LineWidth',2),...
-                        plot(1:length(frqz),[Data(CondIDX).(name).SinkRMS.VIaE],'LineWidth',2),...
-                        plot(1:length(frqz),[Data(CondIDX).(name).SinkRMS.VIaL],'LineWidth',2),...
-                        plot(1:length(frqz),[Data(CondIDX).(name).SinkRMS.VIbE],'LineWidth',2),...
-                        plot(1:length(frqz),[Data(CondIDX).(name).SinkRMS.VIbL],'LineWidth',2),...
-                        legend('I_IIE','I_IIL','IVE','IVL','VaE','VaL',...
-                               'VbE','VbL','VIaE','VIaL','VIbE','VIbL');
+                        plot(1:length(frqz),[Data(CondIDX).(name).SinkRMS.IVE],'LineWidth',2,'Color','red'),...
+                        plot(1:length(frqz),[Data(CondIDX).(name).SinkRMS.VaE],'LineWidth',2,'Color','green'),...
+                        plot(1:length(frqz),[Data(CondIDX).(name).SinkRMS.VbE],'LineWidth',2,'Color','blue'),...
+                        plot(1:length(frqz),[Data(CondIDX).(name).SinkRMS.VIaE],'LineWidth',2,'Color','magenta'),...
+                        plot(1:length(frqz),[Data(CondIDX).(name).SinkRMS.VIaL],'LineWidth',2,'Color','cyan'),...
+                        legend('I/IIL', 'IVE', 'VaE', 'VbE', 'VIaE','IG', 'VIaL')
                     hold off
                     h = gcf;
+                    set(gca,'XTickLabel',Data(CondIDX).(name).Frqz,'FontSize',12);
                     set(h, 'PaperType', 'A4');
                     set(h, 'PaperOrientation', 'landscape');
                     set(h, 'PaperUnits', 'centimeters');
@@ -701,36 +664,29 @@ for i1 = 1:entries
                     close (h)
                     
                     figure('Name',[name ' ' measurement ': ' Condition{iC} ' ' num2str(i4)]);
-                    plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.I_IIE],'LineWidth',2),...%'Color','black'
+                    plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.I_IIL],'LineWidth',2,'Color','black'),...
                         hold on,...
-                        plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.I_IIL],'LineWidth',2),...
-                        plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.IVE],'LineWidth',2),...
-                        plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.IVL],'LineWidth',2),...
-                        plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.VaE],'LineWidth',2),...
-                        plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.VaL],'LineWidth',2),...
-                        plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.VbE],'LineWidth',2),...
-                        plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.VbL],'LineWidth',2),...
-                        plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.VIaE],'LineWidth',2),...
-                        plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.VIaL],'LineWidth',2),...
-                        plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.VIbE],'LineWidth',2),...
-                        plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.VIbL],'LineWidth',2),...
-                        legend('I_IIE','I_IIL','IVE','IVL','VaE','VaL',...
-                               'VbE','VbL','VIaE','VIaL','VIbE','VIbL');
+                        plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.IVE],'LineWidth',2,'Color','red'),...
+                        plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.VaE],'LineWidth',2,'Color','green'),...
+                        plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.VbE],'LineWidth',2,'Color','blue'),...
+                        plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.VIaE],'LineWidth',2,'Color','magenta'),...
+                        plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.VIaL],'LineWidth',2,'Color','cyan'),...
+                        legend('I/IIL', 'IVE', 'VaE', 'VbE', 'VIaE', 'GS','VIaL')
                     hold off
                     h = gcf;
+                    set(gca,'XTickLabel',Data(CondIDX).(name).Frqz,'FontSize',12);
                     set(h, 'PaperType', 'A4');
                     set(h, 'PaperOrientation', 'landscape');
                     set(h, 'PaperUnits', 'centimeters');
                     savefig(h,[name '_' measurement '_temporal RMS Sink tuning' ],'compact')
                     close (h)
-                    toc
                 end
             end
         end
     end
-    
-
-    cd ([home '/DATA'])
+    cd ([homedir '/DATA'])
     save([input(i1).name(1:end-2) '_Data'],'Data');
     clear Data
 end
+cd(homedir)
+toc
