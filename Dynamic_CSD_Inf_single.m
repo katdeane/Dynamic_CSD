@@ -14,7 +14,6 @@ function Dynamic_CSD_Inf_single(homedir)
 %   CHANGE if needed: add your working directory to the try/catch; change
 %   condition to run 
 
-clear
 %% standard operations
 warning('OFF');
 dbstop if error
@@ -23,8 +22,8 @@ dbstop if error
 if ~exist('homedir','var')
     if exist('D:\MyCode\Dynamic_CSD','dir') == 7
         cd('D:\MyCode\Dynamic_CSD');
-    elseif exist('C:\Users\kedea\Documents\Dynamic_CSD','dir') == 7
-        cd('C:\Users\kedea\Documents\Dynamic_CSD')
+    elseif exist('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD','dir') == 7
+        cd('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD')
     end
     
     homedir = pwd;
@@ -43,11 +42,9 @@ for i1 = 1:entries
     run(input(i1).name);
     
     %% Choose Condition    
-%     Condition = {'Pre' 'Combo' 'Post1' 'Post2' 'SCH' 'PostSCH' 'Muscimol'};
+%     Condition = {'TM1' 'TM2' 'TM3'};
     Condition = {'condition'};
-%     Condition = {'Pre' 'preAM' 'preAMtono' 'preCL' 'preCLtono' 'CL' 'CLtono' 'AM' 'AMtono'}; 
-%     Condition = {'CL' 'CLtono'}; 
-    %MUST HAVE CAPITAL P FOR STRING MATCH IN NEXT CODE 
+    %If Pre condition, must have capital P to match string in group code 
     
     %% Condition and Indexer   
     Data = struct;
@@ -120,14 +117,12 @@ for i1 = 1:entries
                     
                     %note: channel order is given twice because the whole
                     %CSD needs to be checked now (and not any one layer)
-                    [SingleLayer_AVREC,Layer_AVREC,AvgFP, SingleTrialFP, AvgCSD,...
+                    [SingleLayer_AVREC,AvgLayer_AVREC,AvgFP, SingleTrialFP, AvgCSD,...
                         SingleTrialCSD, AvgRecCSD, SingleTrialAvgRecCSD,...
                         SingleTrialRelResCSD, AvgRelResCSD,AvgAbsResCSD,...
-                        SingleTrialAbsResCSD, LayerRelRes, AvgLayerRelRes] =...
+                        SingleTrialAbsResCSD, SingleLayerRelRes, AvgLayerRelRes] =...
                         SingleTrialCSD_full(SWEEP, str2num(channels{iA}),1:length(str2num(channels{iA})),BL);
-                    
-                    
-                    
+                                       
                     %delete empty columns to have the correct amount of stimuli
                     %present (needed for attenuation 30)
                     SingleLayer_AVREC = SingleLayer_AVREC(~cellfun('isempty',SingleLayer_AVREC'));
@@ -136,7 +131,7 @@ for i1 = 1:entries
                     SingleTrialRelResCSD = SingleTrialRelResCSD(~cellfun('isempty',SingleTrialRelResCSD'));
                     AvgAbsResCSD = AvgAbsResCSD(~cellfun('isempty',AvgAbsResCSD'));
                     SingleTrialAbsResCSD = SingleTrialAbsResCSD(~cellfun('isempty',SingleTrialAbsResCSD'));
-                    LayerRelRes = LayerRelRes(~cellfun('isempty',LayerRelRes'));
+                    SingleLayerRelRes = SingleLayerRelRes(~cellfun('isempty',SingleLayerRelRes'));
                     AvgLayerRelRes = AvgLayerRelRes(~cellfun('isempty',AvgLayerRelRes'));
                     SingleTrialAvgRecCSD = SingleTrialAvgRecCSD(~cellfun('isempty',SingleTrialAvgRecCSD'));
                     AvgRelResCSD = AvgRelResCSD(~cellfun('isempty', AvgRelResCSD'));
@@ -157,8 +152,8 @@ for i1 = 1:entries
                     curChan = str2num(channels{iA});
                     
                     %Generate Sink Boxes
-                    [DUR,RMS,SINGLE_RMS,PAMP,SINGLE_PAMP,PLAT,SINGLE_PLAT,INT] =...
-                        sink_dura_single(L,AvgCSD,BL,SWEEP,curChan,Baseline);
+                    [DUR,RMS,SINGLE_RMS,SINT,PAMP,SINGLE_PAMP,PLAT,SINGLE_PLAT,INT] =...
+                        sink_dura_single(L,AvgCSD,SingleTrialCSD,BL,SWEEP,curChan,Baseline);
                     
                     toc
                     
@@ -210,128 +205,7 @@ for i1 = 1:entries
                     DUR2.VIbL = DUR2.VIbL(:,2)' - DUR2.VIbL(:,1)';
                     DUR2.InfE = DUR2.InfE(:,2)' - DUR2.InfE(:,1)'; 
                     DUR2.InfL = DUR2.InfL(:,2)' - DUR2.InfL(:,1)'; 
-                    
-                    threshold_std = 2;
-                    threshold_dur = 0.005;
-                    Latency_HighCutoff = 0.2;
-                    Latency_LowCutoff = 0.015;
-                    state = 1:(length(AvgRecCSD{1})-BL);
-                    
-                    %reformulate the single trial data to run through ExtractCSDBasePar
-                    temp = nan(size(SingleTrialAvgRecCSD{1},1),1,size(SingleTrialAvgRecCSD{1},3));
-                    for i5 = 1: length(SingleTrialAvgRecCSD)
-                        temp(:,i5,1:size([SingleTrialAvgRecCSD{i5}],3))=[SingleTrialAvgRecCSD{i5}];
-                    end
-                    extractSTAvgRecCSD= temp;
-                    
-                    temp = nan(size(SingleTrialRelResCSD{1},1),1,size(SingleTrialRelResCSD{1},3));
-                    for i5 = 1: length(SingleTrialRelResCSD)
-                        temp(:,i5,1:size([SingleTrialRelResCSD{i5}],3))=[SingleTrialRelResCSD{i5}];
-                    end
-                    extractSTRelResCSD= temp;
-                    
-                    temp = nan(size(SingleTrialAbsResCSD{1},1),1,size(SingleTrialAbsResCSD{1},3));
-                    for i5 = 1: length(SingleTrialAbsResCSD)
-                        temp(:,i5,1:size([SingleTrialAbsResCSD{i5}],3))=[SingleTrialAbsResCSD{i5}];
-                    end
-                    extractSTAbsResCSD= temp;
-                    
-                    %calculate full RMS of AVREC and RELRES (1-max Duration)
-                    [full_BW,~, ~, full_RMS_AvgRecCSD,~, ~,~, ~] =...
-                        ExtractCSDBasedPar(1,AvgRecCSD,BL,...
-                        Fs, 1, 0, threshold_std, threshold_dur,...
-                        Latency_HighCutoff, Latency_LowCutoff,state);
-                    
-                    [~,~, ~, full_RMS_RelResCSD,~, ~, ~, ~] =...
-                        ExtractCSDBasedPar(1,AvgRelResCSD,BL,...
-                        Fs, 0, 0, threshold_std, threshold_dur,...
-                        Latency_HighCutoff, Latency_LowCutoff,state);
-                    
-                    [~,~, ~, full_RMS_AbsResCSD,~, ~, ~, ~] =...
-                        ExtractCSDBasedPar(1,AvgAbsResCSD,BL,...
-                        Fs, 0, 0, threshold_std, threshold_dur,...
-                        Latency_HighCutoff, Latency_LowCutoff,state);
-                    
-                    
-                    [~,~, ~, full_Single_RMS_AvgRecCSD,~, ~,~, ~] =...
-                        ExtractCSDBasedPar(2,extractSTAvgRecCSD,BL,...
-                        Fs, 1, 0, threshold_std, threshold_dur,...
-                        Latency_HighCutoff, Latency_LowCutoff,state);
-                    
-                    [~,~, ~, full_Single_RMS_RelResCSD,~, ~,~, ~] =...
-                        ExtractCSDBasedPar(2,extractSTRelResCSD,BL,...
-                        Fs, 1, 0, threshold_std, threshold_dur,...
-                        Latency_HighCutoff, Latency_LowCutoff,state);
-                    
-                    [~,~, ~, full_Single_RMS_AbsResCSD,~, ~,~, ~] =...
-                        ExtractCSDBasedPar(2,extractSTAbsResCSD,BL,...
-                        Fs, 1, 0, threshold_std, threshold_dur,...
-                        Latency_HighCutoff, Latency_LowCutoff,state);
-                    
-                    %calculate early RMS of AVREC and RELRES (1-50 ms)
-                    state = 1:50;
-                    [e_BW,~, ~, e_RMS_AvgRecCSD,~, ~, ~, ~] =...
-                        ExtractCSDBasedPar(1,AvgRecCSD,BL,...
-                        Fs, 1, 0, threshold_std, threshold_dur,...
-                        Latency_HighCutoff, Latency_LowCutoff,state);
-                    
-                    [~,~, ~, e_RMS_RelResCSD, ~, ~, ~, ~] =...
-                        ExtractCSDBasedPar(1,AvgRelResCSD,BL,...
-                        Fs, 0, 0, threshold_std, threshold_dur,...
-                        Latency_HighCutoff, Latency_LowCutoff,state);
-                    
-                    [~,~, ~, e_RMS_AbsResCSD, ~, ~, ~, ~] =...
-                        ExtractCSDBasedPar(1,AvgAbsResCSD,BL,...
-                        Fs, 0, 0, threshold_std, threshold_dur,...
-                        Latency_HighCutoff, Latency_LowCutoff,state);
-                    
-                    [~,~, ~, e_Single_RMS_AvgRecCSD,~, ~,~, ~] =...
-                        ExtractCSDBasedPar(2,extractSTAvgRecCSD,BL,...
-                        Fs, 1, 0, threshold_std, threshold_dur,...
-                        Latency_HighCutoff, Latency_LowCutoff,state);
-                    
-                    [~,~, ~, e_Single_RMS_RelResCSD,~, ~,~, ~] =...
-                        ExtractCSDBasedPar(2,extractSTRelResCSD,BL,...
-                        Fs, 1, 0, threshold_std, threshold_dur,...
-                        Latency_HighCutoff, Latency_LowCutoff,state);
-                    
-                    [~,~, ~, e_Single_RMS_AbsResCSD,~, ~,~, ~] =...
-                        ExtractCSDBasedPar(2,extractSTAbsResCSD,BL,...
-                        Fs, 1, 0, threshold_std, threshold_dur,...
-                        Latency_HighCutoff, Latency_LowCutoff,state);
-                    
-                    %calculate early RMS of AVREC and RELRES (81-300 ms)
-                    state = 81:300;
-                    [l_BW,~, ~, l_RMS_AvgRecCSD,~, ~, ~, ~] =...
-                        ExtractCSDBasedPar(1,AvgRecCSD,BL,...
-                        Fs, 1, 0, threshold_std, threshold_dur,...
-                        Latency_HighCutoff, Latency_LowCutoff,state);
-                    
-                    [~,~, ~, l_RMS_RelResCSD, ~, ~, ~, ~] =...
-                        ExtractCSDBasedPar(1,AvgRelResCSD,BL,...
-                        Fs, 0, 0, threshold_std, threshold_dur,...
-                        Latency_HighCutoff, Latency_LowCutoff,state);
-                    
-                    [~,~, ~, l_RMS_AbsResCSD, ~, ~, ~, ~] =...
-                        ExtractCSDBasedPar(1,AvgAbsResCSD,BL,...
-                        Fs, 0, 0, threshold_std, threshold_dur,...
-                        Latency_HighCutoff, Latency_LowCutoff,state);
-                    
-                    [~,~, ~, l_Single_RMS_SingleAvgRecCSD,~, ~,~, ~] =...
-                        ExtractCSDBasedPar(2,extractSTAvgRecCSD,BL,...
-                        Fs, 1, 0, threshold_std, threshold_dur,...
-                        Latency_HighCutoff, Latency_LowCutoff,state);
-                    
-                    [~,~, ~, l_Single_RMS_RelResCSD,~, ~,~, ~] =...
-                        ExtractCSDBasedPar(2,extractSTRelResCSD,BL,...
-                        Fs, 1, 0, threshold_std, threshold_dur,...
-                        Latency_HighCutoff, Latency_LowCutoff,state);
-                    
-                    [~,~, ~, l_Single_RMS_AbsResCSD,~, ~,~, ~] =...
-                        ExtractCSDBasedPar(2,extractSTAbsResCSD,BL,...
-                        Fs, 1, 0, threshold_std, threshold_dur,...
-                        Latency_HighCutoff, Latency_LowCutoff,state);
-                    
+                                       
                     %rename data for plots
                     if ~isempty(dB_lev{iA})
                         name = [animals{iA} '_' dB_lev{iA}];
@@ -622,15 +496,13 @@ for i1 = 1:entries
                     Data(CondIDX).(name).Sinkonset = onset;
                     Data(CondIDX).(name).Sinkoffset = offset;
                     Data(CondIDX).(name).SinkRMS = RMS;
+                    Data(CondIDX).(name).SinkINT = SINT;
                     Data(CondIDX).(name).SingleSinkRMS = SINGLE_RMS;
                     Data(CondIDX).(name).tempSinkRMS = RMSTIME;
                     Data(CondIDX).(name).singletrialLFP = SingleTrialFP;
                     Data(CondIDX).(name).LFP = AvgFP;
                     Data(CondIDX).(name).singletrialCSD =SingleTrialCSD;
                     Data(CondIDX).(name).CSD = AvgCSD;
-                    Data(CondIDX).(name).BW_full = full_BW;
-                    Data(CondIDX).(name).BW_early = e_BW;
-                    Data(CondIDX).(name).BW_late = l_BW;
                     Data(CondIDX).(name).LayerRelRes =AvgLayerRelRes;
                     Data(CondIDX).(name).AVREC_raw = AvgRecCSD;
                     Data(CondIDX).(name).SingleTrial_AVREC_raw = SingleTrialAvgRecCSD;
@@ -638,28 +510,7 @@ for i1 = 1:entries
                     Data(CondIDX).(name).SingleTrial_AbsRes_raw = SingleTrialAbsResCSD;
                     Data(CondIDX).(name).RELRES_raw = AvgRelResCSD;
                     Data(CondIDX).(name).ABSRES_raw = AvgAbsResCSD;
-                    
-                    Data(CondIDX).(name).Full_RMS_AVREC = full_RMS_AvgRecCSD;
-                    Data(CondIDX).(name).Early_RMS_AVREC = e_RMS_AvgRecCSD;
-                    Data(CondIDX).(name).Late_RMS_AVREC = l_RMS_AvgRecCSD;
-                    Data(CondIDX).(name).Full_Single_RMS_AVREC = full_Single_RMS_AvgRecCSD;
-                    Data(CondIDX).(name).Early_Single_RMS_AVREC = e_Single_RMS_AvgRecCSD;
-                    Data(CondIDX).(name).Late_Single_RMS_AVREC = l_Single_RMS_SingleAvgRecCSD;
-                    
-                    Data(CondIDX).(name).Full_RMS_RELRES= full_RMS_RelResCSD*100;% make it percent
-                    Data(CondIDX).(name).Early_RMS_RELRES = e_RMS_RelResCSD*100;
-                    Data(CondIDX).(name).Late_RMS_RELRES = l_RMS_RelResCSD*100;
-                    Data(CondIDX).(name).Full_Single_RMS_RELRES= full_Single_RMS_RelResCSD*100;% make it percent
-                    Data(CondIDX).(name).Early_Single_RMS_RELRES = e_Single_RMS_RelResCSD*100;
-                    Data(CondIDX).(name).Late_Single_RMS_RELRES = l_Single_RMS_RelResCSD*100;
-                    
-                    Data(CondIDX).(name).Full_RMS_ABSRES= full_RMS_AbsResCSD;
-                    Data(CondIDX).(name).Early_RMS_ABSRES = e_RMS_AbsResCSD;
-                    Data(CondIDX).(name).Late_RMS_ABSRES = l_RMS_AbsResCSD;
-                    Data(CondIDX).(name).Full_Single_RMS_ABSRES= full_Single_RMS_AbsResCSD;
-                    Data(CondIDX).(name).Early_Single_RMS_ABSRES = e_Single_RMS_AbsResCSD;
-                    Data(CondIDX).(name).Late_Single_RMS_ABSRES = l_Single_RMS_AbsResCSD;
-                
+                   
                     figure('Name',[name ' ' measurement ': ' Condition{iC} ' ' num2str(i4)]);
                     plot(1:length(frqz),[Data(CondIDX).(name).SinkRMS.I_IIL],'LineWidth',2,'Color','black'),...
                         hold on,...
@@ -672,6 +523,7 @@ for i1 = 1:entries
                         legend('I/IIL', 'IVE', 'VaE', 'VbE', 'VIaE','IG', 'VIaL')
                     hold off
                     h = gcf;
+                    set(gca,'XTickLabel',Data(CondIDX).(name).Frqz,'FontSize',12);
                     set(h, 'PaperType', 'A4');
                     set(h, 'PaperOrientation', 'landscape');
                     set(h, 'PaperUnits', 'centimeters');
@@ -690,6 +542,7 @@ for i1 = 1:entries
                         legend('I/IIL', 'IVE', 'VaE', 'VbE', 'VIaE', 'GS','VIaL')
                     hold off
                     h = gcf;
+                    set(gca,'XTickLabel',Data(CondIDX).(name).Frqz,'FontSize',12);
                     set(h, 'PaperType', 'A4');
                     set(h, 'PaperOrientation', 'landscape');
                     set(h, 'PaperUnits', 'centimeters');
