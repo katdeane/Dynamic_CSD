@@ -36,7 +36,7 @@ rowofnans = NaN(1,5);
 ticks = {'-2' '-1' 'BF' '+1' '+2'};
 
 Order = {'I_IIE','IVE','VbE','VIaE'};
-Parameter = {'SinkRMS','SinkPeakAmp','SinkPeakLate'};
+Parameter = {'SinkRMS','SinkPeakAmp','SinkPeakLate','SinkINT'};
 
 
 %% Load in the appropriate files

@@ -5,7 +5,10 @@
 
 clear
 sink = {'I_IIE','IVE','VbE','VIaE'};%The sinks we would like to compare - currently limited to 4 sinks exactly
-para = 2;                           %1 = 'SinkRMS',2 = 'SinkPeakAmp', 3 = 'SinkPeakLate', 4 = 'Sinkonset'
+
+para = 5;                           %1 = 'SinkRMS',2 = 'SinkPeakAmp', 
+                                    %3 = 'SinkPeakLate', 4 = 'Sinkonset' 5 = 'SinkINT'
+                                    
 addmusc = 1;                        %1 = include muscimol and 0 = do not include muscimol
 which = 2;                          %1 = GS_based and 2 = ST_based
 
@@ -21,7 +24,7 @@ addpath(genpath(home));
 rowofnans = NaN(1,5);
 ticks = {'b -2' 'c -1' 'd BF' 'e +1' 'f +2'};
 based = {'GS_based','ST_based'};
-Parameter = {'SinkRMS','SinkPeakAmp','SinkPeakLate','Sinkonset'};
+Parameter = {'SinkRMS','SinkPeakAmp','SinkPeakLate','Sinkonset','SinkINT'};
 
 %% Load in the appropriate files
 cd DATA;cd Output;

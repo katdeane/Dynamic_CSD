@@ -12,8 +12,8 @@ dbstop if error
 if ~exist('homedir','var')
     if exist('D:\MyCode\Dynamic_CSD','dir') == 7
         cd('D:\MyCode\Dynamic_CSD');
-    elseif exist('C:\Users\kedea\Documents\Dynamic_CSD','dir') == 7
-        cd('C:\Users\kedea\Documents\Dynamic_CSD')
+    elseif exist('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD','dir') == 7
+        cd('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD')
     end
     
     homedir = pwd;
