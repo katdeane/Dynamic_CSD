@@ -1,5 +1,5 @@
-function [DUR,RMS,SINGLE_RMS,PAMP,SINGLE_SinkPeak,PLAT,SINGLE_PeakLat,INT] = ...
-    sink_dura_single(Layer,AvgCSD,BL,SWEEP,ChanOrder, Baseline)
+function [DUR,RMS,SINGLE_RMS,SINT,PAMP,SINGLE_SinkPeak,PLAT,SINGLE_PeakLat,INT] = ...
+    sink_dura_single(Layer,AvgCSD,SingleTrialCSD,BL,SWEEP,ChanOrder, Baseline)
 %This function produces the duration of sinks within pre-specified
 %layers.
 
@@ -20,12 +20,17 @@ std_detect = 1.1;
 std_lev = 1.5;
 pre_std_lev = .8;
 
-Order = {'VbE','IVE','VIaE','VIbE','VaE','InfE','I_IIE',...
-    'VbL','IVL','VIaL','VIbL','VaL','InfL','I_IIL','all_chan'};
-threshold_std = 2;
-threshold_dur = 0.005;
-Latency_HighCutoff = 0.2;
-Latency_LowCutoff = 0.015;
+Order = {'VbE','IVE','VIaE','VIbE','VaE','I_IIE','InfE',...
+    'VbL','IVL','VIaL','VIbL','VaL','I_IIL','InfL','all_chan'};
+PAMP = struct;
+PLAT = struct;
+DUR = struct;
+RMS = struct;
+SINT = struct;
+INT = struct;
+SINGLE_SinkPeak = struct;
+SINGLE_PeakLat = struct;
+SINGLE_RMS = struct;
 
 for i1= 1:length(AvgCSD) %length of stimuli
     
@@ -51,11 +56,12 @@ for i1= 1:length(AvgCSD) %length of stimuli
         
         %current stimulus avgcsd only in the current layer
         rawCSD = (nanmean(AvgCSD{i1}(Chan,:)))*-1; %to calculate latency and amplitude from unaltered signal
+        rawCSD_single = (nanmean(SingleTrialCSD{i1}(Chan,:,:))) *-1;
         
         %zero all source info and shape the data for sink detection
         holdAvgCSD = AvgCSD{i1}(Chan,:);
         zerosource =find(holdAvgCSD(:,:)>=0);
-        holdAvgCSD(zerosource)= 0; %equates all positive values (denoting sources) to zero
+        holdAvgCSD(zerosource) = 0; %#ok<*FNDSB> %equates all positive values (denoting sources) to zero
         zeroCSD_layer = (nanmean(holdAvgCSD))*-1; %flips negative values to positive 
         
         g = gausswin(10); %generates a gausswin distribution of 15 points from 1
@@ -141,16 +147,19 @@ for i1= 1:length(AvgCSD) %length of stimuli
         
         %to determine peak amplitude and latency
         if isnan(Sink_time(1))
-            peakamp = NaN; peaklat = NaN; sinkrms = NaN;
+            peakamp = NaN; peaklat = NaN; sinkrms = NaN; sinkint = NaN;
         else
+            sinkint = nanmean(rawCSD(:,Sink_time(1):Sink_time(2)));
             sinkrms = rms(rawCSD(:,Sink_time(1):Sink_time(2)));
             peakamp = nanmax(rawCSD(:,Sink_time(1):Sink_time(2)));
             peaklat = (find(rawCSD(:,Sink_time(1):Sink_time(2)) == nanmax(rawCSD(:,Sink_time(1):Sink_time(2)))))+Sink_time(1);
         end
         
-        PAMP(i1).(Order{i2}) = peakamp;
-        PLAT(i1).(Order{i2}) = round(peaklat);
-        DUR(i1).(Order{i2}) = round(Sink_time);
+        PAMP(i1).(Order{i2}) = peakamp; % peak amplitude
+        PLAT(i1).(Order{i2}) = round(peaklat); % peak latency
+        DUR(i1).(Order{i2}) = round(Sink_time); % sink duration
+        RMS(i1).(Order{i2})= sinkrms; % sink rms
+        SINT(i1).(Order{i2})= sinkint; % sink integral (mean)
         
         state = round((Sink_time(1):Sink_time(end))-BL);
         if isnan(state)
@@ -159,64 +168,33 @@ for i1= 1:length(AvgCSD) %length of stimuli
         
         RMSINT = sqrt((rawCSD*-1).^2)';
         
-%         try % all of above to generate state
-%             [~,~,~,RMS_AvgRecCSD,~,~,~,~] =...
-%                 ExtractCSDBasedPar(1, zeroCSD_layer,BL,...
-%                 1000, 1, 0, threshold_std, threshold_dur,...
-%                 Latency_HighCutoff, Latency_LowCutoff,state);
-%         catch
-%             fprintf('You are getting full NaNs!/n')
-%             RMS_AvgRecCSD = NaN;
-%         end
-%         
-%         if length(state) == 2
-%             RMS_AvgRecCSD = NaN;
-%         end
-        
-        RMS(i1).(Order{i2})= sinkrms;
         INT(i1).(Order{i2})= trapz(RMSINT(state+BL)); % integral of sink curve to get V*s/mm?
         
         %% Single Trial Data Structures
-        [SingleLayer_AVREC,~,~,~,~,SingleTrialCSD,~,~,~,~,~,~,~,~] =...
-            SingleTrialCSD_full(SWEEP,ChanOrder, Chan,BL); % changed to dismiss positive values from sources
         
-        %needed for attenuation 30dB
-        SingleLayer_AVREC = SingleLayer_AVREC(~cellfun('isempty',SingleLayer_AVREC'));
-        SingleTrialCSD = SingleTrialCSD(~cellfun('isempty',SingleTrialCSD'));
-                    
-        for i4 = 1:size(SingleLayer_AVREC{i1},3)
-            try
-                curRun{i1}= SingleLayer_AVREC{i1}(:,:,i4);
-            catch
-                curRun{i1}=nan(size(SingleLayer_AVREC{i1}(:,:,1)));% if less entries
-            end
-            Y = curRun{i1}(state+BL);
-            Y(Y <= 0)=nan;
-            
-            SINGLE_SinkPeak(i1).(Order{i2})(i4)= max(Y);
-            if isnan(max(Y)) || length(state) == 2 || length(find(Y == max(Y))) > 2
-                %if there's no max, if the state is default 2, or if
-                %there's more than two times it hits the max value: NaN
-                SINGLE_PeakLat(i1).(Order{i2})(i4)= NaN;
-            else
-                %given the case allowed that it may reach max value twice, take the first max
-                SINGLE_PeakLat(i1).(Order{i2})(i4)= find(Y == max(Y),1) + 200;
-            end
-            
-            X =SingleTrialCSD{i1}(Chan,state(1)+BL:state(end)+BL,i4);
-            X(X>=0)=nan;
-            X = nanmean(X);
-            X = sqrt(nanmean(X.^2));
-            
-            SINGLE_RMS(i1).(Order{i2})(i4)= X;
-            
+        if isnan(sinkrms)
+            SINGLE_SinkPeak(i1).(Order{i2})= nan(50,1);
+            SINGLE_PeakLat(i1).(Order{i2})= nan(50,1);
+            SINGLE_RMS(i1).(Order{i2})= nan(50,1);
+            continue % skip and go to next loop
         end
-        if length(SINGLE_SinkPeak(i1).(Order{i2})) == 49 %case with some chronic animals
+         
+        for i4 = 1:size(rawCSD_single,3)
+            curRun = rawCSD_single(:,Sink_time(1):Sink_time(2),i4);
+
+            SINGLE_RMS(i1).(Order{i2})(i4) = rms(curRun);
+            SINGLE_SinkPeak(i1).(Order{i2})(i4)= max(curRun);
+            SINGLE_PeakLat(i1).(Order{i2})(i4)= find(curRun == max(curRun),1) + 200;
+        end
+        
+        % if only 49 trils (case with some chronic animals)
+        if length(SINGLE_SinkPeak(i1).(Order{i2})) == 49 
             SINGLE_SinkPeak(i1).(Order{i2})(50)= NaN;
             SINGLE_PeakLat(i1).(Order{i2})(50)= NaN;
             SINGLE_RMS(i1).(Order{i2})(50)= NaN;
         end
-        if length(SINGLE_SinkPeak(i1).(Order{i2})) > 50 %case with other chronic animals
+        % if more than 50 trials (%case with other chronic animals)
+        if length(SINGLE_SinkPeak(i1).(Order{i2})) > 50 
             SINGLE_SinkPeak(i1).(Order{i2}) = SINGLE_SinkPeak(i1).(Order{i2})(1:50);
             SINGLE_PeakLat(i1).(Order{i2}) = SINGLE_PeakLat(i1).(Order{i2})(1:50);
             SINGLE_RMS(i1).(Order{i2}) = SINGLE_RMS(i1).(Order{i2})(1:50);
