@@ -3,7 +3,6 @@
 % sinks from which parameter are combined, whether or not to add muscimol,
 % and whether or not to have GS or ST based tuning
 
-clear
 sink = {'I_IIE','IVE','VbE','VIaE'};%The sinks we would like to compare - currently limited to 4 sinks exactly
 
 para = 5;                           %1 = 'SinkRMS',2 = 'SinkPeakAmp', 
@@ -216,14 +215,17 @@ g(1,1).set_layout_options('Position',[0 0 0.8 1],...
 g(1,1).set_text_options('base_size',11,'legend_title_scaling', 1,'facet_scaling', 1)
 % 
 if para == 1
-    g(1,1).set_names('x','Tone','y','mV/mm?','color','Group');
+    g(1,1).set_names('x','Tone','y','mV/mm^2','color','Group');
 %     g(1,1).axe_property('Ygrid','on','YLim',[0.005 0.04]); %,'YLim',[0 0.0015]
 elseif para == 2
-    g(1,1).set_names('x','Tone','y','mV/mm?','color','Group');
+    g(1,1).set_names('x','Tone','y','mV/mm^2','color','Group');
     g(1,1).axe_property('Ygrid','on','YLim',[-0.001 0.006]); %,'YLim',[0 0.0015]
 elseif para == 3
     g(1,1).set_names('x','Tone','y','ms','color','Group');
     g(1,1).axe_property('Ygrid','on','YLim',[200 350]);
+elseif para == 5
+    g(1,1).set_names('x','Tone','y','mV/mm^2','color','Group');
+    g(1,1).axe_property('Ygrid','on','YLim',[0 0.002]);
 else
     g(1,1).set_names('x','Tone','y','ms','color','Group');
 end
@@ -475,7 +477,7 @@ g(1,1).set_layout_options('Position',[0 0 0.8 1],...
     'redraw',false);
 g(1,1).set_text_options('base_size',11,'legend_title_scaling', 1,'facet_scaling', 1)
 g(1,1).set_names('x','Tone','y','%','color','Group');
-% g(1,1).axe_property('Ygrid','on','YLim',[0 1.5]);
+% g(1,1).axe_property('Ygrid','on','YLim',[-2 2]);
 
 g(1,1).set_color_options('map','matlab');
 g(1,1).axe_property('XTickLabel',{'BF', '+-1', '+-2', '+-3'})
