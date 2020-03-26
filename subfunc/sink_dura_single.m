@@ -1,5 +1,5 @@
 function [DUR,RMS,SINGLE_RMS,SINT,PAMP,SINGLE_SinkPeak,PLAT,SINGLE_PeakLat,INT] = ...
-    sink_dura_single(Layer,AvgCSD,SingleTrialCSD,BL,SWEEP,ChanOrder, Baseline)
+    sink_dura_single(Layer,AvgCSD,SingleTrialCSD,BL, Baseline)
 %This function produces the duration of sinks within pre-specified
 %layers.
 
@@ -59,10 +59,15 @@ for i1= 1:length(AvgCSD) %length of stimuli
         rawCSD_single = (nanmean(SingleTrialCSD{i1}(Chan,:,:))) *-1;
         
         %zero all source info and shape the data for sink detection
-        holdAvgCSD = AvgCSD{i1}(Chan,:);
-        zerosource =find(holdAvgCSD(:,:)>=0);
-        holdAvgCSD(zerosource) = 0; %#ok<*FNDSB> %equates all positive values (denoting sources) to zero
-        zeroCSD_layer = (nanmean(holdAvgCSD))*-1; %flips negative values to positive 
+        holdAvgCSDzero = AvgCSD{i1}(Chan,:);
+        zerosource = find(holdAvgCSDzero(:,:)>=0);
+        holdAvgCSDzero(zerosource) = 0; %#ok<*FNDSB> %equates all positive values (denoting sources) to zero
+        zeroCSD_layer = (nanmean(holdAvgCSDzero))*-1; %flips negative values to positive 
+        
+        %nan all source for INT calculation
+        holdAvgCSDnan = AvgCSD{i1}(Chan,:);
+        holdAvgCSDnan(zerosource) = NaN;
+        nanCSD = (nanmean(holdAvgCSDnan))*-1;
         
         g = gausswin(10); %generates a gausswin distribution of 15 points from 1
         g = g/sum(g); %turns it into a percentage distribution
@@ -149,10 +154,10 @@ for i1= 1:length(AvgCSD) %length of stimuli
         if isnan(Sink_time(1))
             peakamp = NaN; peaklat = NaN; sinkrms = NaN; sinkint = NaN;
         else
-            sinkint = nanmean(rawCSD(:,Sink_time(1):Sink_time(2)));
-            sinkrms = rms(rawCSD(:,Sink_time(1):Sink_time(2)));
-            peakamp = nanmax(rawCSD(:,Sink_time(1):Sink_time(2)));
-            peaklat = (find(rawCSD(:,Sink_time(1):Sink_time(2)) == nanmax(rawCSD(:,Sink_time(1):Sink_time(2)))))+Sink_time(1);
+            sinkint = nanmean(nanCSD(:,Sink_time(1):Sink_time(2)));
+            sinkrms = rms(nanCSD(:,Sink_time(1):Sink_time(2)));
+            peakamp = nanmax(nanCSD(:,Sink_time(1):Sink_time(2)));
+            peaklat = (find(nanCSD(:,Sink_time(1):Sink_time(2)) == nanmax(rawCSD(:,Sink_time(1):Sink_time(2)))))+Sink_time(1);
         end
         
         PAMP(i1).(Order{i2}) = peakamp; % peak amplitude

@@ -153,7 +153,7 @@ for i1 = 1:entries
                     
                     %Generate Sink Boxes
                     [DUR,RMS,SINGLE_RMS,SINT,PAMP,SINGLE_PAMP,PLAT,SINGLE_PLAT,INT] =...
-                        sink_dura_single(L,AvgCSD,SingleTrialCSD,BL,SWEEP,curChan,Baseline);
+                        sink_dura_single(L,AvgCSD,SingleTrialCSD,BL,Baseline);
                     
                     toc
                     
