@@ -109,72 +109,8 @@ for isink = 1:length(Order)
     
 end
 
-%% Normalized Sink Group
-for isink = 1:length(Order)
-    
-    disp(['***********************Normalized ST STATS FOR ' (Order{isink}) '***********************'])
-    %% Avg Trial Loop
-    for ipara = 1:length(Parameter)
-        cd(homedir); cd figs; cd('Group Tuning Curves ST');
-        disp(['********Normalized ' (Parameter{ipara}) '********']) %these headers allow a copy and paste of all post-hoc tests which aren't saved in the data at the end
-        
-        % Below are the data, means, and sems of the current parameter and
-        % sink
-        An_data = vertcat(Anesthetized.ST_based.(Parameter{ipara}).(Order{isink})(:,6:10)); %, rowofnans
-        An_data(An_data == 0) = 1;
-        An_data = An_data./An_data(:,3);
-        An_datamean = nanmean(An_data,1);
-        An_datastd = nanstd(An_data,1);
-        
-        Aw_data = vertcat(Awake.ST_based.(Parameter{ipara}).(Order{isink})(:,5:9), rowofnans,rowofnans);
-        Aw_data(Aw_data == 0) = 1;
-        Aw_data = Aw_data./Aw_data(:,3);
-        Aw_datamean = nanmean(Aw_data,1);
-        Aw_datastd = nanstd(Aw_data,1);
-        
-        M_data = vertcat(Muscimol.ST_based.(Parameter{ipara}).(Order{isink})(:,6:10));
-        M_data(M_data == 0) = 1;
-        M_data = M_data./M_data(:,3);
-        M_datamean = nanmean(M_data,1);
-        M_datastd = nanstd(M_data,1);
-        
-        %now we generate a figure based on these three groups
-        h=figure;
-        
-        errorbar(1:5, An_datamean, An_datastd, 'Linewidth', 2); hold on;
-        errorbar(1:5, Aw_datamean, Aw_datastd, 'Linewidth', 2);
-        errorbar(1:5, M_datamean, M_datastd, 'Linewidth', 2);
-        legend('Anesthetized', 'Awake', 'Muscimol')
-        title(['Sink' (Order{isink}) (Parameter{ipara})])
-        set(gca,'XTick',1:5); set(gca,'XTickLabel',ticks,'FontSize',10);
-        
-        savefig(h,['Sink' (Order{isink}) (Parameter{ipara}) '_Norm']); close all;
-        
-        %finally, we run the statistics. The stats will only appear in the
-        %command window if they are significant
-       
-        com_AnvsAw = horzcat(Aw_data, An_data);
-        com_AnvsM = horzcat(An_data, M_data);
-        
-        disp('**Anesthetized vs Awake**')
-        AnesthetizedvsAwakeN = teg_repeated_measures_ANOVA(com_AnvsAw, levels, varinames);
-        AvK_CDN = iMakeCohensD(Aw_data, An_data)
-                    
-        disp('**Anesthetized vs Muscimol**')
-        AnesthetizedvsMuscimolN = teg_repeated_measures_ANOVA(com_AnvsM, levels, varinames);
-        MvK_CDN = iMakeCohensD(M_data, An_data)
-        
-        %significant or not, the F = #(#,#) and p= # will be saves in this file
-        cd(homedir); cd DATA
-        mkdir('StatsST'); cd StatsST
-        savefile = [(Order{isink}) (Parameter{ipara}) 'SinkStats_Norm.mat'];
-        save(savefile, 'AnesthetizedvsAwakeN', 'AvK_CDN', 'AnesthetizedvsMuscimolN', 'MvK_CDN')
-    end
-    
-end
-
 %% Normalized Mirror Sink Group
-ParameterMir = {'SinkRMS','SinkPeakAmp'};
+ParameterMir = {'SinkRMS','SinkPeakAmp','SinkINT'};
 for isink = 1:length(Order)
     
     disp(['***********************Mirror Normalized ST STATS FOR ' (Order{isink}) '***********************'])
