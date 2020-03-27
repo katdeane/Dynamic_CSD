@@ -5,7 +5,7 @@
 
 sink = {'I_IIE','IVE','VbE','VIaE'};%The sinks we would like to compare - currently limited to 4 sinks exactly
 
-para = 5;                           %1 = 'SinkRMS',2 = 'SinkPeakAmp', 
+para = 3;                           %1 = 'SinkRMS',2 = 'SinkPeakAmp', 
                                     %3 = 'SinkPeakLate', 4 = 'Sinkonset' 5 = 'SinkINT'
                                     
 addmusc = 1;                        %1 = include muscimol and 0 = do not include muscimol
@@ -219,10 +219,10 @@ if para == 1
 %     g(1,1).axe_property('Ygrid','on','YLim',[0.005 0.04]); %,'YLim',[0 0.0015]
 elseif para == 2
     g(1,1).set_names('x','Tone','y','mV/mm^2','color','Group');
-    g(1,1).axe_property('Ygrid','on','YLim',[-0.001 0.006]); %,'YLim',[0 0.0015]
+    g(1,1).axe_property('Ygrid','on','YLim',[-0.0005 0.0065]); %,'YLim',[0 0.0015]
 elseif para == 3
     g(1,1).set_names('x','Tone','y','ms','color','Group');
-    g(1,1).axe_property('Ygrid','on','YLim',[200 350]);
+    g(1,1).axe_property('Ygrid','on','YLim',[175 475]);
 elseif para == 5
     g(1,1).set_names('x','Tone','y','mV/mm^2','color','Group');
     g(1,1).axe_property('Ygrid','on','YLim',[0 0.002]);
@@ -233,10 +233,10 @@ g(1,1).set_color_options('map','matlab');
 g(1,1).axe_property('XTickLabel',{'-2', '-1', 'BF', '+1', '+2'})
 
 
-g.set_title([(based{which}) ' ' (sink{1}) ', ' (sink{2}) ', ' (sink{3})  ', and ' (sink{4}) ' for ' (Parameter{para}) 'std']);
+g.set_title([(based{which}) ' ' (sink{1}) ', ' (sink{2}) ', ' (sink{3})  ', and ' (sink{4}) ' for ' (Parameter{para}) 'nan']);
 g.draw();
-g.export('file_name',[(based{which}) '_' (sink{1}) '_' (sink{2}) '_' (sink{3}) '_' (sink{4}) '_' (Parameter{para}) 'std'], 'file_type','png');
-g.export('file_name',[(based{which}) '_' (sink{1}) '_' (sink{2}) '_' (sink{3}) '_' (sink{4}) '_' (Parameter{para}) 'std'], 'file_type','pdf');
+g.export('file_name',[(based{which}) '_' (sink{1}) '_' (sink{2}) '_' (sink{3}) '_' (sink{4}) '_' (Parameter{para}) 'nan'], 'file_type','png');
+g.export('file_name',[(based{which}) '_' (sink{1}) '_' (sink{2}) '_' (sink{3}) '_' (sink{4}) '_' (Parameter{para}) 'nan'], 'file_type','pdf');
 close all
 
 %% grammplot for sink tuning curves NORMALIZED
@@ -262,10 +262,10 @@ g(1,1).set_color_options('map','matlab');
 g(1,1).axe_property('XTickLabel',{'-2', '-1', 'BF', '+1', '+2'})
 
 
-g.set_title([(based{which}) ' ' (sink{1}) ', ' (sink{2}) ', ' (sink{3}) ', and ' (sink{4}) ' for ' (Parameter{para}) 'std']);
+g.set_title([(based{which}) ' ' (sink{1}) ', ' (sink{2}) ', ' (sink{3}) ', and ' (sink{4}) ' for ' (Parameter{para}) 'nan']);
 g.draw();
-g.export('file_name',['Normalized ' (based{which}) '_' (sink{1}) '_' (sink{2}) '_' (sink{3}) '_' (sink{4}) '_' (Parameter{para}) 'std'], 'file_type','png');
-g.export('file_name',['Normalized ' (based{which}) '_' (sink{1}) '_' (sink{2}) '_' (sink{3}) '_' (sink{4}) '_' (Parameter{para}) 'std'], 'file_type','pdf');
+g.export('file_name',['Normalized ' (based{which}) '_' (sink{1}) '_' (sink{2}) '_' (sink{3}) '_' (sink{4}) '_' (Parameter{para}) 'nan'], 'file_type','png');
+g.export('file_name',['Normalized ' (based{which}) '_' (sink{1}) '_' (sink{2}) '_' (sink{3}) '_' (sink{4}) '_' (Parameter{para}) 'nan'], 'file_type','pdf');
 close all
 %% got mirror?
 
@@ -483,12 +483,12 @@ g(1,1).set_color_options('map','matlab');
 g(1,1).axe_property('XTickLabel',{'BF', '+-1', '+-2', '+-3'})
 
 
-g.set_title([(based{which}) ' ' (sink{1}) ', ' (sink{2}) ', ' (sink{3}) ', and ' (sink{4}) ' for ' (Parameter{para}) 'std']);
+g.set_title([(based{which}) ' ' (sink{1}) ', ' (sink{2}) ', ' (sink{3}) ', and ' (sink{4}) ' for ' (Parameter{para}) 'nan']);
 g.draw();
 g.export('file_name',['Normalized mirror ' (based{which}) '_' (sink{1}) '_' ...
-    (sink{2}) '_' (sink{3}) '_' (sink{4}) '_' (Parameter{para}) 'std'], 'file_type','png');
+    (sink{2}) '_' (sink{3}) '_' (sink{4}) '_' (Parameter{para}) 'nan'], 'file_type','png');
 g.export('file_name',['Normalized mirror ' (based{which}) '_' (sink{1}) '_' ...
-    (sink{2}) '_' (sink{3}) '_' (sink{4}) '_' (Parameter{para}) 'std'], 'file_type','pdf');
+    (sink{2}) '_' (sink{3}) '_' (sink{4}) '_' (Parameter{para}) 'nan'], 'file_type','pdf');
 close all
 
 

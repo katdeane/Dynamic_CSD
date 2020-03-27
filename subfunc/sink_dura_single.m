@@ -32,7 +32,7 @@ SINGLE_SinkPeak = struct;
 SINGLE_PeakLat = struct;
 SINGLE_RMS = struct;
 
-for i1= 1:length(AvgCSD) %length of stimuli
+for i1 = 1:length(AvgCSD) %length of stimuli
     
     %create std and mean line from previously generated mat or from current
     %CSDs' BL horizontally stacking
@@ -157,7 +157,7 @@ for i1= 1:length(AvgCSD) %length of stimuli
             sinkint = nanmean(nanCSD(:,Sink_time(1):Sink_time(2)));
             sinkrms = rms(nanCSD(:,Sink_time(1):Sink_time(2)));
             peakamp = nanmax(nanCSD(:,Sink_time(1):Sink_time(2)));
-            peaklat = (find(nanCSD(:,Sink_time(1):Sink_time(2)) == nanmax(rawCSD(:,Sink_time(1):Sink_time(2)))))+Sink_time(1);
+            peaklat = (find(nanCSD(:,Sink_time(1):Sink_time(2)) == nanmax(nanCSD(:,Sink_time(1):Sink_time(2)))))+Sink_time(1);
         end
         
         PAMP(i1).(Order{i2}) = peakamp; % peak amplitude
