@@ -158,7 +158,7 @@ for i1 = 1:entries
                     
                     %Generate Sink Boxes
                     [DUR,RMS,SINGLE_RMS,PAMP,SINGLE_PAMP,PLAT,SINGLE_PLAT,INT] =...
-                        sink_dura_single(L,AvgCSD,BL,SWEEP,curChan,Baseline);
+                        sink_dura_single(L,AvgCSD,SingleTrialCSD,BL,Baseline);
                     
                     toc
                     
@@ -436,152 +436,152 @@ for i1 = 1:entries
                     set(h, 'PaperUnits', 'centimeters');
                     savefig(h,[name '_' measurement '_CSDs' ],'compact')
                     close (h)
-
-                    Order = {'I_IIL','IVE','VaE','VbE','VIaE','VIaL'};
-                    h = figure('Name',[name ' ' measurement ': ' Condition{iC} ' ' num2str(i4)]);
-                    for i5 = 1:length(Order)
-                        subplot(1,7,i5)
-                        time = [DUR(:).(Order{i5})];
-                        time = reshape(time,[],length(time)/2);
-                        time = time-BL;
-                        hold on
-                        plot (time(1,:),'b--o','LineWidth',2);
-                        plot (time(2,:),'r--o','LineWidth',2);
-                        hold off
-                        title(Order{i5})
-                        ylim([0 (length(AvgCSD{1})-BL)])
-                        xlim([0 (length(AvgCSD)+1)])
-                        ylabel ('Time in ms')
-                        xlabel ('Index of Stimuli')
-                        if i5 == 1
-                            legend('Sink onset','Sink offset','Location','best')
-                        end
-                    end
-                    set(h, 'PaperType', 'A4');
-                    set(h, 'PaperOrientation', 'landscape');
-                    set(h, 'PaperUnits', 'centimeters');
-                    savefig(h,[name '_' measurement '_Sink_onset+offset' ],'compact')
-                    close (h)
-
+% 
+%                     Order = {'I_IIL','IVE','VaE','VbE','VIaE','VIaL'};
+%                     h = figure('Name',[name ' ' measurement ': ' Condition{iC} ' ' num2str(i4)]);
+%                     for i5 = 1:length(Order)
+%                         subplot(1,7,i5)
+%                         time = [DUR(:).(Order{i5})];
+%                         time = reshape(time,[],length(time)/2);
+%                         time = time-BL;
+%                         hold on
+%                         plot (time(1,:),'b--o','LineWidth',2);
+%                         plot (time(2,:),'r--o','LineWidth',2);
+%                         hold off
+%                         title(Order{i5})
+%                         ylim([0 (length(AvgCSD{1})-BL)])
+%                         xlim([0 (length(AvgCSD)+1)])
+%                         ylabel ('Time in ms')
+%                         xlabel ('Index of Stimuli')
+%                         if i5 == 1
+%                             legend('Sink onset','Sink offset','Location','best')
+%                         end
+%                     end
+%                     set(h, 'PaperType', 'A4');
+%                     set(h, 'PaperOrientation', 'landscape');
+%                     set(h, 'PaperUnits', 'centimeters');
+%                     savefig(h,[name '_' measurement '_Sink_onset+offset' ],'compact')
+%                     close (h)
+% 
                     BF = find([PAMP.IVE] == max([PAMP.IVE]));
                     BF_frqz = frqz(BF);
+%                     
+%                     if isnan(BF), BF = 1; end
+%                     if isempty(BF), BF = 1; end
                     
-                    if isnan(BF), BF = 1; end
-                    if isempty(BF), BF = 1; end
+%                     SINK = {'VbE', 'IVE', 'VIaE', 'VIbE', 'VaE', 'I_IIE',...
+%                         'VbL', 'IVL', 'VIaL', 'VIbL', 'VaL', 'I_IIL'};
+%                     h = figure('Name',[name ' ' measurement ': ' Condition{iC} ' ' num2str(i4)]);
+%                     for i5 = 1: length(SINK)
+%                         subplot(3,length(SINK),i5)
+%                         durtime = DUR2.(SINK{i5});
+%                         plot(durtime,'b--o','LineWidth',2)
+%                         hold on
+%                         plot (BF,durtime(BF),'r*','LineWidth',2)
+%                         hold off
+%                         xlim([0 (length(AvgCSD)+1)])
+%                         title (['Sink duration Layer ' SINK{i5} ' ms'])
+%                         
+%                         subplot(3,length(SINK),i5+length(SINK))
+%                         plot([RMS.(SINK{i5})],'b--o','LineWidth',2)
+%                         hold on
+%                         plot (BF,RMS(BF).(SINK{i5}),'r*','LineWidth',2)
+%                         hold off
+%                         xlim([0 (length(AvgCSD)+1)])
+%                         title (['RMS Layer ' SINK{i5} ' mV/mm?'])
+%                         
+%                         subplot(3,length(SINK),i5+2*length(SINK))
+%                         relRMS = [RMS.(SINK{i5})]./durtime;
+%                         plot(relRMS,'b--o','LineWidth',2)
+%                         hold on
+%                         plot (BF,relRMS(BF),'r*','LineWidth',2)
+%                         hold off
+%                         xlim([0 (length(AvgCSD)+1)])
+%                         title (['RMS / ms L ' SINK{i5} ' mV/mm? ms'])
+%                         RMSTIME.(SINK{i5}) = relRMS;
+%                         
+%                     end
+%                     
+%                     set(h, 'PaperType', 'A4');
+%                     set(h, 'PaperOrientation', 'landscape');
+%                     set(h, 'PaperUnits', 'centimeters');
+%                     savefig(h,[name '_' measurement '_Duration_RMS_Ratio' ],'compact')
+%                     close (h)
+%                     
+%                     % Integral current flow V*ms/mm?
+%                     h = figure('Name',[name ' ' measurement ': ' Condition{iC} ' ' num2str(i4)]);
+%                     for i5 = 1: length(SINK)
+%                         subplot(3,length(SINK),i5)
+%                         durtime = DUR2.(SINK{i5});
+%                         plot(durtime./durtime(BF),'LineWidth',2)
+%                         hold on
+%                         plot (BF,durtime(BF)./durtime(BF),'r*','LineWidth',2)
+%                         hold off
+%                         xlim([0 (length(AvgCSD)+1)])
+%                         title (['Sink duration Layer ' SINK{i5} ' ms'])
+%                         
+%                         subplot(3,length(SINK),i5+length(SINK))
+%                         RS =[RMS.(SINK{i5})];
+%                         plot(RS./RS(BF),'LineWidth',2)
+%                         hold on
+%                         plot (BF,RMS(BF).(SINK{i5})/RS(BF),'r*','LineWidth',2)
+%                         hold off
+%                         xlim([0 (length(AvgCSD)+1)])
+%                         title (['RMS Layer ' SINK{i5} ' mV/mm?'])
+%                         
+%                         subplot(3,length(SINK),i5+2*length(SINK))
+%                         relRMS = [RMS.(SINK{i5})]./durtime;
+%                         plot(relRMS./relRMS(BF),'LineWidth',2)
+%                         hold on
+%                         plot (BF,relRMS(BF)/relRMS(BF),'r*','LineWidth',2)
+%                         hold off
+%                         xlim([0 (length(AvgCSD)+1)])
+%                         title (['RMS / ms L ' SINK{i5} ' mV/mm? ms'])
+%                         
+%                     end
+%                     
+%                     set(h, 'PaperType', 'A4');
+%                     set(h, 'PaperOrientation', 'landscape');
+%                     set(h, 'PaperUnits', 'centimeters');
+%                     savefig(h,[name '_' measurement 'Duration_RMS_Ratio_BF_normalized' ],'compact')
+%                     close (h)
                     
-                    SINK = {'VbE', 'IVE', 'VIaE', 'VIbE', 'VaE', 'I_IIE',...
-                        'VbL', 'IVL', 'VIaL', 'VIbL', 'VaL', 'I_IIL'};
-                    h = figure('Name',[name ' ' measurement ': ' Condition{iC} ' ' num2str(i4)]);
-                    for i5 = 1: length(SINK)
-                        subplot(3,length(SINK),i5)
-                        durtime = DUR2.(SINK{i5});
-                        plot(durtime,'b--o','LineWidth',2)
-                        hold on
-                        plot (BF,durtime(BF),'r*','LineWidth',2)
-                        hold off
-                        xlim([0 (length(AvgCSD)+1)])
-                        title (['Sink duration Layer ' SINK{i5} ' ms'])
-                        
-                        subplot(3,length(SINK),i5+length(SINK))
-                        plot([RMS.(SINK{i5})],'b--o','LineWidth',2)
-                        hold on
-                        plot (BF,RMS(BF).(SINK{i5}),'r*','LineWidth',2)
-                        hold off
-                        xlim([0 (length(AvgCSD)+1)])
-                        title (['RMS Layer ' SINK{i5} ' mV/mm?'])
-                        
-                        subplot(3,length(SINK),i5+2*length(SINK))
-                        relRMS = [RMS.(SINK{i5})]./durtime;
-                        plot(relRMS,'b--o','LineWidth',2)
-                        hold on
-                        plot (BF,relRMS(BF),'r*','LineWidth',2)
-                        hold off
-                        xlim([0 (length(AvgCSD)+1)])
-                        title (['RMS / ms L ' SINK{i5} ' mV/mm? ms'])
-                        RMSTIME.(SINK{i5}) = relRMS;
-                        
-                    end
-                    
-                    set(h, 'PaperType', 'A4');
-                    set(h, 'PaperOrientation', 'landscape');
-                    set(h, 'PaperUnits', 'centimeters');
-                    savefig(h,[name '_' measurement '_Duration_RMS_Ratio' ],'compact')
-                    close (h)
-                    
-                    % Integral current flow V*ms/mm?
-                    h = figure('Name',[name ' ' measurement ': ' Condition{iC} ' ' num2str(i4)]);
-                    for i5 = 1: length(SINK)
-                        subplot(3,length(SINK),i5)
-                        durtime = DUR2.(SINK{i5});
-                        plot(durtime./durtime(BF),'LineWidth',2)
-                        hold on
-                        plot (BF,durtime(BF)./durtime(BF),'r*','LineWidth',2)
-                        hold off
-                        xlim([0 (length(AvgCSD)+1)])
-                        title (['Sink duration Layer ' SINK{i5} ' ms'])
-                        
-                        subplot(3,length(SINK),i5+length(SINK))
-                        RS =[RMS.(SINK{i5})];
-                        plot(RS./RS(BF),'LineWidth',2)
-                        hold on
-                        plot (BF,RMS(BF).(SINK{i5})/RS(BF),'r*','LineWidth',2)
-                        hold off
-                        xlim([0 (length(AvgCSD)+1)])
-                        title (['RMS Layer ' SINK{i5} ' mV/mm?'])
-                        
-                        subplot(3,length(SINK),i5+2*length(SINK))
-                        relRMS = [RMS.(SINK{i5})]./durtime;
-                        plot(relRMS./relRMS(BF),'LineWidth',2)
-                        hold on
-                        plot (BF,relRMS(BF)/relRMS(BF),'r*','LineWidth',2)
-                        hold off
-                        xlim([0 (length(AvgCSD)+1)])
-                        title (['RMS / ms L ' SINK{i5} ' mV/mm? ms'])
-                        
-                    end
-                    
-                    set(h, 'PaperType', 'A4');
-                    set(h, 'PaperOrientation', 'landscape');
-                    set(h, 'PaperUnits', 'centimeters');
-                    savefig(h,[name '_' measurement 'Duration_RMS_Ratio_BF_normalized' ],'compact')
-                    close (h)
-                    
-                    h = figure('Name',[name ' ' measurement ': ' Condition{iC} ' ' num2str(i4)]);
-                    for i5 = 1: length(SINK)
-                        subplot(3,length(SINK),i5)
-                        durtime = DUR2.(SINK{i5});
-                        plot(durtime,'b--o','LineWidth',2)
-                        hold on
-                        plot (BF,durtime(BF),'r*','LineWidth',2)
-                        hold off
-                        xlim([0 (length(AvgCSD)+1)])
-                        title (['Sink duration Layer ' SINK{i5} ' ms'])
-                        
-                        subplot(3,length(SINK),i5+length(SINK))
-                        plot([INT.(SINK{i5})],'b--o','LineWidth',2)
-                        hold on
-                        plot (BF,INT(BF).(SINK{i5}),'r*','LineWidth',2)
-                        hold off
-                        xlim([0 (length(AvgCSD)+1)])
-                        title (['Current flow Layer ' SINK{i5} ' mV*ms/mm?'])
-                        
-                        subplot(3,length(SINK),i5+2*length(SINK))
-                        relRMS = [INT.(SINK{i5})]./durtime;
-                        plot(relRMS,'b--o','LineWidth',2)
-                        hold on
-                        plot (BF,relRMS(BF),'r*','LineWidth',2)
-                        hold off
-                        xlim([0 (length(AvgCSD)+1)])
-                        title (['mean CF L ' SINK{i5} ' mV/mm?'])
-                        RMSTIME.(SINK{i5}) = relRMS;
-                        
-                    end
-                    
-                    set(h, 'PaperType', 'A4');
-                    set(h, 'PaperOrientation', 'landscape');
-                    set(h, 'PaperUnits', 'centimeters');
-                    savefig(h,[name '_' measurement '_Current_flow' ],'compact')
-                    close (h)
+%                     h = figure('Name',[name ' ' measurement ': ' Condition{iC} ' ' num2str(i4)]);
+%                     for i5 = 1: length(SINK)
+%                         subplot(3,length(SINK),i5)
+%                         durtime = DUR2.(SINK{i5});
+%                         plot(durtime,'b--o','LineWidth',2)
+%                         hold on
+%                         plot (BF,durtime(BF),'r*','LineWidth',2)
+%                         hold off
+%                         xlim([0 (length(AvgCSD)+1)])
+%                         title (['Sink duration Layer ' SINK{i5} ' ms'])
+%                         
+%                         subplot(3,length(SINK),i5+length(SINK))
+%                         plot([INT.(SINK{i5})],'b--o','LineWidth',2)
+%                         hold on
+%                         plot (BF,INT(BF).(SINK{i5}),'r*','LineWidth',2)
+%                         hold off
+%                         xlim([0 (length(AvgCSD)+1)])
+%                         title (['Current flow Layer ' SINK{i5} ' mV*ms/mm?'])
+%                         
+%                         subplot(3,length(SINK),i5+2*length(SINK))
+%                         relRMS = [INT.(SINK{i5})]./durtime;
+%                         plot(relRMS,'b--o','LineWidth',2)
+%                         hold on
+%                         plot (BF,relRMS(BF),'r*','LineWidth',2)
+%                         hold off
+%                         xlim([0 (length(AvgCSD)+1)])
+%                         title (['mean CF L ' SINK{i5} ' mV/mm?'])
+%                         RMSTIME.(SINK{i5}) = relRMS;
+%                         
+%                     end
+%                     
+%                     set(h, 'PaperType', 'A4');
+%                     set(h, 'PaperOrientation', 'landscape');
+%                     set(h, 'PaperUnits', 'centimeters');
+%                     savefig(h,[name '_' measurement '_Current_flow' ],'compact')
+%                     close (h)
                     
                     all = [AvgRecCSD{:}];
                     all = all(BL+15:BL+50,:);
@@ -608,8 +608,8 @@ for i1 = 1:entries
                     Data(CondIDX).(name).Sinkoffset = offset;
                     Data(CondIDX).(name).SinkRMS = RMS;
                     Data(CondIDX).(name).SingleSinkRMS = SINGLE_RMS;
-                    Data(CondIDX).(name).tempSinkRMS = RMSTIME;
-                    Data(CondIDX).(name).singletrialLFP = SingleTrialFP;
+%                     Data(CondIDX).(name).tempSinkRMS = RMSTIME;
+%                     Data(CondIDX).(name).singletrialLFP = SingleTrialFP;
                     Data(CondIDX).(name).LFP = AvgFP;
                     Data(CondIDX).(name).singletrialCSD =SingleTrialCSD;
                     Data(CondIDX).(name).CSD = AvgCSD;
@@ -646,14 +646,12 @@ for i1 = 1:entries
 %                     Data(CondIDX).(name).Late_Single_RMS_ABSRES = l_Single_RMS_AbsResCSD;
                 
                     figure('Name',[name ' ' measurement ': ' Condition{iC} ' ' num2str(i4)]);
-                    plot(1:length(frqz),[Data(CondIDX).(name).SinkRMS.I_IIL],'LineWidth',2,'Color','black'),...
-                        hold on,...
                         plot(1:length(frqz),[Data(CondIDX).(name).SinkRMS.IVE],'LineWidth',2,'Color','red'),...
+                        hold on,...
                         plot(1:length(frqz),[Data(CondIDX).(name).SinkRMS.VaE],'LineWidth',2,'Color','green'),...
                         plot(1:length(frqz),[Data(CondIDX).(name).SinkRMS.VbE],'LineWidth',2,'Color','blue'),...
                         plot(1:length(frqz),[Data(CondIDX).(name).SinkRMS.VIaE],'LineWidth',2,'Color','magenta'),...
-                        plot(1:length(frqz),[Data(CondIDX).(name).SinkRMS.VIaL],'LineWidth',2,'Color','cyan'),...
-                        legend('I/IIL', 'IVE', 'VaE', 'VbE', 'VIaE','IG', 'VIaL')
+                        legend('IVE', 'VaE', 'VbE', 'VIaE')
                     hold off
                     h = gcf;
                     set(gca,'XTickLabel',Data(CondIDX).(name).Frqz,'FontSize',12);
@@ -663,23 +661,23 @@ for i1 = 1:entries
                     savefig(h,[name '_' measurement '_RMS Sink tuning' ],'compact')
                     close (h)
                     
-                    figure('Name',[name ' ' measurement ': ' Condition{iC} ' ' num2str(i4)]);
-                    plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.I_IIL],'LineWidth',2,'Color','black'),...
-                        hold on,...
-                        plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.IVE],'LineWidth',2,'Color','red'),...
-                        plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.VaE],'LineWidth',2,'Color','green'),...
-                        plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.VbE],'LineWidth',2,'Color','blue'),...
-                        plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.VIaE],'LineWidth',2,'Color','magenta'),...
-                        plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.VIaL],'LineWidth',2,'Color','cyan'),...
-                        legend('I/IIL', 'IVE', 'VaE', 'VbE', 'VIaE', 'GS','VIaL')
-                    hold off
-                    h = gcf;
-                    set(gca,'XTickLabel',Data(CondIDX).(name).Frqz,'FontSize',12);
-                    set(h, 'PaperType', 'A4');
-                    set(h, 'PaperOrientation', 'landscape');
-                    set(h, 'PaperUnits', 'centimeters');
-                    savefig(h,[name '_' measurement '_temporal RMS Sink tuning' ],'compact')
-                    close (h)
+%                     figure('Name',[name ' ' measurement ': ' Condition{iC} ' ' num2str(i4)]);
+%                     plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.I_IIL],'LineWidth',2,'Color','black'),...
+%                         hold on,...
+%                         plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.IVE],'LineWidth',2,'Color','red'),...
+%                         plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.VaE],'LineWidth',2,'Color','green'),...
+%                         plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.VbE],'LineWidth',2,'Color','blue'),...
+%                         plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.VIaE],'LineWidth',2,'Color','magenta'),...
+%                         plot(1:length(frqz),[Data(CondIDX).(name).tempSinkRMS.VIaL],'LineWidth',2,'Color','cyan'),...
+%                         legend('I/IIL', 'IVE', 'VaE', 'VbE', 'VIaE', 'GS','VIaL')
+%                     hold off
+%                     h = gcf;
+%                     set(gca,'XTickLabel',Data(CondIDX).(name).Frqz,'FontSize',12);
+%                     set(h, 'PaperType', 'A4');
+%                     set(h, 'PaperOrientation', 'landscape');
+%                     set(h, 'PaperUnits', 'centimeters');
+%                     savefig(h,[name '_' measurement '_temporal RMS Sink tuning' ],'compact')
+%                     close (h)
                 end
             end
         end
