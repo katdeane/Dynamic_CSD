@@ -5,26 +5,30 @@ function PermutationTestScalogram(layer,rel2BFin)
 %           comparison; figures for observed t values, clusters, ttest line
 %           output; boxplot and significance of permutation test -> Pictures folder
 
-%% INIT 
+%% standard operations
+
+warning('OFF');
+dbstop if error
 
 % Change directory to your working folder
-if exist('D:\MyCode\Dynamic_CSD_Analysis','dir') == 7
-    cd('D:\MyCode\Dynamic_CSD_Analysis');
-elseif exist('D:\Dynamic_CSD_Analysis','dir') == 7
-    cd('D:\Dynamic_CSD_Analysis');
-elseif exist('C:\Users\kedea\Documents\Dynamic_CSD_Analysis','dir') == 7
-    cd('C:\Users\kedea\Documents\Dynamic_CSD_Analysis')
+if ~exist('homedir','var')
+    if exist('D:\MyCode\Dynamic_CSD','dir') == 7
+        cd('D:\MyCode\Dynamic_CSD');
+    elseif exist('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD','dir') == 7
+        cd('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD')
+    end
+    
+    homedir = pwd;
+    addpath(genpath(homedir));
 end
+if ~exist('rel2BFin','var')
+    rel2BFin = 0; % run the BF if not specified
+end
+if ~exist('layer','var')
+    layer = 'IVE'; % run the granular layer if not specified
+end 
 
-home = pwd;
-addpath(genpath(home));
-
-cd AndrewSpectralData; cd Data;
-
-% function in
-% rel2BFin = 0; % 0 = BF, 1 = BF+1, etc. (stay close to BF, awake animals...
-                                             % don't have a full range)
-% layer = 'IVE';
+cd (homedir),cd DATA;
 
 nperms = 1000;
 pthresh = nperms*(0.05/7);
@@ -149,7 +153,7 @@ for ispec = 1:length(osciName)
     end
 end
 
-cd(home); cd AndrewSpectralData; cd Pictures; cd Permutations
+cd(homedir); cd figs; mkdir('Spectral_MagPerm'); cd('Spectral_MagPerm');
 %% dif fig
 [X,Y]=meshgrid(wtTable.freq{1},params.startTime*1000:(params.limit-201));
 ObservedDiff = figure('Name','Observed Difference Values BF','Position',[-1070 500 1065 400]); 
@@ -300,7 +304,7 @@ for iperm = 1:nperms
     
 end
 
-
+cd(homedir); cd DATA; cd Spectral; mkdir('MagPerm'); cd('MagPerm');
 %% Check Significance of full clustermass
 
 % In how many instances is the clustermass of the permutation LESS than
@@ -339,7 +343,7 @@ set(h, 'PaperOrientation', 'landscape');
 set(h, 'PaperUnits', 'centimeters');
 savefig(['Full Permutation ' layer ' ' num2str(rel2BFin)])
 saveas(gcf, ['Full Permutation ' layer '.pdf'])
-
+close(h)
 save(['Permutation ' layer ' ' num2str(rel2BFin) '.mat'],'pValL','pValM','permMean','permSTD')
 
 %% Check Significance of layers' clustermass
@@ -381,9 +385,8 @@ set(h, 'PaperOrientation', 'landscape');
 set(h, 'PaperUnits', 'centimeters');
 savefig(['Permutation ' layer ' ' osciName{ispec} ' ' num2str(rel2BFin)])
 saveas(gcf, ['Permutation ' layer ' ' osciName{ispec} ' ' num2str(rel2BFin) '.pdf'])
-
+close(h)
 save(['Permutation ' layer ' ' osciName{ispec} ' ' num2str(rel2BFin) '.mat'],'pValL','pValM','permMean','permSTD')
-fprintf(['The P value after clustermass permutation for ' layer num2str(rel2BFin) ' at ' osciName{ispec} ' is ' num2str(pValM) ' \n'])
 
 end
 

@@ -1,4 +1,4 @@
-function GMOScal_LayerSelect(layer, rel2BFin)
+function GMOScal_LayerSelect(layer, rel2BFin,homedir)
 % GMOScal gets the averaged scalogram for each condition at layer 4
 % Uses data produced by CSD_allLayers_scalogram from Andrew Curran, named
 % here scalogramsfull.mat
@@ -6,14 +6,33 @@ function GMOScal_LayerSelect(layer, rel2BFin)
 %   - scaled to full scale (minimum found value, maximum found value)
 % 03.06.2019 added function to specify layer under consideration
 
-%% INIT 
-cd('D:\MyCode\Dynamic_CSD_Analysis');
-home = pwd;
-addpath(genpath(home));
+%% standard operations
 
-cd AndrewSpectralData; cd Data;
+warning('OFF');
+dbstop if error
 
-load('scalogramsfull.mat')% var = wtTable
+% Change directory to your working folder
+if ~exist('homedir','var')
+    if exist('D:\MyCode\Dynamic_CSD','dir') == 7
+        cd('D:\MyCode\Dynamic_CSD');
+    elseif exist('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD','dir') == 7
+        cd('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD')
+    end
+    
+    homedir = pwd;
+    addpath(genpath(homedir));
+end
+if ~exist('rel2BFin','var')
+    rel2BFin = 0; % run the BF if not specified
+end
+if ~exist('layer','var')
+    layer = 'IVE'; % run the granular layer if not specified
+end 
+
+cd (homedir),cd DATA;
+
+
+load('scalograms.mat','wtTable')% var = wtTable
 
 varNames = unique(wtTable.layer);
 if ~any(contains(varNames,layer)) && ~strcmp(layer, 'ALL')
@@ -57,7 +76,7 @@ for ii = 1:length(musc)
     musc2(ii,:,:)=musc{ii};
 end
 
-cd(home); cd AndrewSpectralData; cd Pictures;
+cd(homedir); cd figs; mkdir('GMOScalo');cd('GMOScalo')
 %% Scaled for total (Minimum to Maximum caxis values between all three conditions)
 %close all
 [X,Y]=meshgrid(wtTable.freq{1},params.startTime*1000:(params.limit-201));
@@ -189,5 +208,4 @@ set(h, 'PaperOrientation', 'landscape');
 set(h, 'PaperUnits', 'centimeters');
 savefig(['Log Scale ' layer ' ' num2str(rel2BFin)])
 saveas(gcf, ['Complete Scale ' layer ' ' num2str(rel2BFin) '.pdf'])
-%% Save
-% saveAllFigs('D:\MyCode\Dynamic_CSD_Analysis\AndrewSpectralData\Pictures');
+

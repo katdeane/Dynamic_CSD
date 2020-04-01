@@ -6,23 +6,24 @@ function PermutationTest_PhaseCoh(inputmat,inputname)
 %           comparison; figures for observed t values, clusters, ttest line
 %           output; boxplot and significance of permutation test -> Pictures folder
 
-%% INIT 
+%% standard operations
+
+warning('OFF');
+dbstop if error
 
 % Change directory to your working folder
-if exist('D:\MyCode\Dynamic_CSD_Analysis','dir') == 7
-    cd('D:\MyCode\Dynamic_CSD_Analysis');
-elseif exist('D:\Dynamic_CSD_Analysis','dir') == 7
-    cd('D:\Dynamic_CSD_Analysis');
-elseif exist('C:\Users\kedea\Documents\Dynamic_CSD_Analysis','dir') == 7
-    cd('C:\Users\kedea\Documents\Dynamic_CSD_Analysis')
+if ~exist('homedir','var')
+    if exist('D:\MyCode\Dynamic_CSD','dir') == 7
+        cd('D:\MyCode\Dynamic_CSD');
+    elseif exist('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD','dir') == 7
+        cd('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD')
+    end
+    
+    homedir = pwd;
+    addpath(genpath(homedir));
 end
 
-home = pwd;
-addpath(genpath(home));
-
-cd AndrewSpectralData; cd Data;
-
-% layer = 'IVE';
+cd (homedir),cd DATA;
 
 nperms = 1000;
 pthresh = nperms*(0.05/7); % Bonferroni corrected for 7 tests
@@ -117,10 +118,10 @@ grpK = mean(KetAll,3);
 diffK_A = grpK - grpA;
 
 %% dif fig
-cd(home); cd AndrewSpectralData; cd Pictures; cd PhasePermutations
+cd(homedir); cd figs; mkdir('Spectral_PhCPerm'); cd('Spectral_PhCPerm');
 
 [X,Y]=meshgrid(wtTable.freq{1},params.startTime*1000:(params.limit-201));
-ObservedDiff = figure('Name',['Observed Phase Difference' name],'Position',[100 100 1065 400]); 
+figure('Name',['Observed Phase Difference' name],'Position',[100 100 1065 400]); 
 ketFig = subplot(131);
 surf(Y',X',grpK,'EdgeColor','None'); view(2);
 set(gca,'YScale','log'); title('Ketamine')
@@ -219,14 +220,14 @@ end
 
 %% cluster fig 
 [X,Y]=meshgrid(wtTable.freq{1},params.startTime*1000:(params.limit-201));
-FValues = figure('Name',['Observed Effect Size and Clustermass' name],'Position',[-1070 900 1065 400]); 
-EFig = subplot(121);
+figure('Name',['Observed Effect Size and Clustermass' name],'Position',[-1070 900 1065 400]); 
+subplot(121);
 surf(Y,X,squeeze(obs_Esize)','EdgeColor','None'); view(2);
 set(gca,'YScale','log'); title('Effect size mat')
 yticks([0 10 20 30 40 50 60 80 100 200 300 500])
 colorbar
 
-clusFig = subplot(122);
+subplot(122);
 surf(Y,X,squeeze(obs_Cmass)','EdgeColor','None'); view(2);
 set(gca,'YScale','log'); title('Clusters where p>0.05')
 yticks([0 10 20 30 40 50 60 80 100 200 300 500])
@@ -250,7 +251,6 @@ perm_layer = struct;
 for ispec = 1:length(osciName)
     perm_layer.(osciName{ispec}) = NaN([1 nperms]);
 end
-
 
 % echo loop to find observed values
 for iperm = 1:nperms
@@ -348,6 +348,7 @@ for iperm = 1:nperms
 end
 toc
 
+cd(homedir); cd DATA; cd Spectral; mkdir('Spectral_PhCPerm'); cd('Spectral_PhCPerm');
 %% Check Significance of full clustermass
 
 % In how many instances is the clustermass of the permutation LESS than
@@ -370,7 +371,7 @@ if pthresh <= 1
     disp('      pthresh is less than 1')
 end
 
-PermutSpread = figure('Name','Observed cluster vs Permutation'); 
+figure('Name','Observed cluster vs Permutation'); 
 boxplot(mass_clustermass); hold on;
 
 if sig_massLess == 0 && sig_massMore == 0
@@ -414,7 +415,7 @@ permSTD = std(perm_layer.(osciName{ispec}));
 sig_massMore(sig_massMore <= pthresh) = true; %if it's not more than 50, it's siginificant for that frequency
 sig_massMore(sig_massMore > pthresh) = false;
 
-PermutSpreadLayer = figure('Name',['Observed cluster vs Permutation' name ' ' osciName{ispec}]); 
+figure('Name',['Observed cluster vs Permutation' name ' ' osciName{ispec}]); 
 boxplot(perm_layer.(osciName{ispec})); hold on;
 
 if sig_massLess == 0 && sig_massMore == 0
