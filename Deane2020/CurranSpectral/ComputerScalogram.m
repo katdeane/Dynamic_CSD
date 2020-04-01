@@ -4,9 +4,8 @@
 % Generated on: 27-Apr-2019 13:18:07
 
 % Parameters
-close all
-thisFold = 'E:\Andrew Curran\Collaborations\Katrina Spectral Analysis\Dynamic_CSD_Analysis Folders\DATA\GXL03\AnesthetizedPre\';
-thisFold2 = 'E:\Andrew Curran\Collaborations\Katrina Spectral Analysis\Dynamic_CSD_Analysis Folders\DATA\GXL03\Muscimol\';
+thisFold = 'C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD\DATA\Spectral\GKD_02\AnesthetizedPre';
+thisFold2 = 'C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD\DATA\Spectral\GKD_02\Muscimol';
 thisFile = 'toneNumber5_2000Hz';
 if ~exist('lfpDat')
     anes = load([thisFold thisFile]);
