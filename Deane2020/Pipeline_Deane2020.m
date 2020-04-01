@@ -1,5 +1,7 @@
 %% PIPELINE DEANE 2020 \m/(>.<)\m/
 
+% By: Katrina Deane; katrina.deane@lin-magdeburg.de
+
 % This code is intended only for use with the data specifically for
 % Deane et al. 2020 (Anesthetized, Awake10dB, and Muscimol).
 % Any other data run through here will require manual edits and seperate scripts.
@@ -111,8 +113,13 @@ BrownScyth(homedir)
 
 %% Spectral Analysis
 
+% Scripts will be made available and added to this pipeline to do the following:
 % generate scalograms.mat
 % generate single trial scalograms (STscalograms_*.mat)
+
+% for now, Data is online and can be loaded into the appropriate folders 
+% to continue running the following steps. If there is an issue, 
+% please feel free to contact me. 
 
  %% Run Permutation Magnitude
 rel2BFin = [0 -2];
