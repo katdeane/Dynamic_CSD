@@ -3,16 +3,16 @@ function Dynamic_CSD_Inf_single(homedir)
 
 %   This script takes input from the groups and raw folders. It calculates 
 %   and stores CSD information in Data struct which is
-%   saved in the DATA folder. 
+%   saved in the DATA folder.
 % 
 %   6a and 6b and Inf are detected here and there is single trial data
 %   IMPORTANT: DO NOT change sink list here. If you need another set of
-%   sinks then create a SEPARATE and UNIQUELY NAMED script. 
+%   sinks then create a SEPARATE and UNIQUELY NAMED script.
 %   Note: Currently the graphs being generated are limited to select sinks
 %   although all sinks are being stored in the data structure
 % 
 %   CHANGE if needed: add your working directory to the try/catch; change
-%   condition to run 
+%   condition to run
 
 %% standard operations
 warning('OFF');

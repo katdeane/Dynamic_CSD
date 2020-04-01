@@ -20,6 +20,8 @@ std_detect = 1.1;
 std_lev = 1.5;
 pre_std_lev = .8;
 
+% Order = {'VbE','IVE','VIaE','VIbE','VaE','I_IIE',...
+%     'VbL','IVL','VIaL','VIbL','VaL','I_IIL','all_chan'};
 Order = {'VbE','IVE','VIaE','VIbE','VaE','I_IIE','InfE',...
     'VbL','IVL','VIaL','VIbL','VaL','I_IIL','InfL','all_chan'};
 PAMP = struct;
@@ -155,7 +157,7 @@ for i1 = 1:length(AvgCSD) %length of stimuli
             peakamp = NaN; peaklat = NaN; sinkrms = NaN; sinkint = NaN;
         else
             sinkint = nanmean(nanCSD(:,Sink_time(1):Sink_time(2)));
-            sinkrms = rms(nanCSD(:,Sink_time(1):Sink_time(2)));
+            sinkrms = rms(nanCSD(:,Sink_time(1):Sink_time(2)),'omitnan');
             peakamp = nanmax(nanCSD(:,Sink_time(1):Sink_time(2)));
             peaklat = (find(nanCSD(:,Sink_time(1):Sink_time(2)) == nanmax(nanCSD(:,Sink_time(1):Sink_time(2)))))+Sink_time(1);
         end
