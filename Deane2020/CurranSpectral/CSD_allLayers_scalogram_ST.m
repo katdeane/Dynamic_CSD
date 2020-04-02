@@ -1,4 +1,8 @@
-
+function CSD_allLayers_scalogram_ST(homedir)
+% Input:    Dynamic_CSD\DATA -> *DATA.mat; manually called
+% Output:   Runs CWT analysis using the Wavelet toolbox. figures of
+%           animal-wise scalograms -> Dynamic_CSD\figs\Spectral_AngPlot
+%           and table 'STscalograms_*.mat' with data -> Dynamic_CSD\DATA\Spectral
 %% standard operations
 warning('OFF');
 dbstop if error
@@ -24,7 +28,7 @@ params.frequencyLimits = [5 params.sampleRate/2]; % Hz
 params.voicesPerOctave = 8;
 params.timeBandWidth = 54;
 
-layers   = {'I_IIE','IVE','VaE','VbE','VIaE','VIbE'};
+layers   = {'I_IIE','IVE','VbE','VIaE'};
 rel2BF   = [0 -2];
 savelist = {'STscalograms_IIBF','STscalograms_IIoffBF','STscalograms_IVBF',...
     'STscalograms_IVoffBF','STscalograms_VbBF','STscalograms_VboffBF',...

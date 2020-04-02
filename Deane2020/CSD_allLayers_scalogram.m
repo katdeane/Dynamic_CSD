@@ -32,12 +32,13 @@ params.frequencyLimits = [5 params.sampleRate/2]; % Hz
 params.voicesPerOctave = 8;
 params.timeBandWidth = 54;
 params.layers = {'I_IIE','IVE','VaE','VbE','VIaE','VIbE'};
+params.rel2BFlist = [0 -2];
 
 %% CWT analysis
 
-[awake] = runCwtCsd('Awake10dB',params,homedir);
-[anest] = runCwtCsd('AnesthetizedPre',params,homedir);
-[musc]  = runCwtCsd('Muscimol',params,homedir);
+[awake] = runCwtCsd('Awake10dB',params,homedir,'average');
+[anest] = runCwtCsd('AnesthetizedPre',params,homedir,'average');
+[musc]  = runCwtCsd('Muscimol',params,homedir,'average');
 
 %% Reorganize data into Gramm-compatible structure
 

@@ -1,4 +1,4 @@
-function PermutationTest_PhaseCoh(inputmat,inputname)
+function PermutationTest_PhaseCoh(inputmat,inputname,homedir)
 
 % Input:    Layer to analyze, (possible input: relative to BF)
 %           Needs scalogramsfull.mat from Andrew Curran's wavelet analysis
