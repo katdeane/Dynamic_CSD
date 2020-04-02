@@ -20,9 +20,9 @@ params.frequencyLimits = [5 params.sampleRate/2]; % Hz
 params.voicesPerOctave = 8;
 params.timeBandWidth = 54;
 % where do I find the group input scripts:
-params.groupFold = 'C:\Users\kedea\Documents\Dynamic_CSD_Analysis\groups\';
+params.groupFold = 'C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD\groups';
 % where do I find the split up CSD data files
-params.datFold = 'C:\Users\kedea\Documents\Dynamic_CSD_Analysis\AndrewSpectralData\Data\';
+params.datFold = 'C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD\DATA\Spectral';
 params.doFig = false;
 
 % Change these for specific runs

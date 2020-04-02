@@ -1,4 +1,4 @@
-function PermutationTestScalogram(layer,rel2BFin)
+function PermutationTestScalogram(layer,rel2BFin,homedir)
 % Input:    Layer to analyze, (possible input: relative to BF)
 %           Needs scalogramsfull.mat from Andrew Curran's wavelet analysis
 % Output:   Figures for means and observed difference of awake/ketamine

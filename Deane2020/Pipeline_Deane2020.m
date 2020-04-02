@@ -113,9 +113,11 @@ BrownScyth(homedir)
 
 %% Spectral Analysis
 
-% Scripts will be made available and added to this pipeline to do the following:
-% generate scalograms.mat
-% generate single trial scalograms (STscalograms_*.mat)
+% Input:    Dynamic_CSD\DATA -> *DATA.mat; manually called
+% Output:   Runs CWT analysis using the Wavelet toolbox. figures of
+%           animal-wise scalograms -> Dynamic_CSD\figs\Spectral_MagPlots
+%           and table 'scalograms.mat' with all data -> Dynamic_CSD\DATA\Spectral
+CSD_allLayers_scalogram(homedir)
 
 % for now, Data is online and can be loaded into the appropriate folders 
 % to continue running the following steps. If there is an issue, 
@@ -133,7 +135,7 @@ for rel2BF = 1:length(rel2BFin)
     %           comparison; figures for observed t values, clusters, ttest line
     %           output; boxplot and significance of permutation test ->
     %           Dynamic_CSD\figs\Spectral_MagPerm and
-    %           Dynamic_CSD\Output\Spectral\MagPerm
+    %           Dynamic_CSD\DATA\Spectral\MagPerm
     PermutationTestScalogram(layerin{layer},rel2BFin(rel2BF),homedir)
         
 
