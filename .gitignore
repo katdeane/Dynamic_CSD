@@ -16,6 +16,7 @@ Deane2020/CurranSpectral/Pictures/
 % Pipelines for specific projects
 Pipeline_KatPhD.m
 Pipeline_KatMasterThesis.m
+Pipeline_Deane2020.m
 Pipline_RunScalos.m
 
 % extra

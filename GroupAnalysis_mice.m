@@ -1,3 +1,4 @@
+function GroupAnalysis_mice(homedir)
 %Input:     D:\MyCode\Dynamic_CSD_Analysis\DATA -> *DATA.mat; (bin,mirror)
 %Output:    Figures of groups in "Group..." folder 
 %           .mat files in DATA/output folder
@@ -19,20 +20,25 @@
 %               responses normalized to the first detected sink of the
 %               pre-CL
 
+%% standard operations
 warning('OFF');
 dbstop if error
-nThresh = 0.25; % i.e. at least 25 out of 100 animals contribute data point to calculate
 
-% Change to add your working directory 
-try cd('D:\MyCode\Dynamic_CSD_Analysis');
-catch
-    cd('D:\Dynamic_CSD_Analysis');
+% Change directory to your working folder
+if ~exist('homedir','var')
+    if exist('D:\MyCode\Dynamic_CSD','dir') == 7
+        cd('D:\MyCode\Dynamic_CSD');
+    elseif exist('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD','dir') == 7
+        cd('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD')
+    end
+    
+    homedir = pwd;
+    addpath(genpath(homedir));
 end
-home = pwd; %pwd: print working directory, gives full current directory title of "home"
-addpath(genpath(home)); %adds all subdirectories of 'home' to path for access
+cd(homedir);
 
 cd DATA
-
+nThresh = 0.25; 
 input = dir('*.mat');
 entries = length(input);
 
@@ -75,7 +81,7 @@ for iG = 1:length(Groups)
     end
     
     % get list of conditions for this group
-    cd(home); cd groups
+    cd(homedir); cd groups
     run([Groups{iG} '.m'])
     clear channels animals Layer
     conditions = fieldnames(Cond);
@@ -88,7 +94,7 @@ for iG = 1:length(Groups)
     
     for iGsub = 1:length(Anlist)
         
-        cd(home); cd DATA
+        cd(homedir); cd DATA
         load (Anlist{iGsub})
         CurAn = (Anlist{iGsub}(1:5));
         
@@ -292,7 +298,7 @@ for iG = 1:length(Groups)
     
     %% Some Plots
     
-    cd(home);cd figs
+    cd(homedir);cd figs
     mkdir(['Group_' (Groups{iG})]); cd(['Group_' (Groups{iG})])
     bfposticks = {'-7' '-6' '-5' '-4' '-3' '-2' '-1' 'BF' '+1' '+2' '+3' '+4' '+5' '+6'};
     take_tono = {'Pre_4','preAMtono_4','preCLtono_4','CLtono_1','AMtono_1'};
@@ -339,6 +345,7 @@ for iG = 1:length(Groups)
     
     % Click boxplots
     take_click = {'preCL_1','CL_1','CL_2','CL_3','CL_4'}; %pre = before laser
+    parastr = { 'SinkRMS','SinkPeakAmp'};
     for istim = 1:length(clfrqz)
         for ipar = 1:length(parastr)
             % 1 fig per frequency; rows are layer, columns are conditions
@@ -382,7 +389,7 @@ for iG = 1:length(Groups)
     
     % Normalized Click boxplots
     take_click = {'preCL_1','CL_1','CL_2','CL_3','CL_4'}; %pre = before laser
-    parastr = { 'SinkRMS','SinkPeakAmp'};
+    
     for istim = 1:length(clfrqz)
         for ipar = 1:length(parastr)
             % 1 fig per frequency; rows are layer, columns are conditions
@@ -426,11 +433,11 @@ for iG = 1:length(Groups)
     
     %% Save it!
     close all
-    cd(home); cd DATA; cd Output;
+    cd(homedir); cd DATA; cd Output;
     save([(Groups{iG}) '_Tuning_Avg'],'Tuning');
     save([(Groups{iG}) '_ClickSinks'],'Clicks','ClickNorm')
     save([(Groups{iG}) '_AMSinks'],'AMs','AMNorm')
-    cd(home);
+    cd(homedir);
     
 end % group
 

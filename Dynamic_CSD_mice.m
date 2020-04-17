@@ -21,16 +21,14 @@ dbstop if error
 if ~exist('homedir','var')
     if exist('D:\MyCode\Dynamic_CSD','dir') == 7
         cd('D:\MyCode\Dynamic_CSD');
-    elseif exist('D:\Dynamic_CSD_Analysis','dir') == 7
-        cd('D:\Dynamic_CSD_Analysis');
-    elseif exist('C:\Users\kedea\Documents\Dynamic_CSD_Analysis','dir') == 7
-        cd('C:\Users\kedea\Documents\Dynamic_CSD_Analysis')
+    elseif exist('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD','dir') == 7
+        cd('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD')
     end
     
     homedir = pwd;
     addpath(genpath(homedir));
 end
-cd (homedir),cd groups;
+cd(homedir),cd groups;
 
 %% Load in
 input = dir('*.m');
@@ -73,16 +71,12 @@ for i1 = 1:entries
                     disp(['Analyzing animal: ' name '_' measurement])
                     clear SWEEP
                     try
-                        load ([name '_' measurement]);clear avgFP;
+                        load([name '_' measurement]);clear avgFP;
                     catch
                         fprintf('the name or measurement does not exist/n')
                     end
                     
                     cd (homedir),cd groups;
-                    try load([name '_Baseline']); %this Baseline is determined by gen_threshold.m from multiple recordings of one animal
-                    catch
-                        Baseline = []; %if a baseline wasn't taken, create an empty variable
-                    end
                     
                     % all of the above is to indicate which animal and
                     % condition is being analyzed
@@ -118,7 +112,7 @@ for i1 = 1:entries
                     
                     %Generate Sink Boxes
                     [DUR,ONSET,OFFSET,RMS,SINGLE_RMS,PAMP,SINGLE_PAMP,PLAT,SINGLE_PLAT] =...
-                        sink_dura_mice(L,AvgCSD,SingleTrialCSD,BL,Baseline);
+                        sink_dura_mice(L,AvgCSD,SingleTrialCSD,BL);
                     
                     toc
                                                          
@@ -257,7 +251,7 @@ for i1 = 1:entries
                     Data(CondIDX).SinkRMS       = RMS;
                     Data(CondIDX).SingleSinkRMS = SINGLE_RMS;
                     Data(CondIDX).LFP           = AvgFP;
-%                     Data(CondIDX).Sgltrl_CSD    = SingleTrialCSD;
+                    Data(CondIDX).SglTrl_CSD    = SingleTrialCSD;
                     Data(CondIDX).CSD           = AvgCSD;
                     Data(CondIDX).LayerRelRes   = AvgLayerRelRes;
                     Data(CondIDX).SingleRecCSD  = SingleRec_preAVREC;
