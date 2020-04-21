@@ -1,4 +1,4 @@
-function Dynamic_CSD_mice(homedir)
+function Dynamic_CSD_Crypt(homedir)
 %% Dynamic CSD for sinks I_II through VI; incl. single
 
 %   This script takes input from the groups and raw folders. It calculates 
