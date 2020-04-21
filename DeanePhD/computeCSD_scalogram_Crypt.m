@@ -1,4 +1,4 @@
-function computeCSD_scalogram_mice(homedir)
+function computeCSD_scalogram_Crypt(homedir)
 
 % Input:    Dynamic_CSD\DATA -> *DATA.mat; manually called through function
 % Output:   Runs CWT analysis using the Wavelet toolbox. tables 'WT_AM.mat' 
@@ -35,13 +35,13 @@ params.rel2BFlist = [0 -2];
 
 %% CWT analysis
 tic
-[KIC_Tune,KIC_CL,KIC_AM] = runCwtCsd_mice('KIC',params,homedir);
+[KIC_Tune,KIC_CL,KIC_AM] = runCwtCsd_Crypt('KIC',params,homedir);
 toc
 tic
-[KIT_Tune,KIT_CL,KIT_AM] = runCwtCsd_mice('KIT',params,homedir);
+[KIT_Tune,KIT_CL,KIT_AM] = runCwtCsd_Crypt('KIT',params,homedir);
 toc
 tic
-[KIV_Tune,KIV_CL,KIV_AM] = runCwtCsd_mice('KIV',params,homedir);
+[KIV_Tune,KIV_CL,KIV_AM] = runCwtCsd_Crypt('KIV',params,homedir);
 toc
 %% Reorganize data into Gramm-compatible structure
 
