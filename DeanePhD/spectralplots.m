@@ -56,9 +56,9 @@ for iGro = 1:length(Group)
             % loop through measurement type
             
             h = figure('units','normalized','outerposition',[0 0 1 1]); 
-%             title(['Spectral Power of group ' Group{iGro} ' layer ' ...
-%                 Layer{iLay} ' for click freq ' num2str(Stim(iSti))])
             hold on
+            hAx=gobjects(length(Meas),1); 
+            ylm = nan(length(Meas),2);
             
             for iMea = 1:length(Meas)
                 
@@ -68,7 +68,7 @@ for iGro = 1:length(Group)
                     WT_CL.stimulus == Stim(iSti) & ...
                     startsWith(WT_CL.layer,Layer{iLay}),:);
                 
-                subplot(floor(length(Meas)/2),ceil(length(Meas)/2),iMea)
+                hAx(iMea) = subplot(floor(length(Meas)/2),ceil(length(Meas)/2),iMea);
                 holdPower = nan(size(curWT,1),length(curWT.scalogram{1,1}));
                 for iOsc = 1:length(osciRows)
                     for iSca = 1:size(curWT,1)
@@ -101,8 +101,12 @@ for iGro = 1:length(Group)
                 
                 legend(osciName)
                 title(Meas{iMea})
+                ylm(iMea,:) = hAx(iMea).YLim;
                 
             end %measurement
+            
+            ylim(hAx,[min(ylm(:,1)) max(ylm(:,2))]);
+            
             h_title = ['Spectral Power of group ' Group{iGro} ' layer ' ...
                 Layer{iLay} ' for click freq ' num2str(Stim(iSti))];
             sgtitle(h_title)
@@ -117,9 +121,9 @@ end %groups
 
 %% plots with power; groups in one window
 
-osciName  = {'Low beta' 'High beta' ...
+osciName  = {'Theta' 'Alpha' 'Low beta' 'High beta' ...
     'Low gamma' 'High gamma'};
-osciRows  = {beta_low beta_high gamma_low gamma_high};
+osciRows  = {theta alpha beta_low beta_high gamma_low gamma_high};
 osciColor = {[0.007, 0.196, 0.949],[0.949, 0.196, 0.007],[0.058, 0.788, 0.031]};
 
 for iOsc = 1:length(osciRows)
@@ -130,6 +134,8 @@ for iOsc = 1:length(osciRows)
             
             h = figure('units','normalized','outerposition',[0 0 1 1]); 
             hold on
+            hAx=gobjects(length(Meas),1); 
+            ylm = nan(length(Meas),2);
             
             % loop through measurement type
             for iMea = 1:length(Meas)
@@ -139,7 +145,7 @@ for iOsc = 1:length(osciRows)
                     WT_CL.stimulus == Stim(iSti) & ...
                     startsWith(WT_CL.layer,Layer{iLay}),:);
                 
-                subplot(floor(length(Meas)/2),ceil(length(Meas)/2),iMea)
+                hAx(iMea) = subplot(floor(length(Meas)/2),ceil(length(Meas)/2),iMea);
                 % loop through groups to make curves
                 for iGro = 1:length(Group)
                     
@@ -177,8 +183,12 @@ for iOsc = 1:length(osciRows)
                 
                 legend(Group)
                 title(Meas{iMea})
+                ylm(iMea,:) = hAx(iMea).YLim;
                 
             end %measurement
+            
+            ylim(hAx,[min(ylm(:,1)) max(ylm(:,2))]);
+            
             h_title = [osciName{iOsc} ' power of groups for layer ' ...
                 Layer{iLay} ' click freq ' num2str(Stim(iSti))];
             sgtitle(h_title)
