@@ -35,13 +35,13 @@ params.rel2BFlist = [0 -2];
 
 %% CWT analysis
 tic
-[KIC_Tune,KIC_CL,KIC_AM] = runCwtCsd_Crypt('KIC',params,homedir);
+[KIC_Tune,KIC_CL,KIC_AM,KIC_SP] = runCwtCsd_Crypt('KIC',params,homedir);
 toc
 tic
-[KIT_Tune,KIT_CL,KIT_AM] = runCwtCsd_Crypt('KIT',params,homedir);
+[KIT_Tune,KIT_CL,KIT_AM,KIT_SP] = runCwtCsd_Crypt('KIT',params,homedir);
 toc
 tic
-[KIV_Tune,KIV_CL,KIV_AM] = runCwtCsd_Crypt('KIV',params,homedir);
+[KIV_Tune,KIV_CL,KIV_AM,KIV_SP] = runCwtCsd_Crypt('KIV',params,homedir);
 toc
 %% Reorganize data into Gramm-compatible structure
 
@@ -51,7 +51,9 @@ cd(homedir); cd DATA; mkdir('Spectral'); cd('Spectral');
 WT_Tuning = [struct2table(KIC_Tune); struct2table(KIT_Tune); struct2table(KIV_Tune)];
 WT_CL = [struct2table(KIC_CL); struct2table(KIT_CL); struct2table(KIV_CL)];
 WT_AM = [struct2table(KIC_AM); struct2table(KIT_AM); struct2table(KIV_AM)];
+WT_SP = [struct2table(KIC_SP); struct2table(KIT_SP); struct2table(KIV_SP)];
 
 save('WT_Tuning.mat','WT_Tuning')
 save('WT_CL.mat','WT_CL')
 save('WT_AM.mat','WT_AM')
+save('WT_SP.mat','WT_SP')
