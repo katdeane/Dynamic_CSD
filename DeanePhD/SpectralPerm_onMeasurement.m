@@ -1,10 +1,13 @@
 function SpectralPerm_onMeasurement(layer,homedir,type)
 
-% Input:    Layer to analyze, (possible input: relative to BF)
-%           Needs scalogramsfull.mat from Andrew Curran's wavelet analysis
-% Output:   Figures for means and observed difference of awake/ketamine
-%           comparison; figures for observed t values, clusters, ttest line
-%           output; boxplot and significance of permutation test -> Pictures folder
+% Input:    Layer to analyze, home directory, type of stimuli (CL or AM).
+%           Loads wavelet transform (WT) mat file from Data/Spectral 
+% Output:   Figures for means and observed difference of groups KIT vs KIC,
+%           KIT vs KIV, and KIC vs KIV comparison and figures for observed t 
+%           values, and clusters in figs/['Crypt_MagPerm_' type]; boxplot 
+%           and significance of permutation test in figs/['Crypt_MagPerm_' type]
+
+% note:     Permutation done between groups on each measurement type
 
 %% standard operations
 

@@ -1,10 +1,14 @@
 function SpectralPerm_aroundLaser(layer,homedir,type)
 
-% Input:    Layer to analyze, (possible input: 2,5,10,20,40)
-%           Needs WT_CL.mat or WT_AM.mat from /Data/Spectral
-% Output:   Figures for means and observed difference of group
-%           comparison; figures for observed t values, clusters
-%           output; boxplot and significance of permutation test -> Pictures folder
+% Input:    Layer to analyze, home directory, type of stimuli (CL or AM).
+%           Loads wavelet transform (WT) mat file from Data/Spectral 
+% Output:   Figures for means and observed difference of measurements pre vs post 1,
+%           pre vs post 2, pre vs post 3, and pre vs post 4 comparison and 
+%           figures for observed t values, and clusters in figs/['Crypt_MagPerm_' type]; 
+%           boxplot and significance of permutation test in figs/['Crypt_MagPerm_' type]
+
+% note:     Permutation done within group on each measurement after laser
+%           to the measurement before the laser
 
 %% standard operations
 
