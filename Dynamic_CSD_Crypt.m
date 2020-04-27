@@ -50,12 +50,12 @@ for i1 = 1:entries
     cd (homedir); cd figs;
     mkdir(['Single_Spike_' input(i1).name(1:end-2)]);
     
-    Indexer = imakeIndexer(Condition,animals,Cond);
+    Indexer = imakeIndexer(Condition,animals,Cond); %#ok<*USENS>
     %%
     
     for iA = 1:length(animals)
         cd (homedir); cd raw;
-        name = animals{iA};
+        name = animals{iA}; %#ok<*IDISVAR>
         
         for iC = 1:length(Condition)
             for i4 = 1:length(Cond.(Condition{iC}){iA})
@@ -71,7 +71,7 @@ for i1 = 1:entries
                     disp(['Analyzing animal: ' name '_' measurement])
                     clear SWEEP
                     try
-                        load([name '_' measurement]);clear avgFP;
+                        load([name '_' measurement]);clear avgFP; %#ok<LOAD>
                     catch
                         fprintf('the name or measurement does not exist/n')
                     end
@@ -84,7 +84,6 @@ for i1 = 1:entries
                     BL = Header.t_pre*P.Fs_AD(1); %BL-baseline %t_pre is the time before the tone %Fs_AD - Sampling frequency of channels (they are all the same so we use first value)
                     tone = Header.t_sig(1)*P.Fs_AD(1); %t_sig is duration of stimulus * sampling rate = 200
                     frqz = Header.stimlist(:,1); %stimlist contains tone frequencies in all rows (:), first column (:,1)
-                    Fs = P.Fs_AD(1); %sampling rate
                     % frqz(find(frqz == inf))=[]; % takes click out of analysis
                     % frqz(find(frqz == 0))=[]; % takes pause out of analysis
                     
@@ -112,7 +111,7 @@ for i1 = 1:entries
                     
                     %Generate Sink Boxes
                     [DUR,ONSET,OFFSET,RMS,SINGLE_RMS,PAMP,SINGLE_PAMP,PLAT,SINGLE_PLAT] =...
-                        sink_dura_mice(L,AvgCSD,SingleTrialCSD,BL);
+                        sink_dura_Crypt(L,AvgCSD,SingleTrialCSD,BL);
                     
                     toc
                                                          

@@ -1,9 +1,10 @@
-clear
+function spectralplots(homedir,type)
 
-% work in progress;
 % Input:        WT_CL.mat generated through computeCSD_scalogram_mice.m
 % Output:       Plots showing power the oscillatory frequencies sorted by
 %               group and then by osci freq -> figs/Group_Spectral_Plots
+
+%% standard operations
 
 warning('OFF');
 dbstop if error
@@ -19,33 +20,45 @@ if ~exist('homedir','var')
     homedir = pwd;
     addpath(genpath(homedir));
 end
+if ~exist('type','var')
+    type = 'CL'; % run the click measurements
+end
 
-cd(homedir)
-
-disp('loading mat file WT_CL')
+disp(['loading mat file WT of ' type])
 tic
-load('WT_CL.mat','WT_CL')
+if contains(type,'CL')
+    load('WT_CL.mat','WT_CL')
+    WT = WT_CL;
+    clear WT_CL
+elseif contains(type,'AM')
+    load('WT_AM.mat','WT_AM')
+    WT = WT_AM;
+    clear WT_AM
+else
+    error('Input "type" needs to be either "CL" or "AM" for clicks or amplitude modulations respectively')
+end
 toc
 
-% frequencies can be found in wtTable.freq{1} to clarify the following
+% frequencies can be found in WT_CL.freq{1} to clarify the following
 % rows choices; actual intended rows commented
-theta = (49:54);        %(4:7);
-alpha = (44:48);        %(8:12);
-beta_low = (39:43);     %(13:18);
-beta_high = (34:38);    %(19:30);
-gamma_low = (26:33);    %(31:60);
-gamma_high = (19:25);   %(61:100);
+theta       = (49:54);   %(4:7);
+alpha       = (44:48);   %(8:12);
+beta_low    = (39:43);   %(13:18);
+beta_high   = (34:38);   %(19:30);
+gamma_low   = (26:33);   %(31:60);
+gamma_high  = (19:25);   %(61:100);
 
 osciName  = {'theta (4:7)' 'alpha (8:12)' 'low beta (13:18)' ...
     'high beta (19:30)' 'low gamma (31:60)' 'high gamma (61:100)'};
 osciRows  = {theta alpha beta_low beta_high gamma_low gamma_high};
-osciColor = {[0.007, 0.196, 1],[0.854, 0.039, 1],[1, 0.196, 0.007],[1, 0.819, 0.039],[0.058, 0.788, 0.031],[0.039, 0.968, 1]};
-Meas  = unique(WT_CL.measurement,'stable');
-Stim  = unique(WT_CL.stimulus,'stable');
-Layer = unique(WT_CL.layer,'stable');
-Group = unique(WT_CL.group,'stable');
+osciColor = {[0.007, 0.196, 1],[0.854, 0.039, 1],[1, 0.196, 0.007],...
+    [1, 0.819, 0.039],[0.058, 0.788, 0.031],[0.039, 0.968, 1]};
+Meas    = unique(WT.measurement,'stable'); Meas = Meas(1:5);
+Stim    = unique(WT.stimulus,'stable');
+Layer   = unique(WT.layer,'stable');
+Group   = unique(WT.group,'stable');
 
-cd(homedir); cd figs; mkdir Group_Spectral_Plots; cd Group_Spectral_Plots;
+cd(homedir); cd figs; mkdir(['Group_Spectral_Plots_' type]); cd(['Group_Spectral_Plots_' type]);
 
 %% plots with power; oscillatory bands in one window
 for iGro = 1:length(Group)
@@ -63,28 +76,23 @@ for iGro = 1:length(Group)
             for iMea = 1:length(Meas)
                 
                 %pull out which group, layer, stim, and measurement
-                curWT = WT_CL(startsWith(WT_CL.group,Group{iGro}) & ...
-                    startsWith(WT_CL.measurement,Meas{iMea}) & ...
-                    WT_CL.stimulus == Stim(iSti) & ...
-                    startsWith(WT_CL.layer,Layer{iLay}),:);
+                curWT = WT(startsWith(WT.group,Group{iGro}) & ...
+                    startsWith(WT.measurement,Meas{iMea}) & ...
+                    WT.stimulus == Stim(iSti) & ...
+                    startsWith(WT.layer,Layer{iLay}) &...
+                    endsWith(WT.layer,Layer{iLay}),:);
                 
-                hAx(iMea) = subplot(floor(length(Meas)/2),ceil(length(Meas)/2),iMea);
+                hAx(iMea) = subplot(2,ceil(length(Meas)/2),iMea);
                 holdPower = nan(size(curWT,1),length(curWT.scalogram{1,1}));
                 for iOsc = 1:length(osciRows)
-                    for iSca = 1:size(curWT,1)
+                    for iWT = 1:size(curWT,1)
                     % loop through oscillation frequencies
-                    curOsci = curWT.scalogram{iSca,1}(osciRows{iOsc},:);
+                    curOsci = curWT.scalogram{iWT,1}(osciRows{iOsc},:);
                     % get power
                     curOsci = abs(curOsci).^2;
                     mean_power = mean(curOsci);
                     
-                    holdPower(iSca,:) = mean_power;
-                    
-                    % possible points to pull out:
-                    % should take the peak after stim selection (consec
-                    % peak function may work here)
-                    % peak_power = max(max(curOsci));
-                    % [row,peaklat] = find(curOsci == peak_power);
+                    holdPower(iWT,:) = mean_power;
                     
                     end %which scalogram
                     
@@ -107,7 +115,7 @@ for iGro = 1:length(Group)
             
             ylim(hAx,[min(ylm(:,1)) max(ylm(:,2))]);
             
-            h_title = ['Spectral Power of group ' Group{iGro} ' layer ' ...
+            h_title = ['Spectral Power of group ' type ' ' Group{iGro} ' layer ' ...
                 Layer{iLay} ' for click freq ' num2str(Stim(iSti))];
             sgtitle(h_title)
             saveas(h,h_title)
@@ -141,9 +149,10 @@ for iOsc = 1:length(osciRows)
             for iMea = 1:length(Meas)
                 
                 %pull out which layer, stim, and measurement
-                curWT = WT_CL(startsWith(WT_CL.measurement,Meas{iMea}) & ...
-                    WT_CL.stimulus == Stim(iSti) & ...
-                    startsWith(WT_CL.layer,Layer{iLay}),:);
+                curWT = WT(startsWith(WT.measurement,Meas{iMea}) & ...
+                    WT.stimulus == Stim(iSti) & ...
+                    startsWith(WT.layer,Layer{iLay}) &...
+                    endsWith(WT.layer,Layer{iLay}),:);
                 
                 hAx(iMea) = subplot(floor(length(Meas)/2),ceil(length(Meas)/2),iMea);
                 % loop through groups to make curves
@@ -153,20 +162,14 @@ for iOsc = 1:length(osciRows)
                     groupWT = curWT(startsWith(curWT.group,Group{iGro}),:);
                     holdPower = nan(size(groupWT,1),length(groupWT.scalogram{1,1}));
                     
-                    for iSca = 1:size(groupWT,1)
+                    for iWT = 1:size(groupWT,1)
                         
-                        curOsci = groupWT.scalogram{iSca,1}(osciRows{iOsc},:);
+                        curOsci = groupWT.scalogram{iWT,1}(osciRows{iOsc},:);
                         % get power
                         curOsci = abs(curOsci).^2;
                         mean_power = mean(curOsci);
                         
-                        holdPower(iSca,:) = mean_power;
-                        
-                        % possible points to pull out:
-                        % should take the peak after stim selection (consec
-                        % peak function may work here)
-                        % peak_power = max(max(curOsci));
-                        % [row,peaklat] = find(curOsci == peak_power);
+                        holdPower(iWT,:) = mean_power;
                         
                     end %which scalogram
                     
@@ -189,7 +192,7 @@ for iOsc = 1:length(osciRows)
             
             ylim(hAx,[min(ylm(:,1)) max(ylm(:,2))]);
             
-            h_title = [osciName{iOsc} ' power of groups for layer ' ...
+            h_title = [osciName{iOsc} ' power of groups ' type ' for layer ' ...
                 Layer{iLay} ' click freq ' num2str(Stim(iSti))];
             sgtitle(h_title)
             saveas(h,h_title)
@@ -199,18 +202,3 @@ for iOsc = 1:length(osciRows)
         end %stimulus
     end %layer
 end %groups
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-

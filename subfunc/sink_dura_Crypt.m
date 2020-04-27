@@ -1,5 +1,5 @@
 function [DUR,ONSET,OFFSET,RMS,SINGLE_RMS,PAMP,SINGLE_SinkPeak,PLAT,SINGLE_PeakLat] = ...
-    sink_dura_mice(Layer,AvgCSD,SingleTrialCSD,BL)
+    sink_dura_Crypt(Layer,AvgCSD,SingleTrialCSD,BL)
 %This function produces the duration of sinks within pre-specified
 %layers.
 

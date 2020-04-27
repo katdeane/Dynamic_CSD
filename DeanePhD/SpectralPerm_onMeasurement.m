@@ -1,4 +1,4 @@
-function SpectralPerm_onMeasurement(layer,homedir)
+function SpectralPerm_onMeasurement(layer,homedir,type)
 
 % Input:    Layer to analyze, (possible input: relative to BF)
 %           Needs scalogramsfull.mat from Andrew Curran's wavelet analysis
@@ -25,13 +25,16 @@ end
 if ~exist('layer','var')
     layer = 'IV'; % run the granular layer if not specified
 end
+if ~exist('type','var')
+    type = 'CL'; % run the click measurements
+end
 
 cd (homedir),cd DATA;
 
 nperms = 1000;
 pthresh = nperms*(0.05); %if bonferroni wanted, *(0.05/7)
 
-% frequencies can be found in wtTable.freq{1} to clarify the following
+% frequencies can be found in WT_CL.freq{1} to clarify the following
 % rows choices; actual intended rows commented
 theta = (49:54);        %(4:7);
 alpha = (44:48);        %(8:12);
@@ -42,35 +45,43 @@ gamma_high = (19:25);   %(61:100);
 
 osciName    = {'theta' 'alpha' 'beta_low' 'beta_high' 'gamma_low' 'gamma_high'};
 osciRows    = {theta alpha beta_low beta_high gamma_low gamma_high};
-measurement = {'preCL_1','CL_1','CL_2','CL_3','CL_4'};
 stimfreq    = [2,5,10,20,40];
 
 %% Load in and seperate Data
-load('WT_CL.mat', 'WT_CL')
+disp(['loading mat file WT of ' type])
+tic
+if contains(type,'CL')
+    measurement = {'preCL_1','CL_1','CL_2','CL_3','CL_4'};
+    load('WT_CL.mat', 'WT_CL')
+    WT = WT_CL(startsWith(WT_CL.layer,layer) & endsWith(WT_CL.layer,layer),:);
+    clear WT_CL
+elseif contains(type,'AM')
+    measurement = {'preAM_1','AM_1','AM_2','AM_3','AM_4'};
+    load('WT_AM.mat','WT_AM')
+    WT = WT_AM(startsWith(WT_AM.layer,layer) & endsWith(WT_AM.layer,layer),:);
+    clear WT_AM
+else
+     error('Input "type" needs to be either "CL" or "AM" for clicks or amplitude modulations respectively')
+end
+toc
 
 % varNames = unique(wtTable.layer);
 params.startTime = -0.2; % seconds
 params.limit = 1300;
 
-% check if layer or full mat needed
-if ~strcmp(layer, 'ALL')
-    %Pull out layer
-    WT_CL = WT_CL(startsWith(WT_CL.layer,layer) & endsWith(WT_CL.layer,layer),:);
-end
-
 for iMea = 1:length(measurement)
     for iStim = 1:length(stimfreq)
         %Pull out conditions and limit them to 1300ms
-        KIC = table2cell(WT_CL(contains(WT_CL.group,'KIC') & ...
-            WT_CL.stimulus==stimfreq(iStim) & startsWith(WT_CL.measurement,measurement{iMea}),1));
+        KIC = table2cell(WT(contains(WT.group,'KIC') & ...
+            WT.stimulus==stimfreq(iStim) & startsWith(WT.measurement,measurement{iMea}),1));
         KIC =  cellfun(@(x) x(:,1:params.limit),KIC,'UniformOutput',false);
         
-        KIT = table2cell(WT_CL(contains(WT_CL.group,'KIT') & ...
-            WT_CL.stimulus==stimfreq(iStim) & startsWith(WT_CL.measurement,measurement{iMea}),1));
+        KIT = table2cell(WT(contains(WT.group,'KIT') & ...
+            WT.stimulus==stimfreq(iStim) & startsWith(WT.measurement,measurement{iMea}),1));
         KIT =  cellfun(@(x) x(:,1:params.limit),KIT,'UniformOutput',false);
         
-        KIV = table2cell(WT_CL(contains(WT_CL.group,'KIV') & ...
-            WT_CL.stimulus==stimfreq(iStim) & startsWith(WT_CL.measurement,measurement{iMea}),1));
+        KIV = table2cell(WT(contains(WT.group,'KIV') & ...
+            WT.stimulus==stimfreq(iStim) & startsWith(WT.measurement,measurement{iMea}),1));
         KIV =  cellfun(@(x) x(:,1:params.limit),KIV,'UniformOutput',false);
         
         %Stack the individual animals' data (animal#x54x600)
@@ -93,16 +104,10 @@ for iMea = 1:length(measurement)
         end
         KIV2 = abs(KIV2);
         
-        if ~strcmp(layer, 'ALL')
-            grpsizeC = length(KIC);
-            grpsizeT = length(KIT);
-            grpsizeV = length(KIV);
-        else
-            keyboard; % need to verify if this step is necessary/correct
-            grpsizeC = length(KIC)/7;
-            grpsizeT = length(KIT)/7;
-            grpsizeV = length(KIV)/7;
-        end
+        grpsizeC = length(KIC);
+        grpsizeT = length(KIT);
+        grpsizeV = length(KIV);
+
         
         %% Degrees of Freedom and t Threshold
         
@@ -204,9 +209,9 @@ for iMea = 1:length(measurement)
             end
         end
         
-        cd(homedir); cd figs; mkdir('Crypt_MagPerm'); cd('Crypt_MagPerm');
+        cd(homedir); cd figs; mkdir(['Crypt_MagPerm_' type]); cd(['Crypt_MagPerm_' type]);
         %% dif figs
-        [X,Y]=meshgrid(WT_CL.freq{1}(19:54),params.startTime*1000:(params.limit-201));
+        [X,Y]=meshgrid(WT.freq{1}(19:54),params.startTime*1000:(params.limit-201));
         figure('Name','Observed Spectral Power and Differences',...
             'units','normalized','outerposition',[0 0 1 1]);
         % observed values
@@ -220,7 +225,7 @@ for iMea = 1:length(measurement)
         surf(Y,X,squeeze(obsC_mean3(:,19:54,:))','EdgeColor','None'); view(2);
         set(gca,'YScale','log'); title('KIC')
         yticks([0 10 20 30 40 50 60 80 100])
-        clim = [clim; get(gca,'clim')];
+        clim = [clim; get(gca,'clim')]; %#ok<*AGROW>
         
         kivFig = subplot(233);
         surf(Y,X,squeeze(obsV_mean3(:,19:54,:))','EdgeColor','None'); view(2);
@@ -261,13 +266,13 @@ for iMea = 1:length(measurement)
         set(h, 'PaperType', 'A4');
         set(h, 'PaperOrientation', 'landscape');
         set(h, 'PaperUnits', 'centimeters');
-        savefig(['Observed Spectral Power of ' layer ' clickfrq ' num2str(stimfreq(iStim)) ' ' measurement{iMea}])
-        saveas(gcf, ['Observed Spectral Power of ' layer ' clickfrq ' num2str(stimfreq(iStim)) ' ' measurement{iMea} '.png'])
+        savefig(['Observed Spectral Power of ' type ' ' layer ' clickfrq ' num2str(stimfreq(iStim)) ' ' measurement{iMea}])
+        saveas(gcf, ['Observed Spectral Power of ' type ' ' layer ' clickfrq ' num2str(stimfreq(iStim)) ' ' measurement{iMea} '.png'])
         close(h)
         
         %% t fig
-        [X,Y]=meshgrid(WT_CL.freq{1}(19:54),params.startTime*1000:(params.limit-201));
-        tValues = figure('Name','Observed t Values BF', ...
+        [X,Y]=meshgrid(WT.freq{1}(19:54),params.startTime*1000:(params.limit-201));
+        figure('Name','Observed t Values BF', ...
             'units','normalized','outerposition',[0 0 1 1]);
         colormap('winter')
         
@@ -312,8 +317,8 @@ for iMea = 1:length(measurement)
         set(h, 'PaperType', 'A4');
         set(h, 'PaperOrientation', 'landscape');
         set(h, 'PaperUnits', 'centimeters');
-        savefig(['Observed t and p ' layer ' ' num2str(stimfreq(iStim)) ' ' measurement{iMea} ])
-        saveas(gcf, ['Observed t and p ' layer ' ' num2str(stimfreq(iStim)) ' ' measurement{iMea} '.png'])
+        savefig(['Observed t and p ' type ' ' layer ' ' num2str(stimfreq(iStim)) ' ' measurement{iMea} ])
+        saveas(gcf, ['Observed t and p ' type ' ' layer ' ' num2str(stimfreq(iStim)) ' ' measurement{iMea} '.png'])
         close(h)
         
         %% Permutation Step 3 - do the permute
@@ -412,7 +417,7 @@ for iMea = 1:length(measurement)
             end
         end
         
-        cd(homedir); cd DATA; cd Spectral; mkdir('Crypt_MagPerm'); cd('Crypt_MagPerm');
+        cd(homedir); cd DATA; cd Spectral; mkdir(['Crypt_MagPerm_' type]); cd(['Crypt_MagPerm_' type]);
         %% Check Significance of full clustermass
         
         % In how many instances is the clustermass of the permutation MORE than
@@ -424,7 +429,7 @@ for iMea = 1:length(measurement)
         sig_mass_TvC(sig_mass_TvC <= pthresh) = true; %if it's not more than 50, it's siginificant for that frequency
         sig_mass_TvC(sig_mass_TvC > pthresh) = false;
         
-        figure('Name',['Observed cluster vs Permutation ' layer ' clickfreq ' num2str(stimfreq(iStim)) ' ' measurement{iMea}]);
+        figure('Name',['Observed cluster vs Permutation ' type ' ' layer ' clickfreq ' num2str(stimfreq(iStim)) ' ' measurement{iMea}]);
         subplot(131)
         boxplot(mass_clustermass_TvC); hold on;
         title('TvC')
@@ -476,16 +481,16 @@ for iMea = 1:length(measurement)
         set(h, 'PaperType', 'A4');
         set(h, 'PaperOrientation', 'landscape');
         set(h, 'PaperUnits', 'centimeters');
-        savefig(['Perm Full ' layer ' clickfreq ' num2str(stimfreq(iStim)) ' ' measurement{iMea}])
-        saveas(gcf, ['Perm Full ' layer ' clickfreq ' num2str(stimfreq(iStim)) ' ' measurement{iMea} '.png'])
+        savefig(['Perm Full ' type ' ' layer ' clickfreq ' num2str(stimfreq(iStim)) ' ' measurement{iMea}])
+        saveas(gcf, ['Perm Full ' type ' ' layer ' clickfreq ' num2str(stimfreq(iStim)) ' ' measurement{iMea} '.png'])
         close(h)
-        save(['Perm Full ' layer ' clickfreq ' num2str(stimfreq(iStim)) ' ' measurement{iMea} '.mat'],...
+        save(['Perm Full ' type ' ' layer ' clickfreq ' num2str(stimfreq(iStim)) ' ' measurement{iMea} '.mat'],...
             'pVal_TvC','permMean_TvC','permSTD_TvC','pVal_TvV','permMean_TvV',...
             'permSTD_TvV','pVal_CvV','permMean_CvV','permSTD_CvV')
         
         %% Check Significance of layers' clustermass
         
-        figure('Name',['Obs vs Perm ' layer ' clickfreq ' num2str(stimfreq(iStim)) ' ' ...
+        figure('Name',['Obs vs Perm ' type ' ' layer ' clickfreq ' num2str(stimfreq(iStim)) ' ' ...
             measurement{iMea} ' ocsillations'],'units','normalized','outerposition',[0 0 1 1])
         pVal_TvC = struct; permMean_TvC = struct; permSTD_TvC = struct;
         pVal_TvV = struct; permMean_TvV = struct; permSTD_TvV = struct;
@@ -554,10 +559,10 @@ for iMea = 1:length(measurement)
         set(h, 'PaperType', 'A4');
         set(h, 'PaperOrientation', 'landscape');
         set(h, 'PaperUnits', 'centimeters');
-        savefig(['Perm Osci ' layer ' ' osciName{iOsc} ' ' num2str(stimfreq(iStim)) ' ' measurement{iMea}])
-        saveas(gcf, ['Perm Osci ' layer ' ' osciName{iOsc} ' ' num2str(stimfreq(iStim)) ' ' measurement{iMea} '.png'])
+        savefig(['Perm Osci ' type ' ' layer ' ' osciName{iOsc} ' ' num2str(stimfreq(iStim)) ' ' measurement{iMea}])
+        saveas(gcf, ['Perm Osci ' type ' ' layer ' ' osciName{iOsc} ' ' num2str(stimfreq(iStim)) ' ' measurement{iMea} '.png'])
         close(h)
-        save(['Perm Osci ' layer ' clickfreq ' num2str(stimfreq(iStim)) ' ' measurement{iMea} '.mat'],...
+        save(['Perm Osci ' type ' ' layer ' clickfreq ' num2str(stimfreq(iStim)) ' ' measurement{iMea} '.mat'],...
             'pVal_TvC','permMean_TvC','permSTD_TvC','pVal_TvV','permMean_TvV',...
             'permSTD_TvV','pVal_CvV','permMean_CvV','permSTD_CvV')
     end
