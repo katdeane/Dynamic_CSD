@@ -312,8 +312,10 @@ for iGro = 1:length(group)
         set(h, 'PaperType', 'A4');
         set(h, 'PaperOrientation', 'landscape');
         set(h, 'PaperUnits', 'centimeters');
-        savefig(['aroundLaser Spectral Power of ' type ' ' layer ' ' num2str(stimfreq(iStim)) ' ' group{iGro}])
-        saveas(gcf, ['aroundLaser Spectral Power of ' type ' ' layer ' ' num2str(stimfreq(iStim)) ' ' group{iGro} '.png'])
+        h_title = ['aroundLaser Spectral Power of ' type ' ' layer ' ' num2str(stimfreq(iStim)) ' ' group{iGro}];
+        sgtitle(h_title)
+        savefig(h_title)
+        saveas(gcf, [h_title '.png'])
         close(h)
         
         %% t fig
@@ -384,8 +386,10 @@ for iGro = 1:length(group)
         set(h, 'PaperType', 'A4');
         set(h, 'PaperOrientation', 'landscape');
         set(h, 'PaperUnits', 'centimeters');
-        savefig(['aroundLaser Observed t and p ' type ' ' layer ' ' num2str(stimfreq(iStim)) ' ' group{iGro} ])
-        saveas(gcf, ['aroundLaser Observed t and p ' type ' ' layer ' ' num2str(stimfreq(iStim)) ' ' group{iGro} '.png'])
+        h_title = ['aroundLaser Observed t and p ' type ' ' layer ' ' num2str(stimfreq(iStim)) ' ' group{iGro} ];
+        sgtitle(h_title)
+        savefig(h_title)
+        saveas(gcf, [h_title '.png'])
         close(h)
         
 
@@ -560,10 +564,12 @@ for iGro = 1:length(group)
         set(h, 'PaperType', 'A4');
         set(h, 'PaperOrientation', 'landscape');
         set(h, 'PaperUnits', 'centimeters');
-        savefig(['aroundLaser Perm Full ' type ' ' layer ' ' num2str(stimfreq(iStim)) ' ' group{iGro}])
-        saveas(gcf, ['aroundLaser Perm Full ' type ' ' layer ' ' num2str(stimfreq(iStim)) ' ' group{iGro} '.png'])
+        h_title = ['aroundLaser Perm Full ' type ' ' layer ' ' num2str(stimfreq(iStim)) ' ' group{iGro}];
+        sgtitle(h_title)
+        savefig(h_title)
+        saveas(gcf, [h_title '.png'])
         close(h)
-        save(['aroundLaser Perm Full ' type ' ' layer ' clickfreq ' num2str(stimfreq(iStim)) ' ' group{iGro} '.mat'],...
+        save([h_title '.mat'],...
             'pVal_v1','permMean_v1','permSTD_v1','pVal_v2','permMean_v2','permSTD_v2',...
             'pVal_v3','permMean_v3','permSTD_v3','pVal_v4','permMean_v4','permSTD_v4')
         
@@ -653,10 +659,12 @@ for iGro = 1:length(group)
         set(h, 'PaperType', 'A4');
         set(h, 'PaperOrientation', 'landscape');
         set(h, 'PaperUnits', 'centimeters');
-        savefig(['aroundLaser Perm Osci ' type ' ' layer ' ' osciName{iOsc} ' ' num2str(stimfreq(iStim)) ' ' group{iGro}])
-        saveas(gcf, ['aroundLaser Perm Osci ' type ' ' layer ' ' osciName{iOsc} ' ' num2str(stimfreq(iStim)) ' ' group{iGro} '.png'])
+        h_title = ['aroundLaser Perm Osci ' type ' ' layer ' ' osciName{iOsc} ' ' num2str(stimfreq(iStim)) ' ' group{iGro}];
+        savefig(h_title)
+        sgtitle(h_title)
+        saveas(gcf, [h_title '.png'])
         close(h)
-        save(['aroundLaser Perm Osci ' type ' ' layer ' ' osciName{iOsc} ' ' num2str(stimfreq(iStim)) ' ' group{iGro} '.mat'],...
+        save([h_title '.mat'],...
             'pVal_v1','permMean_v1','permSTD_v1','pVal_v2','permMean_v2','permSTD_v2',...
             'pVal_v3','permMean_v3','permSTD_v3','pVal_v4','permMean_v4','permSTD_v4')
     end

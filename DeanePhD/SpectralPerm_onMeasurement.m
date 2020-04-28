@@ -269,8 +269,10 @@ for iMea = 1:length(measurement)
         set(h, 'PaperType', 'A4');
         set(h, 'PaperOrientation', 'landscape');
         set(h, 'PaperUnits', 'centimeters');
-        savefig(['Observed Spectral Power of ' type ' ' layer ' clickfrq ' num2str(stimfreq(iStim)) ' ' measurement{iMea}])
-        saveas(gcf, ['Observed Spectral Power of ' type ' ' layer ' clickfrq ' num2str(stimfreq(iStim)) ' ' measurement{iMea} '.png'])
+        h_title = ['Observed Spectral Power of ' type ' ' layer ' clickfrq ' num2str(stimfreq(iStim)) ' ' measurement{iMea}];
+        sgtitle(h_title)
+        savefig(h_title)
+        saveas(gcf, [h_title '.png'])
         close(h)
         
         %% t fig
@@ -320,8 +322,10 @@ for iMea = 1:length(measurement)
         set(h, 'PaperType', 'A4');
         set(h, 'PaperOrientation', 'landscape');
         set(h, 'PaperUnits', 'centimeters');
-        savefig(['Observed t and p ' type ' ' layer ' ' num2str(stimfreq(iStim)) ' ' measurement{iMea} ])
-        saveas(gcf, ['Observed t and p ' type ' ' layer ' ' num2str(stimfreq(iStim)) ' ' measurement{iMea} '.png'])
+        h_title = ['Observed t and p ' type ' ' layer ' ' num2str(stimfreq(iStim)) ' ' measurement{iMea} ];
+        sgtitle(h_title)
+        savefig(h_title)
+        saveas(gcf, [h_title '.png'])
         close(h)
         
         %% Permutation Step 3 - do the permute
@@ -484,10 +488,12 @@ for iMea = 1:length(measurement)
         set(h, 'PaperType', 'A4');
         set(h, 'PaperOrientation', 'landscape');
         set(h, 'PaperUnits', 'centimeters');
-        savefig(['Perm Full ' type ' ' layer ' clickfreq ' num2str(stimfreq(iStim)) ' ' measurement{iMea}])
-        saveas(gcf, ['Perm Full ' type ' ' layer ' clickfreq ' num2str(stimfreq(iStim)) ' ' measurement{iMea} '.png'])
+        h_title = ['Perm Full ' type ' ' layer ' clickfreq ' num2str(stimfreq(iStim)) ' ' measurement{iMea}];
+        sgtitle(h_title)
+        savefig(h_title)
+        saveas(gcf, [h_title '.png'])
         close(h)
-        save(['Perm Full ' type ' ' layer ' clickfreq ' num2str(stimfreq(iStim)) ' ' measurement{iMea} '.mat'],...
+        save([h_title '.mat'],...
             'pVal_TvC','permMean_TvC','permSTD_TvC','pVal_TvV','permMean_TvV',...
             'permSTD_TvV','pVal_CvV','permMean_CvV','permSTD_CvV')
         
@@ -562,10 +568,12 @@ for iMea = 1:length(measurement)
         set(h, 'PaperType', 'A4');
         set(h, 'PaperOrientation', 'landscape');
         set(h, 'PaperUnits', 'centimeters');
-        savefig(['Perm Osci ' type ' ' layer ' ' osciName{iOsc} ' ' num2str(stimfreq(iStim)) ' ' measurement{iMea}])
-        saveas(gcf, ['Perm Osci ' type ' ' layer ' ' osciName{iOsc} ' ' num2str(stimfreq(iStim)) ' ' measurement{iMea} '.png'])
+        h_title = ['Perm Osci ' type ' ' layer ' ' osciName{iOsc} ' ' num2str(stimfreq(iStim)) ' ' measurement{iMea}];
+        sgtitle(h_title)
+        savefig(h_title)
+        saveas(gcf, [h_title '.png'])
         close(h)
-        save(['Perm Osci ' type ' ' layer ' clickfreq ' num2str(stimfreq(iStim)) ' ' measurement{iMea} '.mat'],...
+        save([h_title '.mat'],...
             'pVal_TvC','permMean_TvC','permSTD_TvC','pVal_TvV','permMean_TvV',...
             'permSTD_TvV','pVal_CvV','permMean_CvV','permSTD_CvV')
     end
