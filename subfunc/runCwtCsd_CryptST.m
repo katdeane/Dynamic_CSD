@@ -1,10 +1,12 @@
-function [datTune,datCL,datAM,datSP] = runCwtCsd_Crypt(groupFile,params,homedir)
+function [datTune,datCL,datAM,datSP] = runCwtCsd_CryptST(groupFile,params,homedir)
 
 % Input:    group name to match *Data.mat in \Dynamic_CSD\DATA, parameters
 %           set for CWT analysis, home director
 % Output:   Runs CWT analysis using the Wavelet toolbox. figures of
 %           animal-wise scalograms -> Dynamic_CSD\figs\Spectral_MagPlots
 %           and group table output to be formatted to full scalograms.mat 
+
+% Note:     Output of single trials!
 
 cd(homedir);
 
@@ -99,43 +101,33 @@ for iAn = 1:length(animals)  %#ok<*USENS>
                     % Select only center 3 channels
                     curChan = curChan(theseChans >=-1 & theseChans <=1);
                     
-                    %average over trials
-                    meanLayCSD = mean(CSD(curChan,:,:),3);
-                    
-                    %average over channels
-                    ROI = mean(meanLayCSD,1);
-                    
-                    % Limit the cwt frequency limits
-                    params.frequencyLimits(1) = max(params.frequencyLimits(1),...
-                        cwtfreqbounds(numel(ROI),params.sampleRate,...
-                        'TimeBandWidth',params.timeBandWidth));
-                    
-                    % uncomment below for plot if desired
-%                     cd(homedir); cd figs; mkdir Spectral_MagPlot; cd Spectral_MagPlot;
-%                     % Get the cone of influence in a very round-about way....
-%                     tit = ([animals{iAn} '_' num2str(stimulus) 'fromBF_Layer_' ...
-%                         params.layers{iLay} '_' Data(iCond).Condition]);
-%                     cwtfig = figure('Name',tit); cwt(ROI,params.sampleRate, ...
-%                         'VoicesPerOctave',params.voicesPerOctave, ...
-%                         'TimeBandWidth',params.timeBandWidth, ...
-%                         'FrequencyLimits',params.frequencyLimits);
-%                     saveas(cwtfig,tit)
-%                     close all
-                    
-                    [WT,F] = cwt(ROI,params.sampleRate, ...
-                        'VoicesPerOctave',params.voicesPerOctave, ...
-                        'TimeBandWidth',params.timeBandWidth, ...
-                        'FrequencyLimits',params.frequencyLimits);
-                    datTune(tunecount).scalogram            = WT;
-                    datTune(tunecount).group                = groupFile;
-                    datTune(tunecount).animal               = animals{iAn};
-                    datTune(tunecount).layer                = params.layers{iLay};
-                    datTune(tunecount).stimulus             = stimulus;
-                    datTune(tunecount).freq                 = F;
-                    datTune(tunecount).measurement          = Data(iCond).Condition;
-                    
-                    tunecount = tunecount + 1;
-                    clear WT
+                    %repeat over trials
+                    for itrial = 1:size(CSD,3)
+                        meanLayCSD = mean(CSD(curChan,:,:),3);
+                        
+                        %average over channels
+                        ROI = mean(meanLayCSD,1);
+                        
+                        % Limit the cwt frequency limits
+                        params.frequencyLimits(1) = max(params.frequencyLimits(1),...
+                            cwtfreqbounds(numel(ROI),params.sampleRate,...
+                            'TimeBandWidth',params.timeBandWidth));
+                        
+                        [WT,F] = cwt(ROI,params.sampleRate, ...
+                            'VoicesPerOctave',params.voicesPerOctave, ...
+                            'TimeBandWidth',params.timeBandWidth, ...
+                            'FrequencyLimits',params.frequencyLimits);
+                        datTune(tunecount).scalogram            = WT;
+                        datTune(tunecount).group                = groupFile;
+                        datTune(tunecount).animal               = animals{iAn};
+                        datTune(tunecount).layer                = params.layers{iLay};
+                        datTune(tunecount).stimulus             = stimulus;
+                        datTune(tunecount).freq                 = F;
+                        datTune(tunecount).measurement          = Data(iCond).Condition;
+                        
+                        tunecount = tunecount + 1;
+                        clear WT
+                    end
                 end %layer
             end %stimuli
         elseif contains(Data(iCond).Condition,'CL_')
