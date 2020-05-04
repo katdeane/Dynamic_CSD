@@ -14,6 +14,8 @@ if ~exist('homedir','var')
         cd('D:\MyCode\Dynamic_CSD');
     elseif exist('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD','dir') == 7
         cd('C:\Users\kedea\Documents\Work Stuff\Dynamic_CSD')
+    elseif exist('C:\Users\kedea\OneDrive\Documents\Work Stuff\Dynamic_CSD','dir') == 7
+        cd('C:\Users\kedea\OneDrive\Documents\Work Stuff\Dynamic_CSD')
     end
     
     homedir = pwd;
@@ -33,27 +35,54 @@ params.timeBandWidth = 54;
 params.layers = {'I_II','IV','V','VI'};
 params.rel2BFlist = [0 -2];
 
-%% CWT analysis
+%% CWT analysis Average
+% tic
+% disp()
+% [KIC_Tune,KIC_CL,KIC_AM,KIC_SP] = runCwtCsd_CryptAV('KIC',params,homedir);
+% toc
+% tic
+% [KIT_Tune,KIT_CL,KIT_AM,KIT_SP] = runCwtCsd_CryptAV('KIT',params,homedir);
+% toc
+% tic
+% [KIV_Tune,KIV_CL,KIV_AM,KIV_SP] = runCwtCsd_CryptAV('KIV',params,homedir);
+% toc
+% % Reorganize data into Gramm-compatible structure
+% 
+% cd(homedir); cd DATA; mkdir('Spectral'); cd('Spectral');
+% 
+% organize 3 tables all with each group
+% WT_Tuning = [struct2table(KIC_Tune); struct2table(KIT_Tune); struct2table(KIV_Tune)];
+% WT_CL = [struct2table(KIC_CL); struct2table(KIT_CL); struct2table(KIV_CL)];
+% WT_AM = [struct2table(KIC_AM); struct2table(KIT_AM); struct2table(KIV_AM)];
+% WT_SP = [struct2table(KIC_SP); struct2table(KIT_SP); struct2table(KIV_SP)];
+% 
+% save('WT_Tuning.mat','WT_Tuning')
+% save('WT_CL.mat','WT_CL')
+% save('WT_AM.mat','WT_AM')
+% save('WT_SP.mat','WT_SP')
+% clear WT_Tuning WT_CL WT_AM WT_SP
+%% CWT analysis Single Trial
 tic
-[KIC_Tune,KIC_CL,KIC_AM,KIC_SP] = runCwtCsd_Crypt('KIC',params,homedir);
+[KIC_Tune,KIC_CL,KIC_AM,KIC_SP] = runCwtCsd_CryptST('KIC',params,homedir);
 toc
 tic
-[KIT_Tune,KIT_CL,KIT_AM,KIT_SP] = runCwtCsd_Crypt('KIT',params,homedir);
+[KIT_Tune,KIT_CL,KIT_AM,KIT_SP] = runCwtCsd_CryptST('KIT',params,homedir);
 toc
 tic
-[KIV_Tune,KIV_CL,KIV_AM,KIV_SP] = runCwtCsd_Crypt('KIV',params,homedir);
+[KIV_Tune,KIV_CL,KIV_AM,KIV_SP] = runCwtCsd_CryptST('KIV',params,homedir);
 toc
 %% Reorganize data into Gramm-compatible structure
 
 cd(homedir); cd DATA; mkdir('Spectral'); cd('Spectral');
 
 % organize 3 tables all with each group
-WT_Tuning = [struct2table(KIC_Tune); struct2table(KIT_Tune); struct2table(KIV_Tune)];
-WT_CL = [struct2table(KIC_CL); struct2table(KIT_CL); struct2table(KIV_CL)];
-WT_AM = [struct2table(KIC_AM); struct2table(KIT_AM); struct2table(KIV_AM)];
-WT_SP = [struct2table(KIC_SP); struct2table(KIT_SP); struct2table(KIV_SP)];
+WT_Tuning_st = [struct2table(KIC_Tune); struct2table(KIT_Tune); struct2table(KIV_Tune)];
+WT_CL_st = [struct2table(KIC_CL); struct2table(KIT_CL); struct2table(KIV_CL)];
+WT_AM_st = [struct2table(KIC_AM); struct2table(KIT_AM); struct2table(KIV_AM)];
+WT_SP_st = [struct2table(KIC_SP); struct2table(KIT_SP); struct2table(KIV_SP)];
 
-save('WT_Tuning.mat','WT_Tuning')
-save('WT_CL.mat','WT_CL')
-save('WT_AM.mat','WT_AM')
-save('WT_SP.mat','WT_SP')
+save('WT_Tuning.mat','WT_Tuning_st')
+save('WT_CL.mat','WT_CL_st')
+save('WT_AM.mat','WT_AM_st')
+save('WT_SP.mat','WT_SP_st')
+clear WT_Tuning_st WT_CL_st WT_AM_st WT_SP_st 
