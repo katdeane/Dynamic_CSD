@@ -17,8 +17,8 @@ dbstop if error
 if ~exist('homedir','var')
     if exist('D:\MyCode\Dynamic_CSD','dir') == 7
         cd('D:\MyCode\Dynamic_CSD');
-    elseif exist('D:\Dynamic_CSD_Analysis','dir') == 7
-        cd('D:\Dynamic_CSD_Analysis');
+    elseif exist('D:\Dynamic_CSD','dir') == 7
+        cd('D:\Dynamic_CSD');
     elseif exist('C:\Users\kedea\Documents\Dynamic_CSD_Analysis','dir') == 7
         cd('C:\Users\kedea\Documents\Dynamic_CSD_Analysis')
     end
@@ -253,5 +253,5 @@ end
 % save it out
 cd (homedir),cd figs;
 mkdir Group_Spikes; cd Group_Spikes;
-% save('SpikesAll','SpikesAll','PeakofPre');
+save('SpikesAll','SpikesAll','PeakofPre');
 save('Spont_SpikesAll','SP_SpikesAll','SP_PeakofPre');

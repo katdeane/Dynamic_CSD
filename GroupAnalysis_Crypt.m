@@ -1,4 +1,4 @@
-function GroupAnalysis_mice(homedir)
+function GroupAnalysis_Crypt(homedir)
 %Input:     D:\MyCode\Dynamic_CSD_Analysis\DATA -> *DATA.mat; (bin,mirror)
 %Output:    Figures of groups in "Group..." folder 
 %           .mat files in DATA/output folder

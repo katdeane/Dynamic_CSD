@@ -114,48 +114,48 @@ for i1 = 1:entries
                     
                     
                     %% Visualize Spikes 
-                    
-                    cd(homedir); cd figs;
-                    cd(['Single_Spike_' input(i1).name(1:end-2)]);
-                    
-                    % run through stimuli
-                    for iStim = 1:length(StimID)
-                        Stim_times = horzcat(SinglTimes{:,iStim});
-                        
-                        % run through layers
-                        for iLay = 1:length(layers)
-                            
-                            % condition to skip if the layer is empty
-                            if ~strcmp(layers{iLay},'All')
-                                if strcmp('[]',Layer.(layers{iLay}){1,iAn})
-                                    continue
-                                end
-                            end
-                            
-                            % function to concatonate spike data
-                            layer_spikes = StimLayerCat(Stim_times, Layer, ...
-                                layers{iLay}, iAn, length(chan_order));
-                            
-                            % function to display spike as psth
-                            ph = psth(layer_spikes, 5, Fs, 49, 1400);
-                            h = gcf;
-                            set(h,'Name',[name '_' measurement ': ' Condition{iCond} ...
-                                '_' num2str(iMeas) ' ' layers{iLay}])
-                            set(h, 'PaperType', 'A4');
-                            set(h, 'PaperOrientation', 'landscape');
-                            set(h, 'PaperUnits', 'centimeters');
-                            savefig(h,['Spike_PSTH ' name '_' measurement '_' ...
-                                Condition{iCond} '_' num2str(iMeas) ' ' ...
-                                StimLabel{iStim} ' ' layers{iLay}],'compact')
-                            saveas(h,['Spike_PSTH ' name '_' measurement '_' ...
-                                Condition{iCond} '_' num2str(iMeas) ' ' ...
-                                StimLabel{iStim} ' ' layers{iLay} '.pdf'])
-                            close (h)
-                        end
-                    end
+%                     
+%                     cd(homedir); cd figs;
+%                     cd(['Single_Spike_' input(i1).name(1:end-2)]);
+%                     
+%                     % run through stimuli
+%                     for iStim = 1:length(StimID)
+%                         Stim_times = horzcat(SinglTimes{:,iStim});
+%                         
+%                         % run through layers
+%                         for iLay = 1:length(layers)
+%                             
+%                             % condition to skip if the layer is empty
+%                             if ~strcmp(layers{iLay},'All')
+%                                 if strcmp('[]',Layer.(layers{iLay}){1,iAn})
+%                                     continue
+%                                 end
+%                             end
+%                             
+%                             % function to concatonate spike data
+%                             layer_spikes = StimLayerCat(Stim_times, Layer, ...
+%                                 layers{iLay}, iAn, length(chan_order));
+%                             
+%                             % function to display spike as psth
+%                             ph = psth(layer_spikes, 5, Fs, 49, 1400);
+%                             h = gcf;
+%                             set(h,'Name',[name '_' measurement ': ' Condition{iCond} ...
+%                                 '_' num2str(iMeas) ' ' layers{iLay}])
+%                             set(h, 'PaperType', 'A4');
+%                             set(h, 'PaperOrientation', 'landscape');
+%                             set(h, 'PaperUnits', 'centimeters');
+%                             savefig(h,['Spike_PSTH ' name '_' measurement '_' ...
+%                                 Condition{iCond} '_' num2str(iMeas) ' ' ...
+%                                 StimLabel{iStim} ' ' layers{iLay}],'compact')
+%                             saveas(h,['Spike_PSTH ' name '_' measurement '_' ...
+%                                 Condition{iCond} '_' num2str(iMeas) ' ' ...
+%                                 StimLabel{iStim} ' ' layers{iLay} '.pdf'])
+%                             close (h)
+%                         end
+%                     end
                     
                     %% save and quit
-                    Data(CondIDX).(name).measurement    =[name '_' measurement];
+                    Data(CondIDX).(name).measurement    = [name '_' measurement];
                     Data(CondIDX).(name).Condition      = [Condition{iCond} '_' num2str(iMeas)];
                     Data(CondIDX).(name).BL             = BL;
                     Data(CondIDX).(name).StimDur        = last_click;
