@@ -104,6 +104,22 @@ else
     else
         w=T2;
     end
+    
+    % Added to get effect size estimate with smaller n
+    mU=NP/2;
+    if B==0
+        sU=realsqrt(NP*N1/12);
+    else
+        sU=realsqrt((NP/(N^2-N))*((N^3-N-2*B)/12));
+    end
+    Z1=(abs(U1-mU)-0.5)/sU;
+    if nargout
+        STATS.mU=mU;
+        STATS.sU=sU;
+        STATS.Z=Z1;
+    end
+    % 
+    
     pdf=sum(nchoosek(A,k),2);
     P = [sum(pdf<=w) sum(pdf>=w)]./length(pdf);
     p = min(P);
