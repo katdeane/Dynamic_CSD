@@ -29,7 +29,6 @@ end
 cd(homedir)
 %% INIT PARAMETERS
 
-%close all
 params.sampleRate = 1000; % Hz
 params.startTime = -0.2; % seconds
 params.timeLimits = [-0.2 0.399]; % seconds
@@ -39,9 +38,11 @@ params.timeBandWidth = 54;
 params.layers = {'I_II','IV','V','VI'};
 params.rel2BFlist = [0 -2];
 
+cd(homedir); cd DATA; mkdir('Spectral'); cd('Spectral');
 %% CWT analysis Average
-% tic
+
 % disp('Running average WTs for KIC group')
+% tic
 % [KIC_Tune,KIC_CL,KIC_AM,KIC_SP] = runCwtCsd_CryptAV('KIC',params,homedir);
 % toc
 % disp('... for KIT group')
@@ -53,8 +54,6 @@ params.rel2BFlist = [0 -2];
 % [KIV_Tune,KIV_CL,KIV_AM,KIV_SP] = runCwtCsd_CryptAV('KIV',params,homedir);
 % toc
 % % Reorganize data into Gramm-compatible structure
-% 
-% cd(homedir); cd DATA; mkdir('Spectral'); cd('Spectral');
 % 
 % organize 3 tables all with each group
 % WT_Tuning = [struct2table(KIC_Tune); struct2table(KIT_Tune); struct2table(KIV_Tune)];
@@ -68,6 +67,7 @@ params.rel2BFlist = [0 -2];
 % save('WT_SP.mat','WT_SP')
 % clear WT_Tuning WT_CL WT_AM WT_SP KIC_Tune KIC_CL KIC_AM KIC_SP KIT_Tune ...
 %     KIT_CL KIT_AM KIT_SP KIV_Tune KIV_CL KIV_AM KIV_SP
+
 %% CWT analysis Single Trial
 
 % these need to be sorted by specific measurement and group because they are
@@ -75,9 +75,8 @@ params.rel2BFlist = [0 -2];
 % the two appropiate measurements/groups for comparison.
 
 group = {'KIC','KIT','KIV'};
-measurements = {'preCL_1','CL_1','CL_2','CL_3','CL_4'}; 
-% 'preAM_1','AM_1','AM_2','AM_3','AM_4'
-% 'spPre1_1','spPost1_1','spPre2_1','spPost2_1','spEnd_1'
+measurements = {'preCL_1','CL_1','CL_2','CL_3','CL_4','preAM_1','AM_1',...
+    'AM_2','AM_3','AM_4','spPre1_1','spPost1_1','spPre2_1','spPost2_1','spEnd_1'}; 
 % 'Pre_1','Pre_2','Pre_3','Pre_4'
 % 'preAMtono_1','preAMtono_2','preAMtono_3','preAMtono_4'
 % 'preCLtono_1','preCLtono_2','preCLtono_3','preCLtono_4'
@@ -94,8 +93,9 @@ for imeas = 1:length(measurements)
             measurements{imeas});        
         
         WT_st = struct2table(datOut);
-        save([group{iGro} '_STWT_' measurements{imeas} '.mat'],'WT_st')
+        save([group{iGro} '_' measurements{imeas} '.mat'],'WT_st')
         clear WT_st datOut
         toc
     end
 end
+
