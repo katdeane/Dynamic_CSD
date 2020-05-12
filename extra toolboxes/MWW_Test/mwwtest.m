@@ -55,17 +55,17 @@ function STATS=mwwtest(x1,x2)
 
 %Input Error handling
 p = inputParser;
-addRequired(p,'x1',@(x) validateattributes(x,{'numeric'},{'row','real','finite','nonnan','nonempty'}));
-addRequired(p,'x2',@(x) validateattributes(x,{'numeric'},{'row','real','finite','nonnan','nonempty'}));
+addRequired(p,'x1',@(x) validateattributes(x,{'numeric'},{'real','finite','nonnan','nonempty'}));
+addRequired(p,'x2',@(x) validateattributes(x,{'numeric'},{'real','finite','nonnan','nonempty'}));
 parse(p,x1,x2);
 
 %set the basic parameter
-n1=length(x1); n2=length(x2); NP=n1*n2; N=n1+n2; N1=N+1; k=min([n1 n2]);
+n1=min(size(x1)); n2=min(size(x2)); NP=n1*n2; N=n1+n2; N1=N+1; k=min([n1 n2]);
 
-[A,B]=tiedrank([x1(:); x2(:)]); %compute the ranks and the ties
-R1=A(1:n1); R2=A(n1+1:end); 
+[A,B]=tiedrank([x1; x2]); %compute the ranks and the ties
+R1=A(1:n1,:,:); R2=A(n1+1:end,:,:); 
 T1=sum(R1); T2=sum(R2);
-U1=NP+(n1*(n1+1))/2-T1; U2=NP-U1;
+U1=NP+(n1*(n1+1))./2-T1; U2=NP-U1;
 % disp('MANN-WHITNEY-WILCOXON TEST')
 % disp(' ')
 % disp(table([n1;T1;T1/n1;U1],[n2;T2;T2/n2;U2],...
@@ -73,11 +73,11 @@ U1=NP+(n1*(n1+1))/2-T1; U2=NP-U1;
 %     'RowNames',{'Numerosity' 'Sum_of_Rank_W' 'Mean_Rank' 'Test_variable_U'}))
 if nargout
     STATS.n=[n1 n2];
-    STATS.W=[T1 T2];
-    STATS.mr=[T1/n1 T2/n2];
-    STATS.U=[U1 U2];
+    STATS.W={T1 T2};
+    STATS.mr={T1./n1 T2./n2};
+    STATS.U={U1 U2};
 end    
-if round(exp(gammaln(N1)-gammaln(k+1)-gammaln(N1-k))) > 20000
+% if round(exp(gammaln(N1)-gammaln(k+1)-gammaln(N1-k))) > 20000
     mU=NP/2;
     if B==0
         sU=realsqrt(NP*N1/12);
@@ -90,44 +90,29 @@ if round(exp(gammaln(N1)-gammaln(k+1)-gammaln(N1-k))) > 20000
 %     disp(' ')
 %     disp(table(mU,sU,Z1,p,2*p,'VariableNames',{'Mean' 'SD' 'Z' 'p_value_one_tail' 'p_value_two_tails'}))
     if nargout
-        STATS.method='Normal approximation';
+        STATS.method = 'Normal approximation';
         STATS.mU=mU;
         STATS.sU=sU;
         STATS.Z=Z1;
-        STATS.p=[p 2*p];
+        STATS.p={p 2*p};
     end
-else
-%     disp('Sample size is small enough to use the exact Mann-Whitney-Wilcoxon distribution')
-%     disp(' ')
-    if n1<=n2
-        w=T1;
-    else
-        w=T2;
-    end
-    
-    % Added to get effect size estimate with smaller n
-    mU=NP/2;
-    if B==0
-        sU=realsqrt(NP*N1/12);
-    else
-        sU=realsqrt((NP/(N^2-N))*((N^3-N-2*B)/12));
-    end
-    Z1=(abs(U1-mU)-0.5)/sU;
-    if nargout
-        STATS.mU=mU;
-        STATS.sU=sU;
-        STATS.Z=Z1;
-    end
-    % 
-    
-    pdf=sum(nchoosek(A,k),2);
-    P = [sum(pdf<=w) sum(pdf>=w)]./length(pdf);
-    p = min(P);
-%     disp(table(w,p,2*p,'VariableNames',{'W' 'p_value_one_tail' 'p_value_two_tails'}))
-    if nargout
-        STATS.method='Exact distribution';
-        STATS.T=w;
-        STATS.p=[p 2*p];
-    end
-end
+% else
+% %     disp('Sample size is small enough to use the exact Mann-Whitney-Wilcoxon distribution')
+% %     disp(' ')
+%     if n1<=n2
+%         w=T1;
+%     else
+%         w=T2;
+%     end
+%     
+%     pdf=sum(nchoosek(A,k),2);
+%     P = [sum(pdf<=w) sum(pdf>=w)]./length(pdf);
+%     p = min(P);
+% %     disp(table(w,p,2*p,'VariableNames',{'W' 'p_value_one_tail' 'p_value_two_tails'}))
+%     if nargout
+%         STATS.method='Exact distribution';
+%         STATS.T=w;
+%         STATS.p=[p 2*p];
+%     end
+% end
 % disp(' ')
