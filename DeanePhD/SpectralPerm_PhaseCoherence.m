@@ -1,5 +1,6 @@
-function SpectralPerm_PhaseCoherence(homedir,Meas1,Meas2)
-
+% function SpectralPerm_PhaseCoherence(homedir,Meas1,Meas2)
+Meas1 = 'KIT_preCL_1.mat';
+Meas2 = 'KIC_preCL_1.mat';
 % Input:    home directory, 2 measurements to compare, between groups
 %           Needs scalogramsfull.mat from Andrew Curran's wavelet analysis
 % Output:   Figures for means and observed difference of awake/ketamine
@@ -74,7 +75,9 @@ for iLay = 1:length(layer)
                 grp1 = table2cell(M1Dat(contains(M1Dat.animal,fullgroup{iAn})...
                     & contains(M1Dat.layer,layer{iLay}) ...
                     & M1Dat.stimulus == stimfrq(iSti),1));
-                grp1 = cellfun(@(x) x(:,1:params.limit),grp1,'UniformOutput',false);
+                for igrp = 1:length(grp1)
+                    grp1{igrp} = grp1{igrp}(:,1:params.limit);
+                end
                 % set up output cells for transformed data
                 transGrp1 = cell(size(grp1));
                 
@@ -96,7 +99,9 @@ for iLay = 1:length(layer)
                 grp2 = table2cell(M2Dat(contains(M2Dat.animal,fullgroup{iAn})...
                     & contains(M2Dat.layer,layer{iLay}) ...
                     & M2Dat.stimulus == stimfrq(iSti),1));
-                grp2 =  cellfun(@(x) x(:,1:params.limit),grp2,'UniformOutput',false);
+                for igrp = 1:length(grp2)
+                    grp2{igrp} = grp2{igrp}(:,1:params.limit);
+                end
                 % set up output cells for transformed data
                 transGrp2 = cell(size(grp2));
                 
@@ -124,46 +129,28 @@ for iLay = 1:length(layer)
         
         %% Mann Whitney U Test (ranksum)
         
-        shifted1 = shiftdim(Grp1All,1);
-        shifted2 = shiftdim(Grp2All,1);
-        obs_Esize = zeros(size(grp1mean));
-        obs_Cmass = zeros(size(grp1mean));
-        
-        % this test works on vectors. so we're doing it pointwise. Awyis.
-        for row = 1:size(Grp1All,1)
-            for col = 1:size(Grp1All,2)
-                
-                % take out the point of interest
-                point1 = shifted1(col,:,row);
-                point1 = point1(~isnan(point1));
-                point2 = shifted2(col,:,row);
-                point2 = point2(~isnan(point2));
-                
-                % two-tailed test (stats.p(2)) like with the ttest2 used in mag plots, the
-                % samples are large enough to use method 'normal approximation'
-                stats = mwwtest(point1,point2);
-                if stats.p(2) <= 0.05
-                    sigtest = 1;
-                else
-                    sigtest = 0;
-                end
-                
-                % effect size of mwwtest is r = abs(z/sqrt(n1+n2)) / 0.1 is small, 0.3 is
-                % medium, 0.5 is large
-                Esize = abs(stats.Z/sqrt(grpsize1+grpsize2));
-                if Esize <= 0.1
-                    Esize = 1;
-                elseif Esize >= 0.5
-                    Esize = 3;
-                else
-                    Esize = 2;
-                end
-                
-                obs_Esize(row,col) = Esize;
-                obs_Cmass(row,col) = sigtest;
-                
-            end
+        % shift dimensions so that subject is first, then y and x axis
+        % remove nan rows (animal KIT04 doesn't have layer II)
+        shifted1 = shiftdim(Grp1All,2);
+        whereNan = find(isnan(shifted1(:,1,1)));
+        if ~isempty(whereNan)
+            shifted1 = vertcat(shifted1(1:whereNan-1,:,:),shifted1(whereNan+1:end,:,:));
         end
+        shifted2 = shiftdim(Grp2All,2);
+        whereNan = find(isnan(shifted2(:,1,1)));
+        if ~isempty(whereNan)
+            shifted2 = vertcat(shifted2(1:whereNan-1,:,:),shifted2(whereNan+1:end,:,:));
+        end
+        
+        stats = mwwtest(shifted1,shifted2);
+        obs_Cmass = squeeze(stats.p{2});
+        obs_Cmass(obs_Cmass <= 0.05) = true;
+        obs_Cmass(obs_Cmass ~= 1) = false;
+        
+        % effect size of mwwtest is r = abs(z/sqrt(n1+n2)) / 0.1 is small, 0.3 is
+        % medium, 0.5 is large
+        Z = squeeze(stats.Z);
+        obs_Esize = abs(Z./sqrt(grpsize1+grpsize2));
         
         % full matrix
         obs_clustermass = nansum(nansum(obs_Cmass));
@@ -273,7 +260,9 @@ for iLay = 1:length(layer)
                     perm1 = table2cell(FullDat(contains(FullDat.animal,fullgroup{order(iAn)})...
                         & contains(FullDat.layer,layer{iLay}) ...
                         & FullDat.stimulus == stimfrq(iSti),1));
-                    perm1 = cellfun(@(x) x(:,1:params.limit),perm1,'UniformOutput',false);
+                    for igrp = 1:length(perm1)
+                        perm1{igrp} = perm1{igrp}(:,1:params.limit);
+                    end
                     % set up output cells for transformed data
                     transPerm1 = cell(size(perm1));
                     
@@ -296,7 +285,9 @@ for iLay = 1:length(layer)
                     perm2 = table2cell(FullDat(contains(FullDat.animal,fullgroup{order(iAn)})...
                         & contains(FullDat.layer,layer{iLay}) ...
                         & FullDat.stimulus == stimfrq(iSti),1));
-                    perm2 = cellfun(@(x) x(:,1:params.limit),perm2,'UniformOutput',false);
+                    for igrp = 1:length(perm2)
+                        perm2{igrp} = perm2{igrp}(:,1:params.limit);
+                    end
                     % set up output cells for transformed data
                     transPerm2 = cell(size(perm2));
                     
@@ -319,30 +310,23 @@ for iLay = 1:length(layer)
             
             % Mann Whitney U Test (ranksum) %%
             
-            shifted1 = shiftdim(permbox1,1);
-            shifted2 = shiftdim(permbox2,1);
-            perm_Cmass = zeros(size(grp1mean));
-            
-            % pointwise
-            for row = 1:size(permbox1,1)
-                for col = 1:size(permbox1,2)
-                    
-                    % take out the point of interest
-                    point1 = shifted1(col,:,row);
-                    point2 = shifted2(col,:,row);
-                    point1 = point1(~isnan(point1));
-                    point2 = point2(~isnan(point2));
-                    
-                    % two-tailed test (stats.p(2))
-                    stats = mwwtest(point1,point2);
-                    if stats.p(2) <= 0.05
-                        sigtest = 1;
-                    else
-                        sigtest = NaN;
-                    end
-                    perm_Cmass(row,col) = sigtest;
-                end
+            % shift dimensions so that subject is first, then y and x axis
+            % remove nan rows (animal KIT04 doesn't have layer II)
+            shifted1 = shiftdim(permbox1,2);
+            whereNan = find(isnan(shifted1(:,1,1)));
+            if ~isempty(whereNan)
+                shifted1 = vertcat(shifted1(1:whereNan-1,:,:),shifted1(whereNan+1:end,:,:));
             end
+            shifted2 = shiftdim(permbox2,2);
+            whereNan = find(isnan(shifted2(:,1,1)));
+            if ~isempty(whereNan)
+                shifted2 = vertcat(shifted2(1:whereNan-1,:,:),shifted2(whereNan+1:end,:,:));
+            end
+            
+            stats = mwwtest(shifted1,shifted2);
+            perm_Cmass = squeeze(stats.p{2});
+            perm_Cmass(perm_Cmass <= 0.05) = true;
+            perm_Cmass(perm_Cmass ~= 1) = false;
             
             % check cluster mass for 300 ms from tone onset
             per_clustermass = nansum(nansum(perm_Cmass));
