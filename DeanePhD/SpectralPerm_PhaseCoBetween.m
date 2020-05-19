@@ -1,6 +1,5 @@
-% function SpectralPerm_PhaseCoherence(homedir,Meas1,Meas2)
-Meas1 = 'KIT_preCL_1.mat';
-Meas2 = 'KIC_preCL_1.mat';
+function SpectralPerm_PhaseCoBetween(homedir,Meas1,Meas2)
+
 % Input:    home directory, 2 measurements to compare, between groups
 %           Needs scalogramsfull.mat from Andrew Curran's wavelet analysis
 % Output:   Figures for means and observed difference of awake/ketamine
@@ -29,7 +28,7 @@ cd (homedir),cd DATA;
 nperms = 1000;
 pthresh = nperms*(0.05);
 
-% frequencies can be found in wtTable.freq{1} to clarify the following
+% frequencies can be found in oscifreq to clarify the following
 % rows choices; actual intended rows commented
 theta = (49:54);        %(4:7);
 alpha = (44:48);        %(8:12);
@@ -40,43 +39,49 @@ gamma_high = (19:25);   %(61:100);
 
 osciName = {'theta' 'alpha' 'beta_low' 'beta_high' 'gamma_low' 'gamma_high'};
 osciRows = {theta alpha beta_low beta_high gamma_low gamma_high};
-layer    = {'II','IV','V','VI'};
+layer    = {'I_II','IV','V','VI'};
 stimfrq  = [2,5,10,20,40];
 
 %% Load in the two groups for comparison
-disp(['Loading ' Meas1(1:end-4) ' and ' Meas2(1:end-4)]); 
-tic
-load(Meas1,'WT_st');
-M1Dat = WT_st; clear WT_st
-load(Meas2,'WT_st');
-M2Dat = WT_st; clear WT_st
-toc
-
-grp1Name  = unique(M1Dat.animal,'stable');
-grp2Name  = unique(M2Dat.animal,'stable');
-grpsize1  = length(grp1Name);
-grpsize2  = length(grp2Name);
-fullgroup = vertcat(grp1Name,grp2Name);
 
 params.startTime = -0.2; % seconds
-params.limit     = 1300;
-
-% Get phase coherence for groups
-Grp1All = nan(54,params.limit,grpsize1);
-Grp2All = nan(54,params.limit,grpsize2);
+timelimit     = 1300;
 
 for iLay = 1:length(layer)
     for iSti = 1:length(stimfrq)
+        % this needs to be loaded in and cut per loop because the parfor
+        % later requires a lot of memory
+        disp(['Loading ' Meas1(1:end-4) ' and ' Meas2(1:end-4) ' for ' ...
+            layer{iLay} ' ' num2str(stimfrq(iSti))]);
+        tic
+        load(Meas1,'WT_st');
+        FullDat = WT_st; clear WT_st
+        load(Meas2,'WT_st');
+        FullDat = [FullDat;WT_st]; clear WT_st %#ok<AGROW>
+        toc
+        
+        fullgroup  = unique(FullDat.animal,'stable');
+        oscifreq   = FullDat.freq{1,1};
+        grpsize1   = length(fullgroup(contains(fullgroup,Meas1(1:3))));
+        grpsize2   = length(fullgroup(contains(fullgroup,Meas2(1:3))));
+        
+        FullDat = table2cell(FullDat(startsWith(FullDat.layer,layer{iLay}) & ...
+            endsWith(FullDat.layer,layer{iLay}) ...
+            & FullDat.stimulus == stimfrq(iSti),1:2));
+        
+        % Get phase coherence for groups
+        Grp1All = nan(54,timelimit,grpsize1);
+        Grp2All = nan(54,timelimit,grpsize2);
+        
         % through each animal
         for iAn = 1: grpsize1 + grpsize2
             
             if iAn <= grpsize1
                 % pull out the data for this group and this animal
-                grp1 = table2cell(M1Dat(contains(M1Dat.animal,fullgroup{iAn})...
-                    & contains(M1Dat.layer,layer{iLay}) ...
-                    & M1Dat.stimulus == stimfrq(iSti),1));
+                boohold = (contains({FullDat{:,2}},fullgroup{iAn})); %#ok<*CCAT1>
+                grp1 = {FullDat{boohold,1}}';
                 for igrp = 1:length(grp1)
-                    grp1{igrp} = grp1{igrp}(:,1:params.limit);
+                    grp1{igrp} = grp1{igrp}(:,1:timelimit);
                 end
                 % set up output cells for transformed data
                 transGrp1 = cell(size(grp1));
@@ -96,11 +101,10 @@ for iLay = 1:length(layer)
                 Grp1All(:,:,iAn) = abs(mean(cat(3,transGrp1{:}),3));
                 
             else
-                grp2 = table2cell(M2Dat(contains(M2Dat.animal,fullgroup{iAn})...
-                    & contains(M2Dat.layer,layer{iLay}) ...
-                    & M2Dat.stimulus == stimfrq(iSti),1));
+                boohold = (contains({FullDat{:,2}},fullgroup{iAn})); %#ok<*CCAT1>
+                grp2 = {FullDat{boohold,1}}';
                 for igrp = 1:length(grp2)
-                    grp2{igrp} = grp2{igrp}(:,1:params.limit);
+                    grp2{igrp} = grp2{igrp}(:,1:timelimit);
                 end
                 % set up output cells for transformed data
                 transGrp2 = cell(size(grp2));
@@ -108,6 +112,7 @@ for iLay = 1:length(layer)
                 if isempty(grp2)
                     continue
                 end
+                
                 % take the phase z/abs(z) for each single trial
                 for iTrial = 1:length(grp2)
                     curTrial = grp2{iTrial};
@@ -119,6 +124,8 @@ for iLay = 1:length(layer)
                 
             end
         end
+        
+        clear grp1 grp2 transGrp1 transGrp2 curTrial
         
         % for the group:
         % take the mean across subjects
@@ -149,8 +156,7 @@ for iLay = 1:length(layer)
         
         % effect size of mwwtest is r = abs(z/sqrt(n1+n2)) / 0.1 is small, 0.3 is
         % medium, 0.5 is large
-        Z = squeeze(stats.Z);
-        obs_Esize = abs(Z./sqrt(grpsize1+grpsize2));
+        obs_Esize = abs((squeeze(stats.Z))./sqrt(grpsize1+grpsize2));
         
         % full matrix
         obs_clustermass = nansum(nansum(obs_Cmass));
@@ -167,12 +173,12 @@ for iLay = 1:length(layer)
             end
         end
         
-        
+        clear stats shifted1 shifted2 Grp1All Grp2All
         %% cluster fig
         %% Fig
-        cd(homedir); cd figs; mkdir('Spectral_PhCPerm'); cd('Spectral_PhCPerm');
+        cd(homedir); cd figs; mkdir('Crypt_PhCPerm'); cd('Crypt_PhCPerm');
         
-        [X,Y]=meshgrid(M1Dat.freq{1}(19:54),params.startTime*1000:(params.limit-201));
+        [X,Y]=meshgrid(oscifreq(19:54),params.startTime*1000:(timelimit-201));
         figure('Name',['Observed Phase Difference' Meas1(1:end-4)...
             ' vs ' Meas2(1:end-4)],'Position',[100 100 1065 700]);
         gr1Fig = subplot(231);
@@ -229,39 +235,42 @@ for iLay = 1:length(layer)
         saveas(h, [htitle '.png'])
         close(h)
 
-        
+        clear obs_Cmass obs_Esize diffmeans grp1mean grp2mean X Y ...
+            gr1Fig gr2Fig diffFig newC boohold
         %% Permutation Step 3 - do the permute
         
         % set up some containers
         mass_clustermass = NaN([1 nperms]);
-        disp('Permuting')
-        tic
-        perm_layer = struct;
-        for iOsc = 1:length(osciName)
-            perm_layer.(osciName{iOsc}) = NaN([1 nperms]);
-        end
         
+        Theta  = NaN([1 nperms]);
+        Alpha  = NaN([1 nperms]);
+        BetaL  = NaN([1 nperms]);
+        BetaH  = NaN([1 nperms]);
+        GammaL = NaN([1 nperms]);
+        GannaH = NaN([1 nperms]);
+        
+        disp('Permuting...')
+        tic
         % echo loop to find observed values
-        for iperm = 1:nperms
+        parfor iperm = 1:nperms
             
             % randomize the order of animal selection
             order = randperm(grpsize1+grpsize2);
-            FullDat = [M1Dat;M2Dat];
+            
             
             % Get phase coherence for groups
-            permbox1 = nan(54,params.limit,grpsize1);
-            permbox2 = nan(54,params.limit,grpsize2);
+            permbox1 = nan(54,1300,grpsize1);
+            permbox2 = nan(54,1300,grpsize2);
                         
             % through each animal
             for iAn = 1: grpsize1 + grpsize2
                 
                 if iAn <= grpsize1
                     % pull out the data for the random animal
-                    perm1 = table2cell(FullDat(contains(FullDat.animal,fullgroup{order(iAn)})...
-                        & contains(FullDat.layer,layer{iLay}) ...
-                        & FullDat.stimulus == stimfrq(iSti),1));
+                    boohold = (contains({FullDat{:,2}},fullgroup{order(iAn)})); %#ok<*CCAT1>
+                    perm1 = {FullDat{boohold,1}}';
                     for igrp = 1:length(perm1)
-                        perm1{igrp} = perm1{igrp}(:,1:params.limit);
+                        perm1{igrp} = perm1{igrp}(:,1:1300);
                     end
                     % set up output cells for transformed data
                     transPerm1 = cell(size(perm1));
@@ -282,11 +291,10 @@ for iLay = 1:length(layer)
                     permbox1(:,:,iAn) = curAn;
                     
                 else
-                    perm2 = table2cell(FullDat(contains(FullDat.animal,fullgroup{order(iAn)})...
-                        & contains(FullDat.layer,layer{iLay}) ...
-                        & FullDat.stimulus == stimfrq(iSti),1));
+                    boohold = (contains({FullDat{:,2}},fullgroup{order(iAn)})); %#ok<*CCAT1>
+                    perm2 = {FullDat{boohold,1}}';
                     for igrp = 1:length(perm2)
-                        perm2{igrp} = perm2{igrp}(:,1:params.limit);
+                        perm2{igrp} = perm2{igrp}(:,1:1300);
                     end
                     % set up output cells for transformed data
                     transPerm2 = cell(size(perm2));
@@ -334,19 +342,24 @@ for iLay = 1:length(layer)
             
             % for layer specific: %%%
             % % pull out clusters
-            
-            for iOsc = 1:length(osciName)
-                hold_permlayer = perm_Cmass(osciRows{iOsc},:);
-                
-                % % sum clusters (twice to get final value)
-                hold_permlayer = nansum(nansum(hold_permlayer));
-                perm_layer.(osciName{iOsc})(iperm) = hold_permlayer;
-            end
+            Theta(iperm)  = nansum(nansum(perm_Cmass(osciRows{1},:)));
+            Alpha(iperm)  = nansum(nansum(perm_Cmass(osciRows{2},:)));
+            BetaL(iperm)  = nansum(nansum(perm_Cmass(osciRows{3},:)));
+            BetaH(iperm)  = nansum(nansum(perm_Cmass(osciRows{4},:)));
+            GammaL(iperm) = nansum(nansum(perm_Cmass(osciRows{5},:)));
+            GammaH(iperm) = nansum(nansum(perm_Cmass(osciRows{6},:)));
             
         end
         toc
         
-        cd(homedir); cd DATA; cd Spectral; mkdir('Spectral_PhCPerm'); cd('Spectral_PhCPerm');
+        perm_layer.theta      = Theta;
+        perm_layer.alpha      = Alpha;
+        perm_layer.beta_low   = BetaL;
+        perm_layer.beta_high  = BetaH;
+        perm_layer.gamma_low  = GammaL;
+        perm_layer.gamma_high = GammaH;
+        
+        cd(homedir); cd DATA; cd Spectral; mkdir('Crypt_PhCPerm'); cd('Crypt_PhCPerm');
         %% Check Significance of full clustermass
         
         figure('Name',['Obs cluster vs Perm Phase Co of ' Meas1 ' vs ' ...
@@ -424,5 +437,7 @@ for iLay = 1:length(layer)
         save(['Permutation' Meas1(1:end-4) ' vs ' Meas2(1:end-4) ' ' ...
             layer{iLay} ' clickfreq ' num2str(stimfrq(iSti)) ' Oscillations.mat'],...
             'pVal','permMean','permSTD')
+        
+        clear FullDat
     end %stim frequency
 end %layer
