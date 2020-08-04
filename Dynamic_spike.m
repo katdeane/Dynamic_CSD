@@ -62,7 +62,8 @@ for i1 = 1:entries
                 % load in measurement
                 measurement = Cond.(Condition{iCond}){iAn}{iMeas};
                 if ~isempty(measurement)
-                    disp(['Analyzing animal: ' name '_' measurement])
+                    disp(['Spike; Analyzing animal: ' name '_' measurement])
+                    tic
                     try
                         load ([name '_' measurement]);
                     catch
@@ -165,6 +166,7 @@ for i1 = 1:entries
                     Data(CondIDX).(name).AvgSpikes      = AvgSpikes;
                     Data(CondIDX).(name).SumSpikes      = SumSpikes;
                     
+                    toc
                 end
             end
         end

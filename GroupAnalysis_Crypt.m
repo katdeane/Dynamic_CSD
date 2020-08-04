@@ -38,7 +38,6 @@ end
 cd(homedir);
 
 cd DATA
-nThresh = 0.25; 
 input = dir('*.mat');
 entries = length(input);
 
@@ -66,7 +65,8 @@ end
 %% Pulling and Sorting
 
 for iG = 1:length(Groups)
-    
+    disp(['for... ' Groups{iG}])
+    tic
     clear Tuning
     clear Clicks
     clear ClickNorm
@@ -438,6 +438,6 @@ for iG = 1:length(Groups)
     save([(Groups{iG}) '_ClickSinks'],'Clicks','ClickNorm')
     save([(Groups{iG}) '_AMSinks'],'AMs','AMNorm')
     cd(homedir);
-    
+    toc
 end % group
 

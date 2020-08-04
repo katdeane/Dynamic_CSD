@@ -39,8 +39,8 @@ gamma_high = (19:25);   %(61:100);
 
 osciName = {'theta' 'alpha' 'beta_low' 'beta_high' 'gamma_low' 'gamma_high'};
 osciRows = {theta alpha beta_low beta_high gamma_low gamma_high};
-layer    = {'I_II','IV','V','VI'};
-stimfrq  = [2,5,10,20,40];
+layer    = {'I_II','IV','V','VI'}; %'I_II','IV','V','VI'
+stimfrq  = [2,5,10,20,40]; %2,5,10,20,40
 
 %% Load in the two groups for comparison
 

@@ -48,7 +48,7 @@ for i_trial = 1:size(stim_list,2)
     SWEEP2(i_trial).CSD = x4;
     SWEEP2(i_trial).AvgRecCSD = x5.var4';
     SWEEP2(i_trial).RelResCSD = x5.var3';
-    SWEEP2(i_trial).AbsResCSD = x5.var1';% X5.var7 = layer specific RelRes
+    SWEEP2(i_trial).AbsResCSD = x5.var1'; % X5.var7 = layer specific RelRes
     SWEEP2(i_trial).LayerRelRes = x5.var6;% MB 27032018
     SWEEP2(i_trial).Layer_AVREC = x6;
     clear x1 x2 x3 x4 x5 x6 dummy_AD

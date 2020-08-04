@@ -40,10 +40,10 @@ for i1 = 1:entries
     run(input(i1).name);
     
     %% Choose Condition    
-%     Condition = {'condition'};
     Condition = {'Pre' 'preAM' 'preAMtono' 'preCL' 'preCLtono' 'spPre1' 'spPost1' ...
         'CL' 'CLtono' 'spPre2' 'spPost2' 'AM' 'AMtono' 'spEnd'}; 
-%     Condition = {'CL' 'CLtono'}; 
+%     Condition = {'Pre' 'preCL' 'preCLtono' 'CL' 'CLtono'}; 
+    disp(['Condition List: ' Condition{:} ' lol'])
     
     %% Condition and Indexer   
     Data = struct;
@@ -107,7 +107,7 @@ for i1 = 1:entries
                     L.IV = str2num(Layer.IV{iA}); 
                     L.V = str2num(Layer.V{iA}); 
                     L.VI = str2num(Layer.VI{iA}); 
-                    Layers = fieldnames(L);
+                    Layers = fieldnames(L); 
                     
                     %Generate Sink Boxes
                     [DUR,ONSET,OFFSET,RMS,SINGLE_RMS,PAMP,SINGLE_PAMP,PLAT,SINGLE_PLAT] =...
