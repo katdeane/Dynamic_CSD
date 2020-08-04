@@ -1,3 +1,6 @@
+This repo cloned and edited in https://github.com/CortXplorer/Dynamic_CSD 
+
+
 ## This repo contains Dynamic CSD Analysis for projects associated with Team CortXplorer at Leibniz Institute for Neurobiology
 
 ### For information on how to use these scripts, please contact me at katrina.deane@lin-magdeburg.de 
