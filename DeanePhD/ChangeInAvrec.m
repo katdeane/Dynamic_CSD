@@ -184,7 +184,8 @@ for i_In = 1:entries
     
     for iLay = 1:length(layers)
         
-        h = figure('Name',['Avrec_Spontaneous_' layers{iLay} '_' name],'Position',[-900 400 800 400]);
+        h = figure('Name',['Avrec_Spontaneous_' layers{iLay} '_' name],...
+            'Position',[100 100 800 400]);
         
         CondN = cell(1,size(Data,2));
         allmeas = [];
@@ -220,7 +221,7 @@ for i_In = 1:entries
             if ~isempty(allmeas) && length(allmeas)>length(avgchan)
                 diflength = length(allmeas) - length(avgchan);
                 if diflength > 100
-                    fprintf(['There is something wrong with the length on ' name])
+                    disp(['There is something wrong with the length on ' name])
                 end
                 endchunk = avgchan(end-diflength+1:end);
                 avgchan = horzcat(avgchan, endchunk);
