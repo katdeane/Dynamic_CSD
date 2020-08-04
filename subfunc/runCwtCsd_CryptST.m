@@ -52,7 +52,11 @@ for iAn = 1:length(animals)  %#ok<*USENS>
     load([animals{iAn} '_Data.mat'],'Data') %#ok<*IDISVAR>
     curData = Data((strcmp({Data.Condition},meas)));
     clear Data
-     
+    
+    if isempty(curData)
+        continue
+    end
+    
     % Tonotopy measurements
     if (contains(curData.Condition,'Pre_') ...
             || contains(curData.Condition,'tono')) ...
