@@ -1,13 +1,4 @@
-This repo cloned and edited in https://github.com/CortXplorer/Dynamic_CSD 
-
-
-## This repo contains Dynamic CSD Analysis for projects associated with Team CortXplorer at Leibniz Institute for Neurobiology
-
-### For information on how to use these scripts, please contact me at katrinad@ucr.edu 
-If you use this code, please cite our [latest paper](https://physoc.onlinelibrary.wiley.com/doi/10.1113/JP279705) associated with this project.
-
-Suggested [Git tutorial](https://www.chalkstreet.com/git-collaboration-tutorial/) and [Git documentation](https://confluence.atlassian.com/bitbucketserver/basic-git-commands-776639767.html)
-
+## This repo contains the CSD Analysis for Mawaheb Kassir's PV Cre project
 
 Good Git practices:
 ***
