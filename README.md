@@ -1,4 +1,4 @@
-## This repo contains the CSD Analysis for Mawaheb Kassir's PV Cre project
+## This repo has been archived and exists now under Cortexplorers github group
 
 Good Git practices:
 ***
